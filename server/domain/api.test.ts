@@ -247,9 +247,10 @@ test('invalid fork requests leave the case store and parent unchanged', async ()
   });
 });
 
-test('reopening a diagnosis restores its unresolved test gate before another reasoning round', async () => {
+for (const testStatus of ['proposed', 'ordered'] as const) {
+test(`reopening a diagnosis restores its unresolved ${testStatus} test gate before another reasoning round`, async () => {
   const parent = caseOf(); proposed(parent);
-  parent.tests.push({ id: 'unanswered', name: 'Unanswered proposed test', rationale: 'Fixture', status: 'proposed', discriminatesBetween: [] });
+  parent.tests.push({ id: 'unanswered', name: 'Unanswered test', rationale: 'Fixture', status: testStatus, discriminatesBetween: [] });
   parent.awaitingHitl = true;
   await serve({ ...mockServices, runRound: async (draft) => proposed(draft) }, async (url) => {
     const hypothesisId = Object.values(parent.hypotheses)[0]!.id;
@@ -259,7 +260,7 @@ test('reopening a diagnosis restores its unresolved test gate before another rea
     const fork = await (await post(`${url}/api/cases/${parent.id}/forks`, { frameSeq: confirmed.history.at(-1)!.seq })).json() as Case;
     assert.equal(fork.workingDiagnosis, undefined);
     assert.equal(fork.awaitingHitl, true);
-    assert.match(fork.hitlPrompt!, /Unanswered proposed test/);
+    assert.match(fork.hitlPrompt!, /Unanswered test/);
     assert.equal((await post(`${url}/api/cases/${fork.id}/advance`)).status, 409);
     const result = await post(`${url}/api/cases/${fork.id}/finding`, { summary: 'Synthetic assumed result', testId: 'unanswered' });
     assert.equal(result.status, 200);
@@ -270,6 +271,7 @@ test('reopening a diagnosis restores its unresolved test gate before another rea
     assert.deepEqual(await (await fetch(`${url}/api/cases/${parent.id}`)).json(), confirmed);
   });
 });
+}
 
 test('hypothetical findings never authorize a documented patient coding assignment', async () => {
   const parent = caseOf();

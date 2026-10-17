@@ -51,13 +51,13 @@ export function NextAction({ c, onUpdated, busy, setBusy, onNewCase }: Props) {
   const [err, setErr] = useState<string | null>(null);
 
   // Reset the inline form when the gate we're answering changes.
-  const proposedTests = c.tests.filter((t) => t.status === "proposed");
+  const pendingTests = c.tests.filter((t) => t.status === "proposed" || t.status === "ordered");
   useEffect(() => {
     setSummary("");
     setDetail("");
-    setTestId(proposedTests[0]?.id ?? "");
+    setTestId(pendingTests[0]?.id ?? "");
     setDirection("supports");
-  }, [c.awaitingHitl, c.round, proposedTests.length]);
+  }, [c.awaitingHitl, c.round, pendingTests.length]);
 
   // "Still thinking" hint after a few seconds (reused from ChatPanel).
   useEffect(() => {
@@ -280,9 +280,9 @@ export function NextAction({ c, onUpdated, busy, setBusy, onNewCase }: Props) {
         <div className="na-finding">
           <div className="na-finding-head">{c.forkOrigin ? 'Enter a hypothetical finding' : 'Enter the test result'}</div>
           {c.forkOrigin && <p className="small muted">Assumed for this exploration only, not an actual patient result.</p>}
-          {proposedTests.length > 0 && (
+          {pendingTests.length > 0 && (
             <select value={testId} onChange={(e) => setTestId(e.target.value)}>
-              {proposedTests.map((t) => (
+              {pendingTests.map((t) => (
                 <option key={t.id} value={t.id}>
                   result for: {t.name}
                 </option>
