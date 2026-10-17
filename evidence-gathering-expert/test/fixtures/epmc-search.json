@@ -1,0 +1,1115 @@
+{
+ "version": "6.9",
+ "hitCount": 501,
+ "nextCursorMark": "AoIIQMgP7Cg1NDkyNjQwMQ==",
+ "nextPageUrl": "https://www.ebi.ac.uk/europepmc/webservices/rest/search?query=%28%22streptococcal+pharyngitis%22%29+AND+%28cough%29+AND+%28%22likelihood+ratio%22+OR+sensitivity+OR+specificity+OR+%22diagnostic+accuracy%22%29&cursorMark=AoIIQMgP7Cg1NDkyNjQwMQ%3D%3D&resultType=core&pageSize=5&format=json",
+ "request": {
+  "queryString": "(\"streptococcal pharyngitis\") AND (cough) AND (\"likelihood ratio\" OR sensitivity OR specificity OR \"diagnostic accuracy\")",
+  "resultType": "core",
+  "cursorMark": "*",
+  "pageSize": 5,
+  "sort": "",
+  "synonym": false
+ },
+ "resultList": {
+  "result": [
+   {
+    "id": "41343363",
+    "source": "MED",
+    "pmid": "41343363",
+    "doi": "10.1093/cid/ciaf668",
+    "title": "2025 Clinical Practice Guideline Update by the Infectious Diseases Society of America on Group A Streptococcal Pharyngitis: Risk Assessment Using Clinical Scoring Systems in Children and Adults.",
+    "authorString": "Linder JA, Watson ME, Wessels MR, Carter DM, Cohen AL, Dien Bard J, Erdem G, Gregory CJ, Kourtis AP, Martin JM, Mochon AB, Shapiro DJ, Stevens RW, Kaur D, Barshak MB.",
+    "authorList": {
+     "author": [
+      {
+       "fullName": "Linder JA",
+       "lastName": "Linder",
+       "firstName": "Jeffrey A",
+       "initials": "JA",
+       "authorId": {
+        "type": "ORCID",
+        "value": "0000-0003-2217-184X"
+       },
+       "authorAffiliationDetailsList": {
+        "authorAffiliation": [
+         {
+          "affiliation": "Division of General Internal Medicine, Northwestern University Feinberg School of Medicine, Chicago, Illinois, USA."
+         }
+        ]
+       }
+      },
+      {
+       "fullName": "Watson ME",
+       "lastName": "Watson",
+       "firstName": "Michael E",
+       "initials": "ME",
+       "authorId": {
+        "type": "ORCID",
+        "value": "0000-0001-5930-3290"
+       },
+       "authorAffiliationDetailsList": {
+        "authorAffiliation": [
+         {
+          "affiliation": "Division of Pediatric Infectious Diseases, Department of Pediatrics, University of Michigan Medical School, Ann Arbor, Michigan, USA."
+         }
+        ]
+       }
+      },
+      {
+       "fullName": "Wessels MR",
+       "lastName": "Wessels",
+       "firstName": "Michael R",
+       "initials": "MR",
+       "authorAffiliationDetailsList": {
+        "authorAffiliation": [
+         {
+          "affiliation": "Division of Infectious Diseases, Boston Children's Hospital, Harvard Medical School, Boston, Massachusetts, USA."
+         }
+        ]
+       }
+      },
+      {
+       "fullName": "Carter DM",
+       "lastName": "Carter",
+       "firstName": "Danielle M",
+       "initials": "DM",
+       "authorAffiliationDetailsList": {
+        "authorAffiliation": [
+         {
+          "affiliation": "Department of Family Medicine, Ascension St Vincent's Riverside, Jacksonville, Florida, USA."
+         }
+        ]
+       }
+      },
+      {
+       "fullName": "Cohen AL",
+       "lastName": "Cohen",
+       "firstName": "Adam L",
+       "initials": "AL",
+       "authorId": {
+        "type": "ORCID",
+        "value": "0000-0003-0591-1009"
+       },
+       "authorAffiliationDetailsList": {
+        "authorAffiliation": [
+         {
+          "affiliation": "Division of Bacterial Diseases, Centers for Disease Control and Prevention, Atlanta, Georgia, USA."
+         }
+        ]
+       }
+      },
+      {
+       "fullName": "Dien Bard J",
+       "lastName": "Dien Bard",
+       "firstName": "Jennifer",
+       "initials": "J",
+       "authorAffiliationDetailsList": {
+        "authorAffiliation": [
+         {
+          "affiliation": "Department of Pathology and Laboratory Medicine, Children's Hospital Los Angeles, Keck School of Medicine, University of Southern California, Los Angeles, California, USA."
+         }
+        ]
+       }
+      },
+      {
+       "fullName": "Erdem G",
+       "lastName": "Erdem",
+       "firstName": "Guliz",
+       "initials": "G",
+       "authorAffiliationDetailsList": {
+        "authorAffiliation": [
+         {
+          "affiliation": "Section of Infectious Diseases, Nationwide Children's Hospital and The Ohio State University, Columbus, Ohio, USA."
+         }
+        ]
+       }
+      },
+      {
+       "fullName": "Gregory CJ",
+       "lastName": "Gregory",
+       "firstName": "Christopher J",
+       "initials": "CJ",
+       "authorAffiliationDetailsList": {
+        "authorAffiliation": [
+         {
+          "affiliation": "Division of Bacterial Diseases, Centers for Disease Control and Prevention, Atlanta, Georgia, USA."
+         }
+        ]
+       }
+      },
+      {
+       "fullName": "Kourtis AP",
+       "lastName": "Kourtis",
+       "firstName": "Athena P",
+       "initials": "AP",
+       "authorAffiliationDetailsList": {
+        "authorAffiliation": [
+         {
+          "affiliation": "Department of Obstetrics and Gynecology, Eastern Virginia Medical School, Norfolk, Virginia, USA."
+         }
+        ]
+       }
+      },
+      {
+       "fullName": "Martin JM",
+       "lastName": "Martin",
+       "firstName": "Judith M",
+       "initials": "JM",
+       "authorAffiliationDetailsList": {
+        "authorAffiliation": [
+         {
+          "affiliation": "Department of Pediatrics, University of Pittsburgh School of Medicine, Pittsburgh, Pennsylvania, USA."
+         }
+        ]
+       }
+      },
+      {
+       "fullName": "Mochon AB",
+       "lastName": "Mochon",
+       "firstName": "A Brian",
+       "initials": "AB",
+       "authorAffiliationDetailsList": {
+        "authorAffiliation": [
+         {
+          "affiliation": "Division of Pathology and Laboratory Medicine, Phoenix Children's Hospital, Phoenix, Arizona, USA."
+         }
+        ]
+       }
+      },
+      {
+       "fullName": "Shapiro DJ",
+       "lastName": "Shapiro",
+       "firstName": "Daniel J",
+       "initials": "DJ",
+       "authorAffiliationDetailsList": {
+        "authorAffiliation": [
+         {
+          "affiliation": "Department of Emergency Medicine, University of California, San Francisco, San Francisco, California, USA."
+         },
+         {
+          "affiliation": "Department of Pediatrics, University of California, San Francisco, San Francisco, California, USA."
+         }
+        ]
+       }
+      },
+      {
+       "fullName": "Stevens RW",
+       "lastName": "Stevens",
+       "firstName": "Ryan W",
+       "initials": "RW",
+       "authorAffiliationDetailsList": {
+        "authorAffiliation": [
+         {
+          "affiliation": "Department of Pharmacy Services, Mayo Clinic, Rochester, Minnesota, USA."
+         }
+        ]
+       }
+      },
+      {
+       "fullName": "Kaur D",
+       "lastName": "Kaur",
+       "firstName": "Dipleen",
+       "initials": "D",
+       "authorAffiliationDetailsList": {
+        "authorAffiliation": [
+         {
+          "affiliation": "Clinical Affairs and Practice Guidelines, Infectious Diseases Society of America, Arlington, Virginia, USA."
+         }
+        ]
+       }
+      },
+      {
+       "fullName": "Barshak MB",
+       "lastName": "Barshak",
+       "firstName": "Miriam B",
+       "initials": "MB",
+       "authorId": {
+        "type": "ORCID",
+        "value": "0009-0002-3244-9366"
+       },
+       "authorAffiliationDetailsList": {
+        "authorAffiliation": [
+         {
+          "affiliation": "Infectious Diseases Division, Massachusetts General Hospital, Boston, Massachusetts, USA."
+         }
+        ]
+       }
+      }
+     ]
+    },
+    "authorIdList": {
+     "authorId": [
+      {
+       "type": "ORCID",
+       "value": "0000-0001-5930-3290"
+      },
+      {
+       "type": "ORCID",
+       "value": "0000-0003-0591-1009"
+      },
+      {
+       "type": "ORCID",
+       "value": "0000-0003-2217-184X"
+      },
+      {
+       "type": "ORCID",
+       "value": "0009-0002-3244-9366"
+      }
+     ]
+    },
+    "dataLinksTagsList": {
+     "dataLinkstag": [
+      "altmetrics"
+     ]
+    },
+    "journalInfo": {
+     "issue": "Suppl 3",
+     "volume": "82",
+     "journalIssueId": 4250538,
+     "dateOfPublication": "2026 Aug",
+     "monthOfPublication": 8,
+     "yearOfPublication": 2026,
+     "journal": {
+      "medlineAbbreviation": "Clin Infect Dis",
+      "title": "Clinical infectious diseases : an official publication of the Infectious Diseases Society of America",
+      "essn": "1537-6591",
+      "issn": "1058-4838",
+      "isoabbreviation": "Clin Infect Dis",
+      "nlmid": "9203213"
+     },
+     "printPublicationDate": "2026-08-01"
+    },
+    "pubYear": "2026",
+    "pageInfo": "i97-i104",
+    "abstractText": "This publication represents the first part of an update to the clinical practice guideline on the diagnosis and management of group A streptococcal (Streptococcus pyogenes or GAS) pharyngitis, developed by the Infectious Diseases Society of America (IDSA). Diagnosis of GAS pharyngitis by clinician judgment alone is unreliable, and unselective testing incurs cost and inconvenience for individuals at low risk of having GAS infection. Clinical scoring systems have been used to quantify the probability of a positive GAS throat culture based on standardized criteria such as the presence of fever; tonsillar enlargement or exudate; tender and enlarged anterior cervical lymph nodes; and the absence of cough. The goal of this article is to determine whether a scoring system should be used to decide which patients should have a diagnostic test performed by rapid antigen detection test, molecular methods, and/or throat culture. We performed a systematic review of randomized and nonrandomized studies that compared the use of a clinical scoring system to clinician judgment alone in predicting the outcome of a throat culture. Evidence from studies in children and adults suggests the diagnostic accuracy of a clinical scoring system is comparable to or slightly higher than clinician judgment alone. However, the studies are limited due to small size, lack of uniformity in outcome measures, and incomplete data. The consensus of the panel is that the balance of benefits and harms favors use of a clinical scoring system as part of the evaluation of patients with sore throat. The principal utility of using a scoring system is to identify patients with low probability of GAS pharyngitis and to reduce unnecessary testing.",
+    "affiliation": "Division of General Internal Medicine, Northwestern University Feinberg School of Medicine, Chicago, Illinois, USA.",
+    "publicationStatus": "ppublish",
+    "language": "eng",
+    "pubModel": "Print",
+    "pubTypeList": {
+     "pubType": [
+      "Research Support, Non-U.S. Gov't",
+      "Systematic Review",
+      "Practice Guideline",
+      "Journal Article"
+     ]
+    },
+    "grantsList": {
+     "grant": [
+      {
+       "agency": "Infectious Diseases Society of America",
+       "orderIn": 0
+      }
+     ]
+    },
+    "meshHeadingList": {
+     "meshHeading": [
+      {
+       "majorTopic_YN": "N",
+       "descriptorName": "Humans"
+      },
+      {
+       "majorTopic_YN": "Y",
+       "descriptorName": "Streptococcus pyogenes",
+       "meshQualifierList": {
+        "meshQualifier": [
+         {
+          "majorTopic_YN": "N",
+          "abbreviation": "IP",
+          "qualifierName": "isolation & purification"
+         }
+        ]
+       }
+      },
+      {
+       "majorTopic_YN": "Y",
+       "descriptorName": "Streptococcal Infections",
+       "meshQualifierList": {
+        "meshQualifier": [
+         {
+          "majorTopic_YN": "N",
+          "abbreviation": "DI",
+          "qualifierName": "diagnosis"
+         },
+         {
+          "majorTopic_YN": "N",
+          "abbreviation": "DT",
+          "qualifierName": "drug therapy"
+         },
+         {
+          "majorTopic_YN": "N",
+          "abbreviation": "MI",
+          "qualifierName": "microbiology"
+         }
+        ]
+       }
+      },
+      {
+       "majorTopic_YN": "Y",
+       "descriptorName": "Pharyngitis",
+       "meshQualifierList": {
+        "meshQualifier": [
+         {
+          "majorTopic_YN": "N",
+          "abbreviation": "DI",
+          "qualifierName": "diagnosis"
+         },
+         {
+          "majorTopic_YN": "N",
+          "abbreviation": "DT",
+          "qualifierName": "drug therapy"
+         },
+         {
+          "majorTopic_YN": "N",
+          "abbreviation": "MI",
+          "qualifierName": "microbiology"
+         }
+        ]
+       }
+      },
+      {
+       "majorTopic_YN": "N",
+       "descriptorName": "Risk Assessment"
+      },
+      {
+       "majorTopic_YN": "N",
+       "descriptorName": "Adult"
+      },
+      {
+       "majorTopic_YN": "N",
+       "descriptorName": "Child"
+      },
+      {
+       "majorTopic_YN": "N",
+       "descriptorName": "Practice Guidelines as Topic"
+      }
+     ]
+    },
+    "keywordList": {
+     "keyword": [
+      "risk assessment",
+      "Streptococcal Pharyngitis",
+      "Clinical Scoring System",
+      "Group A Streptococcal Pharyngitis"
+     ]
+    },
+    "subsetList": {
+     "subset": [
+      {
+       "code": "IM",
+       "name": "Index Medicus"
+      }
+     ]
+    },
+    "fullTextUrlList": {
+     "fullTextUrl": [
+      {
+       "availability": "Subscription required",
+       "availabilityCode": "S",
+       "documentStyle": "doi",
+       "site": "DOI",
+       "url": "https://doi.org/10.1093/cid/ciaf668"
+      }
+     ]
+    },
+    "isOpenAccess": "N",
+    "inEPMC": "N",
+    "inPMC": "N",
+    "citedByCount": 7,
+    "hasReferences": "Y",
+    "hasTextMinedTerms": "Y",
+    "hasDbCrossReferences": "N",
+    "hasPDF": "N",
+    "hasBook": "N",
+    "hasSuppl": "N",
+    "hasLabsLinks": "Y",
+    "hasData": "N",
+    "authMan": "N",
+    "epmcAuthMan": "N",
+    "nihAuthMan": "N",
+    "hasTMAccessionNumbers": "N",
+    "dateOfCompletion": "2026-08-24",
+    "dateOfCreation": "2025-12-04",
+    "dateOfRevision": "2026-09-02",
+    "firstPublicationDate": "2026-08-01",
+    "firstIndexDate": "2025-12-05",
+    "hasEvaluations": "N"
+   },
+   {
+    "id": "42073032",
+    "source": "MED",
+    "pmid": "42073032",
+    "pmcid": "PMC13114618",
+    "fullTextIdList": {
+     "fullTextId": [
+      "PMC13114618"
+     ]
+    },
+    "doi": "10.3390/children13040454",
+    "title": "Comparative Evaluation of Strep A Throat Swab Culture Results Using the RapidFor\u2122 Strep A Rapid Test Kit.",
+    "authorString": "Ates B, Olt MC, Kacar A, Yeni N, Guzeloglu E, Arabaci C.",
+    "authorList": {
+     "author": [
+      {
+       "fullName": "Ates B",
+       "lastName": "Ates",
+       "firstName": "Belen",
+       "initials": "B",
+       "authorId": {
+        "type": "ORCID",
+        "value": "0000-0002-4525-8764"
+       },
+       "authorAffiliationDetailsList": {
+        "authorAffiliation": [
+         {
+          "affiliation": "Department of Pediatrics, Prof. Dr. Cemil Tascioglu City Hospital, University of Health Sciences, 34384 Istanbul, T\u00fcrkiye."
+         }
+        ]
+       }
+      },
+      {
+       "fullName": "Olt MC",
+       "lastName": "Olt",
+       "firstName": "Meryem Cansu",
+       "initials": "MC",
+       "authorAffiliationDetailsList": {
+        "authorAffiliation": [
+         {
+          "affiliation": "Department of Ethics Committee, Prof. Dr. Cemil Tascioglu City Hospital, University of Health Sciences, 34384 Istanbul, T\u00fcrkiye."
+         }
+        ]
+       }
+      },
+      {
+       "fullName": "Kacar A",
+       "lastName": "Kacar",
+       "firstName": "Alper",
+       "initials": "A",
+       "authorAffiliationDetailsList": {
+        "authorAffiliation": [
+         {
+          "affiliation": "Department of Pediatric Emergency, Prof. Dr. Cemil Tascioglu City Hospital, University of Health Sciences, 34384 Istanbul, T\u00fcrkiye."
+         }
+        ]
+       }
+      },
+      {
+       "fullName": "Yeni N",
+       "lastName": "Yeni",
+       "firstName": "Nazmiye",
+       "initials": "N",
+       "authorId": {
+        "type": "ORCID",
+        "value": "0009-0004-2609-0179"
+       },
+       "authorAffiliationDetailsList": {
+        "authorAffiliation": [
+         {
+          "affiliation": "Department of Pediatrics, Prof. Dr. Cemil Tascioglu City Hospital, University of Health Sciences, 34384 Istanbul, T\u00fcrkiye."
+         }
+        ]
+       }
+      },
+      {
+       "fullName": "Guzeloglu E",
+       "lastName": "Guzeloglu",
+       "firstName": "Eren",
+       "initials": "E",
+       "authorId": {
+        "type": "ORCID",
+        "value": "0000-0003-4316-2491"
+       },
+       "authorAffiliationDetailsList": {
+        "authorAffiliation": [
+         {
+          "affiliation": "Department of Pediatrics, Prof. Dr. Cemil Tascioglu City Hospital, University of Health Sciences, 34384 Istanbul, T\u00fcrkiye."
+         }
+        ]
+       }
+      },
+      {
+       "fullName": "Arabaci C",
+       "lastName": "Arabaci",
+       "firstName": "Cigdem",
+       "initials": "C",
+       "authorAffiliationDetailsList": {
+        "authorAffiliation": [
+         {
+          "affiliation": "Department of Clinical Microbiology, Prof. Dr. Cemil Tascioglu City Hospital, University of Health Sciences, 34384 Istanbul, T\u00fcrkiye."
+         }
+        ]
+       }
+      }
+     ]
+    },
+    "authorIdList": {
+     "authorId": [
+      {
+       "type": "ORCID",
+       "value": "0000-0002-4525-8764"
+      },
+      {
+       "type": "ORCID",
+       "value": "0000-0003-4316-2491"
+      },
+      {
+       "type": "ORCID",
+       "value": "0009-0004-2609-0179"
+      }
+     ]
+    },
+    "dataLinksTagsList": {
+     "dataLinkstag": [
+      "supporting_data"
+     ]
+    },
+    "journalInfo": {
+     "issue": "4",
+     "volume": "13",
+     "journalIssueId": 4188736,
+     "dateOfPublication": "2026 Mar",
+     "monthOfPublication": 3,
+     "yearOfPublication": 2026,
+     "journal": {
+      "medlineAbbreviation": "Children (Basel)",
+      "title": "Children (Basel, Switzerland)",
+      "essn": "2227-9067",
+      "issn": "2227-9067",
+      "isoabbreviation": "Children (Basel)",
+      "nlmid": "101648936"
+     },
+     "printPublicationDate": "2026-03-01"
+    },
+    "pubYear": "2026",
+    "pageInfo": "454",
+    "abstractText": "<b>Background/Objectives:</b> Group A Streptococcus (GAS) pharyngitis is a frequent cause of morbidity in pediatric populations, which requires timely identification to prevent complications such as acute rheumatic fever. Rapid antigen detection tests (RADTs) are practical alternatives to throat culture. This study evaluates the diagnostic performance of the RapidFor\u2122 Strep A test. <b>Methods:</b> This prospective clinical study enrolled 389 pediatric patients aged < 18 years with symptoms suggestive of streptococcal pharyngitis. Two throat swabs were collected from each patient: one for rapid antigen testing with RapidFor\u2122 Strep A and one for culture. Sensitivity, specificity, positive predictive value (PPV), and negative predictive value (NPV) were calculated. <b>Results:</b> Throat culture was positive in 95 of 389 patients (24.4%). The RapidFor\u2122 Strep A test demonstrated a sensitivity of 98.95% (95% confidence interval [CI]: 94.28-99.81%) and a specificity of 96.26% (95% CI: 93.43-97.90%). The PPV was 89.52%, and the NPV was 99.65%. Agreement with culture was excellent (\u03ba = 0.919); in particular, false-positive results accounted for 2.8% and false-negative results accounted for 1.05%. Fever was the strongest clinical indicator associated with positive results. <b>Conclusions:</b> The RapidFor\u2122 Strep A test showed very high diagnostic accuracy compared with throat culture, including an excellent NPV (99.6%), which supports its reliability for ruling out GAS pharyngitis in pediatric settings. The test is an effective screening tool that facilitates timely antibiotic therapy.",
+    "affiliation": "Department of Pediatrics, Prof. Dr. Cemil Tascioglu City Hospital, University of Health Sciences, 34384 Istanbul, T\u00fcrkiye.",
+    "publicationStatus": "epublish",
+    "language": "eng",
+    "pubModel": "Electronic",
+    "pubTypeList": {
+     "pubType": [
+      "research-article",
+      "Journal Article"
+     ]
+    },
+    "keywordList": {
+     "keyword": [
+      "Pediatric",
+      "Pharyngitis",
+      "Throat Culture",
+      "Group A Streptococcus",
+      "Rapid Antigen Detection Test"
+     ]
+    },
+    "fullTextUrlList": {
+     "fullTextUrl": [
+      {
+       "availability": "Subscription required",
+       "availabilityCode": "S",
+       "documentStyle": "doi",
+       "site": "DOI",
+       "url": "https://doi.org/10.3390/children13040454"
+      },
+      {
+       "availability": "Open access",
+       "availabilityCode": "OA",
+       "documentStyle": "html",
+       "site": "Europe_PMC",
+       "url": "https://europepmc.org/articles/PMC13114618"
+      },
+      {
+       "availability": "Open access",
+       "availabilityCode": "OA",
+       "documentStyle": "pdf",
+       "site": "Europe_PMC",
+       "url": "https://europepmc.org/articles/PMC13114618?pdf=render"
+      }
+     ]
+    },
+    "isOpenAccess": "Y",
+    "inEPMC": "Y",
+    "inPMC": "Y",
+    "citedByCount": 0,
+    "hasReferences": "Y",
+    "hasTextMinedTerms": "Y",
+    "hasDbCrossReferences": "N",
+    "hasPDF": "Y",
+    "hasBook": "N",
+    "hasSuppl": "N",
+    "hasLabsLinks": "N",
+    "hasData": "Y",
+    "license": "cc by",
+    "authMan": "N",
+    "epmcAuthMan": "N",
+    "nihAuthMan": "N",
+    "hasTMAccessionNumbers": "Y",
+    "tmAccessionTypeList": {
+     "accessionType": [
+      "doi"
+     ]
+    },
+    "dateOfCompletion": "2026-05-04",
+    "dateOfCreation": "2026-05-04",
+    "dateOfRevision": "2026-08-13",
+    "electronicPublicationDate": "2026-03-26",
+    "firstPublicationDate": "2026-03-26",
+    "firstIndexDate": "2026-05-13",
+    "fullTextReceivedDate": "2026-05-18",
+    "hasEvaluations": "N"
+   },
+   {
+    "id": "42597699",
+    "source": "MED",
+    "pmid": "42597699",
+    "pmcid": "PMC13469245",
+    "fullTextIdList": {
+     "fullTextId": [
+      "PMC13469245"
+     ]
+    },
+    "doi": "10.3389/fmed.2026.1895376",
+    "title": "Conversational speech for respiratory triage in primary care: a pilot study.",
+    "authorString": "Ravi V, Noufi C.",
+    "authorList": {
+     "author": [
+      {
+       "fullName": "Ravi V",
+       "lastName": "Ravi",
+       "firstName": "Vijay",
+       "initials": "V",
+       "authorAffiliationDetailsList": {
+        "authorAffiliation": [
+         {
+          "affiliation": "Amplifier Health, Inc., San Francisco, CA, United States."
+         }
+        ]
+       }
+      },
+      {
+       "fullName": "Noufi C",
+       "lastName": "Noufi",
+       "firstName": "Camille",
+       "initials": "C",
+       "authorAffiliationDetailsList": {
+        "authorAffiliation": [
+         {
+          "affiliation": "Amplifier Health, Inc., San Francisco, CA, United States."
+         }
+        ]
+       }
+      }
+     ]
+    },
+    "dataLinksTagsList": {
+     "dataLinkstag": [
+      "supporting_data"
+     ]
+    },
+    "journalInfo": {
+     "volume": "13",
+     "journalIssueId": 4110742,
+     "dateOfPublication": "2026 ",
+     "monthOfPublication": 0,
+     "yearOfPublication": 2026,
+     "journal": {
+      "medlineAbbreviation": "Front Med (Lausanne)",
+      "title": "Frontiers in medicine",
+      "essn": "2296-858X",
+      "issn": "2296-858X",
+      "isoabbreviation": "Front Med (Lausanne)",
+      "nlmid": "101648047"
+     },
+     "printPublicationDate": "2026-01-01"
+    },
+    "pubYear": "2026",
+    "pageInfo": "1895376",
+    "abstractText": "<h4>Background</h4>Respiratory complaints account for a substantial share of adult ambulatory visits, and accurate triage has direct consequences for antibiotic stewardship and pathogen-specific therapy. Prior work has investigated voice as a triage signal, but that literature is dominated by single-condition detection from scripted speech in crowdsourced or controlled clinical settings and has not been evaluated at the primary care scale using conversational ambient audio.<h4>Methods</h4>A dataset of 514,377 ambient-recorded primary care visits from 379,225 adult patients at a US clinic network was used, with per-visit clinically assigned ICD-10 diagnosis codes and de-identified demographic and geographic metadata. Patient audio was extracted from each doctor-patient conversation, and spectral, voice quality, and prosodic features were computed. Eleven binary classification tasks were defined, aligned with a respiratory triage cascade (e.g., acute respiratory vs. acute non-respiratory illness, and lower vs. upper respiratory tract infection). An acoustic model was trained independently for each task using patient-stratified 5-fold cross-validation and evaluated on a held-out test set. Each model was also compared against six non-acoustic baselines using a single demographic, geographic, or temporal variable. The 11 trained classifiers were combined into a hierarchical cascade and illustrated as case studies.<h4>Results</h4>Test-set AUC across the 11 tasks ranged from 0.602 (95% CI: 0.588-0.614) to 0.745 (95% CI: 0.742-0.748), with a mean expected calibration error of 0.018. After multiple-testing correction, six of the eleven binaries outperformed all six confounder baselines. Four binaries showed a median within-stratum AUC of 0.61-0.70 when the confounder was held fixed, indicating acoustic discrimination beyond what the confounder alone explains. Five binaries failed at least one axis; the only one outperformed by a confounder baseline was the pneumonia vs. non-pneumonia lower respiratory tract infection binary, which failed against the patient-city confounder baseline, plausibly reflecting a clinic-level difference in ICD-10 coding.<h4>Conclusion</h4>Conversational primary care audio contains an acoustic signal that discriminates clinically meaningful respiratory contrasts. Absolute performance is moderate, but the conditions are stricter than in prior work: conversational speech and differential-diagnosis contrasts among patients with illness. This pilot study establishes a baseline for voice-based clinical AI, advancing from sick-vs.-healthy detection toward differential-diagnosis panels and demonstrating a proof of concept for hierarchical composition.",
+    "affiliation": "Amplifier Health, Inc., San Francisco, CA, United States.",
+    "publicationStatus": "epublish",
+    "language": "eng",
+    "pubModel": "Electronic-eCollection",
+    "pubTypeList": {
+     "pubType": [
+      "research-article",
+      "Journal Article"
+     ]
+    },
+    "keywordList": {
+     "keyword": [
+      "Differential diagnosis",
+      "Hierarchical Classification",
+      "Acoustic Features",
+      "Vocal Biomarkers",
+      "Confounder Analysis",
+      "Icd-10 Cohorts",
+      "Ambient Audio",
+      "Real-world Clinical Audio"
+     ]
+    },
+    "fullTextUrlList": {
+     "fullTextUrl": [
+      {
+       "availability": "Subscription required",
+       "availabilityCode": "S",
+       "documentStyle": "doi",
+       "site": "DOI",
+       "url": "https://doi.org/10.3389/fmed.2026.1895376"
+      },
+      {
+       "availability": "Open access",
+       "availabilityCode": "OA",
+       "documentStyle": "html",
+       "site": "Europe_PMC",
+       "url": "https://europepmc.org/articles/PMC13469245"
+      },
+      {
+       "availability": "Open access",
+       "availabilityCode": "OA",
+       "documentStyle": "pdf",
+       "site": "Europe_PMC",
+       "url": "https://europepmc.org/articles/PMC13469245?pdf=render"
+      }
+     ]
+    },
+    "commentCorrectionList": {
+     "commentCorrection": [
+      {
+       "source": "PPR",
+       "id": "PPR1251722",
+       "type": "Preprint in",
+       "note": "Link created based on a title-first author match",
+       "orderIn": 10002
+      }
+     ]
+    },
+    "isOpenAccess": "Y",
+    "inEPMC": "Y",
+    "inPMC": "Y",
+    "citedByCount": 0,
+    "hasReferences": "Y",
+    "hasTextMinedTerms": "Y",
+    "hasDbCrossReferences": "N",
+    "hasPDF": "Y",
+    "hasBook": "N",
+    "hasSuppl": "Y",
+    "hasLabsLinks": "N",
+    "hasData": "Y",
+    "license": "cc by",
+    "authMan": "N",
+    "epmcAuthMan": "N",
+    "nihAuthMan": "N",
+    "hasTMAccessionNumbers": "Y",
+    "tmAccessionTypeList": {
+     "accessionType": [
+      "doi"
+     ]
+    },
+    "dateOfCompletion": "2026-08-14",
+    "dateOfCreation": "2026-08-14",
+    "dateOfRevision": "2026-08-15",
+    "electronicPublicationDate": "2026-07-30",
+    "firstPublicationDate": "2026-07-30",
+    "firstIndexDate": "2026-08-16",
+    "fullTextReceivedDate": "2026-09-09",
+    "hasEvaluations": "N"
+   },
+   {
+    "id": "40796655",
+    "source": "MED",
+    "pmid": "40796655",
+    "pmcid": "PMC12344290",
+    "fullTextIdList": {
+     "fullTextId": [
+      "PMC12344290"
+     ]
+    },
+    "doi": "10.1038/s43856-025-01023-1",
+    "title": "Diagnostic test accuracy of simplified algorithms for diagnosing acute rheumatic fever: a systematic review.",
+    "authorString": "Providencia R, Aali G, Zhu F, Katairo T, Ahmad M, Bray JJ, Pelone F, Marijon E, Cassandra M, Celermajer DS, Shokraneh F.",
+    "authorList": {
+     "author": [
+      {
+       "fullName": "Providencia R",
+       "lastName": "Providencia",
+       "firstName": "Rui",
+       "initials": "R",
+       "authorId": {
+        "type": "ORCID",
+        "value": "0000-0001-9141-9883"
+       },
+       "authorAffiliationDetailsList": {
+        "authorAffiliation": [
+         {
+          "affiliation": "GENEs health and social care evidence SYnthesiS unit, Institute of Health Informatics, University College, London, UK. r.providencia@ucl.ac.uk."
+         },
+         {
+          "affiliation": "Barts Heart Centre, St Bartholomew's Hospital, Barts Health NHS Trust, London, UK. r.providencia@ucl.ac.uk."
+         }
+        ]
+       }
+      },
+      {
+       "fullName": "Aali G",
+       "lastName": "Aali",
+       "firstName": "Ghazaleh",
+       "initials": "G",
+       "authorAffiliationDetailsList": {
+        "authorAffiliation": [
+         {
+          "affiliation": "Department of Evidence Synthesis, Systematic Review Consultants LTD, Oxford, UK."
+         }
+        ]
+       }
+      },
+      {
+       "fullName": "Zhu F",
+       "lastName": "Zhu",
+       "firstName": "Fang",
+       "initials": "F",
+       "authorId": {
+        "type": "ORCID",
+        "value": "0000-0002-6676-1270"
+       },
+       "authorAffiliationDetailsList": {
+        "authorAffiliation": [
+         {
+          "affiliation": "Department of Biostatistics, Systematic Review Consultants LTD, Oxford, UK."
+         }
+        ]
+       }
+      },
+      {
+       "fullName": "Katairo T",
+       "lastName": "Katairo",
+       "firstName": "Thomas",
+       "initials": "T",
+       "authorAffiliationDetailsList": {
+        "authorAffiliation": [
+         {
+          "affiliation": "Department of Biostatistics, Systematic Review Consultants LTD, Oxford, UK."
+         }
+        ]
+       }
+      },
+      {
+       "fullName": "Ahmad M",
+       "lastName": "Ahmad",
+       "firstName": "Mahmood",
+       "initials": "M",
+       "authorAffiliationDetailsList": {
+        "authorAffiliation": [
+         {
+          "affiliation": "GENEs health and social care evidence SYnthesiS unit, Institute of Health Informatics, University College, London, UK."
+         }
+        ]
+       }
+      },
+      {
+       "fullName": "Bray JJ",
+       "lastName": "Bray",
+       "firstName": "Jonathan Jh",
+       "initials": "JJ",
+       "authorAffiliationDetailsList": {
+        "authorAffiliation": [
+         {
+          "affiliation": "GENEs health and social care evidence SYnthesiS unit, Institute of Health Informatics, University College, London, UK."
+         }
+        ]
+       }
+      },
+      {
+       "fullName": "Pelone F",
+       "lastName": "Pelone",
+       "firstName": "Ferruccio",
+       "initials": "F",
+       "authorAffiliationDetailsList": {
+        "authorAffiliation": [
+         {
+          "affiliation": "GENEs health and social care evidence SYnthesiS unit, Institute of Health Informatics, University College, London, UK."
+         }
+        ]
+       }
+      },
+      {
+       "fullName": "Marijon E",
+       "lastName": "Marijon",
+       "firstName": "Eloi",
+       "initials": "E",
+       "authorAffiliationDetailsList": {
+        "authorAffiliation": [
+         {
+          "affiliation": "Paris Cardiovascular Research Centre, INSERM U970, European Georges Pompidou Hospital, Paris, France."
+         }
+        ]
+       }
+      },
+      {
+       "fullName": "Cassandra M",
+       "lastName": "Cassandra",
+       "firstName": "Miryan",
+       "initials": "M",
+       "authorAffiliationDetailsList": {
+        "authorAffiliation": [
+         {
+          "affiliation": "Cardiology Department, Hospital Dr. Ayres de Menezes, S\u00e3o Tom\u00e9, Sao Tome and Principe."
+         }
+        ]
+       }
+      },
+      {
+       "fullName": "Celermajer DS",
+       "lastName": "Celermajer",
+       "firstName": "David S",
+       "initials": "DS",
+       "authorAffiliationDetailsList": {
+        "authorAffiliation": [
+         {
+          "affiliation": "Faculty of Medicine and Health, The University of Sydney, Sydney, Australia."
+         }
+        ]
+       }
+      },
+      {
+       "fullName": "Shokraneh F",
+       "lastName": "Shokraneh",
+       "firstName": "Farhad",
+       "initials": "F",
+       "authorId": {
+        "type": "ORCID",
+        "value": "0000-0001-9687-8560"
+       },
+       "authorAffiliationDetailsList": {
+        "authorAffiliation": [
+         {
+          "affiliation": "GENEs health and social care evidence SYnthesiS unit, Institute of Health Informatics, University College, London, UK."
+         },
+         {
+          "affiliation": "Department of Evidence Synthesis, Systematic Review Consultants LTD, Oxford, UK."
+         }
+        ]
+       }
+      }
+     ]
+    },
+    "authorIdList": {
+     "authorId": [
+      {
+       "type": "ORCID",
+       "value": "0000-0001-9141-9883"
+      },
+      {
+       "type": "ORCID",
+       "value": "0000-0001-9687-8560"
+      },
+      {
+       "type": "ORCID",
+       "value": "0000-0002-6676-1270"
+      }
+     ]
+    },
+    "dataLinksTagsList": {
+     "dataLinkstag": [
+      "altmetrics",
+      "supporting_data"
+     ]
+    },
+    "journalInfo": {
+     "issue": "1",
+     "volume": "5",
+     "journalIssueId": 3987259,
+     "dateOfPublication": "2025 Aug",
+     "monthOfPublication": 8,
+     "yearOfPublication": 2025,
+     "journal": {
+      "medlineAbbreviation": "Commun Med (Lond)",
+      "title": "Communications medicine",
+      "essn": "2730-664X",
+      "issn": "2730-664X",
+      "isoabbreviation": "Commun Med (Lond)",
+      "nlmid": "9918250414506676"
+     },
+     "printPublicationDate": "2025-08-01"
+    },
+    "pubYear": "2025",
+    "pageInfo": "348",
+    "abstractText": "<h4>Background</h4>Rheumatic heart disease, the long-term sequel to acute rheumatic fever, remains a prevalent public health problem in Africa and other low to middle-income regions of the world. Diagnosing acute rheumatic fever and using the modified Jones criteria in high-prevalence areas remains challenging.<h4>Methods</h4>We assessed the (i) diagnostic accuracy of simplified diagnostic algorithms among children, adolescents, and adults with suspected acute rheumatic fever, and (ii) the impact of different diagnostic criteria on the development of rheumatic heart disease (PROSPERO CRD42022344077). The MEDLINE, Embase, and Conference Proceedings Citation Index-Science were searched for relevant reports (date: 15th March 2025).<h4>Results</h4>Here we identify 12,075 records, and three studies (four reports) meeting our eligibility criteria. Simplified diagnostic algorithms using only clinical data at community health centre-level (AUC 0.69, sensitivity 66% and specificity 68%), or adding 12-lead electrocardiogram and simple laboratory investigations at district-level facilities (AUC 0.76, sensitivity 77% and specificity 67%) perform worse than models including the full-set of laboratory investigations and echocardiography at National referral hospitals (AUC 0.91, sensitivity 84% & specificity 87%). Using modified Jones criteria without echocardiography results in an important loss of sensitivity (sensitivity 79%, specificity 100% & AUC 0.90). Progression to rheumatic heart disease is reported in 2.5-5% of children and young adults in high-prevalence areas who do not meet the full modified Jones criteria.<h4>Conclusions</h4>Simplification of the modified Jones criteria in areas without access to echocardiography and laboratory investigations may lead to underdiagnosis of acute rheumatic fever. Some patients who do not meet the modified Jones criteria for definite acute rheumatic fever diagnosis may still progress to develop rheumatic heart disease.",
+    "affiliation": "GENEs health and social care evidence SYnthesiS unit, Institute of Health Informatics, University College, London, UK. r.providencia@ucl.ac.uk.",
+    "publicationStatus": "epublish",
+    "language": "eng",
+    "pubModel": "Electronic",
+    "pubTypeList": {
+     "pubType": [
+      "research-article",
+      "Journal Article"
+     ]
+    },
+    "grantsList": {
+     "grant": [
+      {
+       "agency": "World Health Organization",
+       "acronym": "WHO_",
+       "grantId": "2022/1225542-0",
+       "orderIn": 0
+      }
+     ]
+    },
+    "fullTextUrlList": {
+     "fullTextUrl": [
+      {
+       "availability": "Subscription required",
+       "availabilityCode": "S",
+       "documentStyle": "doi",
+       "site": "DOI",
+       "url": "https://doi.org/10.1038/s43856-025-01023-1"
+      },
+      {
+       "availability": "Open access",
+       "availabilityCode": "OA",
+       "documentStyle": "html",
+       "site": "Europe_PMC",
+       "url": "https://europepmc.org/articles/PMC12344290"
+      },
+      {
+       "availability": "Open access",
+       "availabilityCode": "OA",
+       "documentStyle": "pdf",
+       "site": "Europe_PMC",
+       "url": "https://europepmc.org/articles/PMC12344290?pdf=render"
+      }
+     ]
+    },
+    "isOpenAccess": "Y",
+    "inEPMC": "Y",
+    "inPMC": "Y",
+    "citedByCount": 1,
+    "hasReferences": "Y",
+    "hasTextMinedTerms": "Y",
+    "hasDbCrossReferences": "N",
+    "hasPDF": "Y",
+    "hasBook": "N",
+    "hasSuppl": "Y",
+    "hasLabsLinks": "Y",
+    "hasData": "Y",
+    "license": "cc by",
+    "authMan": "N",
+    "epmcAuthMan": "N",
+    "nihAuthMan": "N",
+    "hasTMAccessionNumbers": "Y",
+    "tmAccessionTypeList": {
+     "accessionType": [
+      "doi"
+     ]
+    },
+    "dateOfCreation": "2025-08-12",
+    "dateOfRevision": "2025-08-16",
+    "electronicPublicationDate": "2025-08-12",
+    "firstPublicationDate": "2025-08-12",
+    "firstIndexDate": "2025-08-21",
+    "fullTextReceivedDate": "2025-11-27",
+    "hasEvaluations": "N"
+   }
+  ]
+ }
+}
