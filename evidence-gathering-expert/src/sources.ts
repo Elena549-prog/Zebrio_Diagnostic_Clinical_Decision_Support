@@ -21,6 +21,8 @@ const ACCESS_RANK: Record<AccessLevel, number> = {
 
 export function classifyStudyType(pubTypes: string[], title: string): StudyType {
   const all = `${pubTypes.join(" | ")} | ${title}`.toLowerCase();
+  // "A case report and review of the literature" is a case report, not a review.
+  if (isCaseReport(title, pubTypes)) return "other";
   if (/practice guideline|\bguideline/.test(all)) return "guideline";
   if (/meta-analysis|meta analysis/.test(all)) return "meta-analysis";
   if (/systematic review/.test(all)) return "systematic-review";
@@ -31,9 +33,18 @@ export function classifyStudyType(pubTypes: string[], title: string): StudyType 
   return "other";
 }
 
-export function rankSources<T extends Pick<Source, "studyType" | "year" | "accessLevel">>(sources: T[]): T[] {
+const CASE_REPORT = /\bcase reports?\b|\bcase series\b|^an? (rare |unusual )?case of\b/i;
+
+/** Case reports describe single patients; they cannot give a base rate or a likelihood ratio. */
+export function isCaseReport(title: string, pubTypes: string[] = []): boolean {
+  return pubTypes.some((t) => /case report/i.test(t)) || CASE_REPORT.test(title);
+}
+
+/** Guideline > review/meta-analysis > RCT > observational > other > case report; newer first. */
+export function rankSources<T extends Pick<Source, "studyType" | "year" | "accessLevel" | "title">>(sources: T[]): T[] {
   return [...sources].sort(
     (a, b) =>
+      Number(isCaseReport(a.title)) - Number(isCaseReport(b.title)) ||
       RANK[a.studyType] - RANK[b.studyType] ||
       (b.year ?? 0) - (a.year ?? 0) ||
       ACCESS_RANK[a.accessLevel] - ACCESS_RANK[b.accessLevel],

@@ -28,7 +28,7 @@ Europe PMC, PubMed and DuckDuckGo need no key. Tests need no key and no network.
 ## Commands
 
 ```bash
-npm test                                             # 57 tests, no keys, no network
+npm test                                             # 65 tests, no keys, no network
 npm run typecheck
 npm run evidence -- examples/sore-throat.request.json  # live run; JSON on stdout, summary with links on stderr, saved to out/<requestId>.json
 npx tsx --env-file=../.env.local scripts/trace-live.ts # live run with a full request/model trace in out/trace.json
@@ -72,11 +72,22 @@ const response = await gatherEvidence(request, {
 
 1. Claude names up to 3 diagnoses and the patient's findings; a finding is dropped
    unless its `quotedFrom` words are literally in the presentation.
-2. Code builds questions (max 12) and search queries from concept words only.
-3. Europe PMC title/abstract search (PubMed fallback), top 10 by relevance, ranked
-   guideline > review/meta-analysis > RCT > observational > other, newer first; up to
-   5 sources per question; open-access full text when available, else the abstract.
-   DuckDuckGo Lite finds one guideline page per diagnosis on allowed domains.
+2. Code builds questions (max 12) and search queries from concept words only. Method
+   words ("diagnosis", "differential", "accuracy"), negations and a second condition
+   after "versus"/"or" are dropped, and diagnosis words the model appended to a finding
+   are removed ("NT-proBNP heart failure diagnosis" → "nt-probnp").
+3. Europe PMC title/abstract search, each question asked several ways (top 10 each):
+   the main query in relevance order and in citation order (`sort=CITED desc` surfaces
+   the classic diagnostic studies), plus a base-rate variant by care setting (primary
+   care, general practice, emergency department) and a systematic-review variant for
+   priors, and a review / prediction-rule variant of the diagnosis for likelihood ratios.
+   Results are merged round-robin and deduplicated; PubMed is the fallback when every
+   variant is empty. Preprints are excluded (`NOT SRC:PPR`, and in code by publication
+   type and preprint-server DOI); case reports go last. Up to 5 sources per question,
+   ranked guideline > review/meta-analysis > RCT > observational > other > case report,
+   newer first; open-access full text when available, else the abstract (also when the
+   full text returns an error). DuckDuckGo Lite finds one guideline page per diagnosis
+   on allowed domains.
 4. A checker call (fresh context, passages marked as untrusted) proposes quotes and numbers.
 5. Code verifies: the quote is in that source's retrieved text; each number is in the
    quote; the source can support (not paywalled/snippet/placeholder host); no
@@ -128,6 +139,34 @@ What the live runs taught us (fixed): exact-phrase queries returned nothing; ful
 matching returned off-topic papers; PubMed returned 429 under parallel calls;
 DuckDuckGo was retried after a block.
 
+## Coverage work (2026-10-17, golden examples)
+
+Changes: clean concept terms (prompt + `conceptTerm`), query variants merged per
+question (relevance + citation order, care-setting and review variants), preprints
+excluded, case reports last, 8 sources per question (was 5), contradicted items carry
+no values. No verification rule was loosened.
+
+Live runs of `examples/golden/*` (supported items / all items; each run 13–32 s):
+
+| Case | Before | After, run A | After, run B |
+|---|---|---|---|
+| 1 chest pain | 0 / 12 (1 contradicted, values from an unrelated GERD stress-test study) | 0 / 10 | 0 / 12 |
+| 2 breathlessness | 1 / 12 (PE: tachycardia sens 0.33) | 1 / 12 (CAP prior 0.35) | 2 / 12 (CAP prior 0.35; ADHF: raised JVP spec 0.70) |
+| 3 dysuria | 0 / 12 | 1 / 12 (vaginitis: leukocyte esterase sens 1.0, spec 0.90) | 1 / 12 (same) |
+| **Total** | **1 / 36** | **2 / 34** | **3 / 36** |
+
+Preprints in sources: 4 before, 0 after. Results vary between runs (same code gave
+0 and then 1 supported item for case 2 at 5 sources per question).
+
+What now limits coverage: retrieval finds the classic studies (e.g. "Chest pain in
+primary care: epidemiology and pre-work-up probabilities", Breathing Not Properly's
+"47 percent" heart-failure rate in ED dyspnoea), and their quotes pass code
+verification, but the independent second check rejects most of them because the
+study population does not match the question's age band ("not specifically among
+patients aged 65+"). Case 1 had 4 such rejections per run. Whether a wider study
+population that includes the patient's age band should count (with a limitation)
+is a design decision for the team; it was left unchanged here.
+
 ## Known limitations
 
 - **DuckDuckGo** has no official API and blocks this kind of traffic after a few
@@ -144,6 +183,9 @@ DuckDuckGo was retried after a block.
   module. Remove them if the orchestrator must not see any presentation wording.
 - Population/setting phrases must appear in the retrieved source, but not necessarily
   inside the quote. A denominator must contain a count.
+- `contradicted` items carry no numbers: values come only from supporting evidence. A
+  contradicting study's numbers often answer a different question, so they stay readable
+  in its cited passage only. A `conflicting` item takes its values from the supporting study.
 - `conflicting` means one source supports and another contradicts. Two supporting
   studies with different values stay `supported` (best-ranked value) and `note` lists
   the other values; read `note` before using a value.

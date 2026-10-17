@@ -157,7 +157,9 @@ export function decideItem(question: Question, accepted: VerifiedFinding[], cons
   else if (considered.length && considered.every((s) => !CAN_SUPPORT.has(s.accessLevel))) status = "inaccessible";
   else status = "insufficient";
 
-  const primary = supports[0] ?? contradicts[0];
+  // Values come from supporting evidence only. A contradicting study's numbers (often from a
+  // different question) stay readable in its cited passage but never become calculator inputs.
+  const primary = supports[0];
   if (supports.length > 1) {
     const others = supports.slice(1).map((s) => `${s.sourceId}: ${fields.map((k) => s.numbers[k]).filter((n) => n != null).join("/")}`);
     notes.push(`Other studies report: ${others.join("; ")}. Values shown are from the best-ranked source; nothing was averaged.`);

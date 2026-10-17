@@ -36,10 +36,12 @@ const epmcResults = [
 
 const NICE = `<html><head><title>Sore throat (acute): antimicrobial prescribing | NICE</title></head><body><main><p>${"Use FeverPAIN or Centor criteria to identify people who are more likely to benefit from an antibiotic. ".repeat(3)}</p></main></body></html>`;
 
-function world(over: { epmc?: () => Response; pubmed?: () => Response; ddg?: () => Response } = {}) {
+type Route = (url: string) => Response;
+
+function world(over: { epmc?: Route; pubmed?: Route; ddg?: Route; fullText?: Route } = {}) {
   return fakeFetch([
     [/europepmc\/webservices\/rest\/search/, over.epmc ?? (() => json({ resultList: { result: epmcResults } }))],
-    [/PMC100\/fullTextXML/, () => xml(fullText)],
+    [/PMC100\/fullTextXML/, over.fullText ?? (() => xml(fullText))],
     [/eutils/, over.pubmed ?? (() => json({ esearchresult: { idlist: [] } }))],
     [
       /lite\.duckduckgo\.com/,
@@ -206,14 +208,117 @@ describe("gatherEvidence end to end (no network, no keys)", () => {
     const queries = fetchFn.calls
       .filter((c) => c.includes("/rest/search?"))
       .map((c) => new URL(c).searchParams.get("query")!);
-    // Title/abstract only: full-text matching returned off-topic papers in live runs.
+    // Title/abstract only: full-text matching returned off-topic papers in live runs. Preprints excluded.
     expect(queries).toContain(
-      'TITLE_ABS:(streptococcal pharyngitis) AND TITLE_ABS:(cough) AND TITLE_ABS:("likelihood ratio" OR sensitivity OR specificity OR "diagnostic accuracy" OR "clinical prediction")',
+      'TITLE_ABS:(streptococcal pharyngitis) AND TITLE_ABS:(cough) AND TITLE_ABS:("likelihood ratio" OR sensitivity OR specificity OR "diagnostic accuracy" OR "clinical prediction") AND NOT SRC:PPR',
     );
     expect(queries).toContain(
-      "TITLE_ABS:(streptococcal pharyngitis) AND TITLE_ABS:(prevalence OR proportion OR incidence OR aetiology OR etiology) AND TITLE_ABS:(sore throat fever)",
+      "TITLE_ABS:(streptococcal pharyngitis) AND TITLE_ABS:(prevalence OR proportion OR incidence OR aetiology OR etiology) AND TITLE_ABS:(sore throat fever) AND NOT SRC:PPR",
     );
     expect(res.diagnoses[0]!.likelihoodRatios[0]!.finding).toBe("absence of cough");
+  });
+
+  it("cleans noisy model search terms down to concept nouns", async () => {
+    const noisy = {
+      presentingProblem: "sore throat",
+      diagnoses: [
+        {
+          name: "Group A streptococcal pharyngitis",
+          searchTerm: "streptococcal pharyngitis diagnosis differential",
+          findings: [
+            // Diagnosis words appended to a finding are dropped...
+            { name: "Tonsillar exudate", searchTerm: "tonsillar exudate pharyngitis diagnosis", quotedFrom: "Exudate on tonsils", presence: "present" },
+            { name: "Cough", searchTerm: "pharyngitis cough", quotedFrom: "no cough", presence: "absent" },
+            { name: "Fever", searchTerm: "fever accuracy", quotedFrom: "fever 38.6°C", presence: "present" },
+          ],
+        },
+        {
+          name: "Viral upper respiratory infection",
+          searchTerm: "viral upper respiratory infection versus streptococcal",
+          // ...but a finding that merely shares a word with the diagnosis keeps it.
+          findings: [{ name: "Runny nose", searchTerm: "upper respiratory symptoms", quotedFrom: "no runny nose", presence: "absent" }],
+        },
+      ],
+    };
+    const base = scriptedLlm();
+    const llm: LlmClient = { complete: async (req) => (req.task === "analyse" ? JSON.stringify(noisy) : base.complete(req)) };
+    const fetchFn = world();
+    const res = await gatherEvidence(request, { llm, fetch: fetchFn, now: fixedNow });
+    expect(res.diagnoses.flatMap((d) => d.likelihoodRatios.map((l) => l.finding))).toEqual([
+      "tonsillar exudate",
+      "absence of cough",
+      "fever",
+      "absence of upper respiratory symptoms",
+    ]);
+    const queries = fetchFn.calls.filter((c) => c.includes("/rest/search?")).map((c) => new URL(c).searchParams.get("query")!);
+    expect(queries.some((q) => q.startsWith("TITLE_ABS:(streptococcal pharyngitis) AND"))).toBe(true);
+    expect(queries.some((q) => q.startsWith("TITLE_ABS:(viral upper respiratory infection) AND"))).toBe(true);
+    for (const q of queries) expect(q).not.toMatch(/\b(differential|versus|accuracy\))|diagnosis\)/);
+  });
+
+  it("merges several query variants per question, so evidence missed by the main query is still found", async () => {
+    const preprints = [
+      paper({ doi: "10.21203/rs.3.rs-111/v1", title: "Cough and pharyngitis: a Research Square preprint", abstractText: COUGH }),
+      paper({ doi: "10.64898/2026.01.01.1", title: "Cough and pharyngitis: a medRxiv preprint", abstractText: COUGH }),
+      paper({ pmid: "999", title: "Cough and pharyngitis: tagged preprint", abstractText: COUGH, source: "PPR" }),
+    ];
+    const epmc: Route = (url) => {
+      const q = new URL(url).searchParams.get("query")!;
+      const results =
+        // The main LR query only finds preprints and a paywalled paper.
+        q.includes("TITLE_ABS:(cough)") ? [...preprints, epmcResults[2]]
+        // A review/prediction-rule variant without the finding finds the meta-analysis.
+        : q.includes("systematic review") && !q.includes("TITLE_ABS:(prevalence") ? [epmcResults[0]]
+        // A base-rate variant by care setting finds it for the prior.
+        : q.includes("primary care") ? [epmcResults[0]]
+        : [];
+      return json({ resultList: { result: results } });
+    };
+    const fetchFn = world({ epmc });
+    const res = await gatherEvidence(request, { llm: scriptedLlm(), fetch: fetchFn, now: fixedNow });
+    const gas = res.diagnoses[0]!;
+    expect(gas.prior).toMatchObject({ status: "supported", value: 0.37 });
+    expect(gas.likelihoodRatios.find((l) => l.quotedFrom === "no cough")).toMatchObject({ status: "supported", lrPositive: 1.4 });
+    // Preprints are excluded at the query and again in code.
+    expect(res.sources.some((s) => /preprint/i.test(s.title))).toBe(false);
+    const searches = fetchFn.calls.filter((c) => c.includes("/rest/search?")).map((c) => new URL(c).searchParams);
+    for (const p of searches) expect(p.get("query")).toMatch(/AND NOT SRC:PPR$/);
+    // Highly cited studies are asked for as well as the default order.
+    expect(searches.some((p) => p.get("sort") === "CITED desc")).toBe(true);
+  });
+
+  it("ranks case reports last, even when the title mentions a review", async () => {
+    const caseReport = paper({
+      pmid: "777", pmcid: "PMC777", isOpenAccess: "Y", pubYear: "2026",
+      title: "Streptococcal pharyngitis with toxic shock: a case report and systematic review of the literature",
+      pubTypeList: { pubType: ["Case Reports"] },
+    });
+    const llm: LlmClient = {
+      async complete(req) {
+        if (req.task === "analyse") return JSON.stringify({ presentingProblem: "sore throat", diagnoses: [{ name: "Group A streptococcal pharyngitis", searchTerm: "streptococcal pharyngitis", findings: [] }] });
+        return scriptedLlm().complete(req);
+      },
+    };
+    const res = await gatherEvidence(request, {
+      llm,
+      fetch: world({ epmc: () => json({ resultList: { result: [caseReport, ...epmcResults] } }) }),
+      now: fixedNow,
+      config: { maxSourcesPerQuestion: 2 },
+    });
+    expect(res.sources.some((s) => s.pmid === "777")).toBe(false);
+    expect(res.diagnoses[0]!.prior.status).toBe("supported");
+  });
+
+  it("falls back to the abstract when Europe PMC full text fails with HTTP 500", async () => {
+    const results = [{ ...epmcResults[0], abstractText: `Background. ${PREVALENCE} Conclusions follow.` }];
+    const res = await gatherEvidence(request, {
+      llm: scriptedLlm(),
+      fetch: world({ epmc: () => json({ resultList: { result: results } }), fullText: () => xml("error", 500) }),
+      now: fixedNow,
+    });
+    expect(res.sources.find((s) => s.pmcid === "PMC100")?.accessLevel).toBe("abstract_only");
+    expect(res.diagnoses[0]!.prior).toMatchObject({ status: "supported", value: 0.37 });
+    expect(res.errors.some((e) => /full text PMC100.*500/.test(e.message))).toBe(true);
   });
 
   it("stops asking DuckDuckGo after it blocks once, and papers still work", async () => {

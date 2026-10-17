@@ -47,16 +47,35 @@ export function cleanTerm(term: string): string {
 }
 
 // Words that narrow a literature search without naming a concept (age is ranked, not searched).
-const NOISE = new Set(["absence", "absent", "no", "not", "without", "lack", "of", "acute", "children", "child", "pediatric", "paediatric", "adult", "adults", "patients", "patient", "in", "with", "the", "a"]);
+const NOISE = new Set([
+  "absence", "absent", "no", "not", "without", "lack", "of", "acute", "children", "child", "pediatric", "paediatric",
+  "adult", "adults", "patients", "patient", "in", "with", "the", "a", "an", "and",
+  "diagnosis", "diagnoses", "diagnostic", "differential", "accuracy", "evaluation", "assessment", "suspected",
+]);
+/** "reflux versus angina chest pain" names two concepts; the search keeps the first. */
+const CONTRAST = /\b(versus|vs|or)\b.*$/i;
 
-/** The bare concept for a search: cleaned, no negation or age words, minus any words in `exclude`. */
+/**
+ * The bare concept for a search: cleaned, no negation, age or method words. With `exclude`
+ * (the diagnosis term), diagnosis words the model tacked on are dropped: a trailing run always
+ * ("cough pharyngitis" -> "cough"), a leading run only when it ends with the diagnosis' last word
+ * ("angina left arm radiation" -> "left arm radiation"), so "chest wall tenderness" keeps "chest".
+ */
 export function conceptTerm(term: string, exclude = ""): string {
-  const skip = new Set(cleanTerm(exclude).toLowerCase().split(" "));
-  return cleanTerm(term)
+  const words = cleanTerm(term.replace(CONTRAST, ""))
     .toLowerCase()
     .split(" ")
-    .filter((w) => w && !NOISE.has(w) && !skip.has(w))
-    .join(" ");
+    .filter((w) => w && !NOISE.has(w));
+  const dx = exclude ? conceptTerm(exclude).split(" ").filter(Boolean) : [];
+  if (!dx.length) return words.join(" ");
+  const inDx = new Set(dx);
+  let end = words.length;
+  while (end > 0 && inDx.has(words[end - 1]!)) end--;
+  let start = 0;
+  while (start < end && inDx.has(words[start]!)) start++;
+  if (start > 0 && words[start - 1] !== dx[dx.length - 1]) start = 0;
+  const kept = words.slice(start, end);
+  return (kept.length ? kept : words).join(" ");
 }
 
 export async function analyse(llm: LlmClient, p: MinimisedPresentation, config: Config): Promise<Analysis> {

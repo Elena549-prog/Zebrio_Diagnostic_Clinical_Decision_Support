@@ -31,6 +31,36 @@ describe("Europe PMC adapter (saved real responses)", () => {
     expect(await fetchEuropePmcFullText(http(f), "PMC0")).toBeNull();
   });
 
+  it("drops preprints (Europe PMC source PPR, preprint publication type or a preprint-server DOI)", async () => {
+    const r = (over: Record<string, unknown>) => ({ title: "A study", pubYear: "2026", isOpenAccess: "N", ...over });
+    const f = fakeFetch([
+      [
+        /rest\/search/,
+        () =>
+          json({
+            resultList: {
+              result: [
+                r({ id: "PPR1", source: "PPR", doi: "10.1/x" }),
+                r({ pmid: "2", pubTypeList: { pubType: ["Preprint"] } }),
+                r({ doi: "10.21203/rs.3.rs-111777/v1" }),
+                r({ doi: "10.64898/2026.02.25.26347092" }),
+                r({ doi: "10.1101/2026.01.01.555" }),
+                r({ pmid: "5", source: "MED", doi: "10.1093/cid/ciaf668" }),
+              ],
+            },
+          }),
+      ],
+    ]);
+    const records = await searchEuropePmc(http(f), "x");
+    expect(records.map((x) => x.pmid)).toEqual(["5"]);
+  });
+
+  it("asks for a sort order when given one", async () => {
+    const f = fakeFetch([[/rest\/search/, () => json({ resultList: { result: [] } })]]);
+    await searchEuropePmc(http(f), "x", 10, "CITED desc");
+    expect(new URL(f.calls[0]!).searchParams.get("sort")).toBe("CITED desc");
+  });
+
   it("throws on a server error so the caller can record a provider failure", async () => {
     const f = fakeFetch([[/search/, () => json({}, 503)]]);
     await expect(searchEuropePmc(http(f), "x")).rejects.toThrow(/503/);

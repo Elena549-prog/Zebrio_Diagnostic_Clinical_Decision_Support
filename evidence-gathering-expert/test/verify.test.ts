@@ -146,6 +146,39 @@ describe("verifyFindings + decideItem", () => {
     expect(v.accepted).toHaveLength(2);
   });
 
+  it("a contradicted item carries no values: numbers from a contradicting study are not calculator inputs", () => {
+    const other = "Exertional pain had a sensitivity of 0 and a specificity of 0.83 for reflux in this stress-test cohort.";
+    const sources = store(source("pmcid:PMC2", other, { studyType: "observational" }));
+    const v = verifyFindings(
+      lrQuestion,
+      [finding({ sourceId: "pmcid:PMC2", quote: other, stance: "contradicts", numbers: { sensitivity: 0, specificity: 0.83 }, population: null })],
+      sources,
+    );
+    v.accepted[0]!.doubleCheck = "agreed";
+    const item = decideItem(lrQuestion, v.accepted, [...sources.values()]);
+    expect(item.status).toBe("contradicted");
+    expect([item.sensitivity, item.specificity, item.lrPositive, item.lrNegative, item.ci95]).toEqual([null, null, null, null, null]);
+    expect(item.missing).toEqual(expect.arrayContaining(["sensitivity", "specificity"]));
+    expect(item.used).toHaveLength(1); // the passage is still cited as evidence
+  });
+
+  it("a conflicting item takes its values from the supporting study only", () => {
+    const other = "In this cohort, absence of cough was not associated with streptococcal infection (likelihood ratio 1.0).";
+    const sources = store(source("pmcid:PMC2", other, { studyType: "guideline" }), source("pmcid:PMC1", LR_TEXT));
+    const v = verifyFindings(
+      lrQuestion,
+      [
+        finding({ sourceId: "pmcid:PMC2", quote: other, stance: "contradicts", numbers: { lrPositive: 1.0 }, population: "In this cohort" }),
+        finding(),
+      ],
+      sources,
+    );
+    const item = decideItem(lrQuestion, v.accepted, [...sources.values()]);
+    expect(item.status).toBe("conflicting");
+    expect(item.lrPositive).toBe(1.4);
+    expect(item.population).toBe("children aged 5 to 15 years");
+  });
+
   it("case 6: paywalled and snippet-only sources can never support", () => {
     for (const accessLevel of ["paywalled", "snippet_only", "inaccessible"] as const) {
       const sources = store(source("pmcid:PMC1", LR_TEXT, { accessLevel }));

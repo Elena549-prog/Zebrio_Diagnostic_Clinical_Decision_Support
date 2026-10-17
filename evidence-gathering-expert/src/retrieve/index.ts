@@ -2,7 +2,7 @@
 // Every query is built here from search terms only, never from patient text.
 import type { Question } from "../internal.js";
 import { findingLabel } from "../analyse.js";
-import { paperSource, rankSources, SourceStore } from "../sources.js";
+import { isCaseReport, paperSource, rankSources, SourceStore } from "../sources.js";
 import type { Config, ErrorEntry, StoredSource } from "../types.js";
 import { fetchGuidelinePage, ProviderBlocked, searchGuidelines } from "./duckduckgo.js";
 import type { Http, ProviderHealth } from "./http.js";
@@ -17,6 +17,8 @@ export interface RetrieveContext {
   config: Config;
   errors: ErrorEntry[];
   fullText: Map<string, Promise<string | null>>;
+  /** Europe PMC searches by query and sort; variants shared by several questions run once. */
+  searches: Map<string, Promise<PaperRecord[]>>;
   guidelines: Map<string, Promise<StoredSource[]>>;
   /** DuckDuckGo searches run one at a time, so a block is seen before the next search starts. */
   ddgQueue?: Promise<unknown>;
@@ -31,8 +33,15 @@ const PASSAGE_CHARS = 3500;
 
 const LR_TERMS = '("likelihood ratio" OR sensitivity OR specificity OR "diagnostic accuracy" OR "clinical prediction")';
 const PRIOR_TERMS = "(prevalence OR proportion OR incidence OR aetiology OR etiology)";
+const REVIEW_TERMS = '("systematic review" OR "meta-analysis" OR "rational clinical examination" OR "clinical prediction rule" OR "clinical decision rule")';
+const SETTING_TERMS = '("primary care" OR "general practice" OR "family practice" OR "emergency department")';
+const BASE_RATE_TERMS = '(prevalence OR proportion OR "final diagnosis" OR "final diagnoses" OR aetiology OR etiology OR causes)';
+/** Preprints are not peer reviewed; the adapters drop any that slip through. */
+const NOT_PREPRINT = " AND NOT SRC:PPR";
+/** Highly cited studies are the classic diagnostic-accuracy and base-rate papers. */
+const CITED = "CITED desc";
 
-/** Candidates taken from the top of the relevance order before ranking by study type. */
+/** Candidates taken from the top of each search's order. */
 const RELEVANCE_POOL = 10;
 
 /**
@@ -50,18 +59,75 @@ export function paperQuery(q: Question, problem: string, field: "" | "TITLE_ABS:
   return parts.map((p) => field + p).join(" AND ");
 }
 
-async function searchPapers(q: Question, problem: string, ctx: RetrieveContext): Promise<PaperRecord[]> {
-  const { health, http, errors } = ctx;
-  if (!health.disabled("europepmc")) {
-    try {
-      const r = await searchEuropePmc(http, paperQuery(q, problem, "TITLE_ABS:"), RELEVANCE_POOL);
-      health.ok("europepmc");
-      if (r.length) return r;
-    } catch (e) {
-      health.fail("europepmc");
-      errors.push({ step: "retrieve", question: q.text, message: `Europe PMC: ${(e as Error).message}` });
+export interface PaperSearch {
+  query: string;
+  sort?: string;
+}
+
+/**
+ * One question asked several ways, still title/abstract only and without exact-phrase concepts:
+ * the main query in relevance and citation order, plus a broader variant. For a base rate the
+ * variant looks for studies of the presenting problem by care setting; for a likelihood ratio it
+ * looks for reviews and prediction rules of the diagnosis, which report many findings at once.
+ */
+export function europePmcSearches(q: Question, problem: string): PaperSearch[] {
+  const f = "TITLE_ABS:";
+  const and = (...parts: string[]) => parts.map((p) => f + p).join(" AND ") + NOT_PREPRINT;
+  const dx = `(${q.diagnosis.searchTerm})`;
+  const main = paperQuery(q, problem, f) + NOT_PREPRINT;
+  if (q.kind === "prior") {
+    return [
+      { query: main },
+      { query: main, sort: CITED },
+      { query: and(dx, ...(problem ? [`(${problem})`] : []), SETTING_TERMS, BASE_RATE_TERMS), sort: CITED },
+      { query: and(dx, PRIOR_TERMS, REVIEW_TERMS), sort: CITED },
+    ];
+  }
+  return [{ query: main }, { query: main, sort: CITED }, { query: and(dx, LR_TERMS, REVIEW_TERMS), sort: CITED }];
+}
+
+/** Round-robin over the result lists, so every variant's best hits are near the front. */
+function interleave(lists: PaperRecord[][]): PaperRecord[] {
+  const out: PaperRecord[] = [];
+  const seen = new Set<string>();
+  for (let i = 0; lists.some((l) => i < l.length); i++) {
+    for (const l of lists) {
+      const r = l[i];
+      if (!r) continue;
+      const keys = [r.pmcid, r.pmid, r.doi?.toLowerCase()].filter(Boolean) as string[];
+      if (keys.some((k) => seen.has(k))) continue;
+      keys.forEach((k) => seen.add(k));
+      out.push(r);
     }
   }
+  return out;
+}
+
+function europePmc(s: PaperSearch, q: Question, ctx: RetrieveContext): Promise<PaperRecord[]> {
+  const key = `${s.sort ?? ""}|${s.query}`;
+  let p = ctx.searches.get(key);
+  if (!p) {
+    p = (async () => {
+      if (ctx.health.disabled("europepmc")) return [];
+      try {
+        const r = await searchEuropePmc(ctx.http, s.query, RELEVANCE_POOL, s.sort);
+        ctx.health.ok("europepmc");
+        return r;
+      } catch (e) {
+        ctx.health.fail("europepmc");
+        ctx.errors.push({ step: "retrieve", question: q.text, message: `Europe PMC: ${(e as Error).message}` });
+        return [];
+      }
+    })();
+    ctx.searches.set(key, p);
+  }
+  return p;
+}
+
+async function searchPapers(q: Question, problem: string, ctx: RetrieveContext): Promise<PaperRecord[]> {
+  const { health, http, errors } = ctx;
+  const merged = interleave(await Promise.all(europePmcSearches(q, problem).map((s) => europePmc(s, q, ctx))));
+  if (merged.length) return merged;
   if (!health.disabled("pubmed")) {
     try {
       const r = await searchPubMed(http, paperQuery(q, problem), RELEVANCE_POOL);
@@ -90,23 +156,27 @@ function fullTextOf(pmcid: string, ctx: RetrieveContext): Promise<string | null>
 async function papersFor(q: Question, problem: string, ctx: RetrieveContext): Promise<StoredSource[]> {
   const records = await searchPapers(q, problem, ctx);
   const at = () => ctx.now().toISOString();
-  // Rank on what each record promises before downloading anything.
-  const prelim = records.map((r) =>
-    paperSource(r, r.isOpenAccess && r.pmcid ? "full_text" : r.abstract ? "abstract_only" : "paywalled", "", at()),
+  // Pick by search order (case reports last), then rank the picks by quality before downloading.
+  const picked = [
+    ...records.filter((r) => !isCaseReport(r.title, r.pubTypes)),
+    ...records.filter((r) => isCaseReport(r.title, r.pubTypes)),
+  ].slice(0, ctx.config.maxSourcesPerQuestion);
+  const prelim = picked.map((r) => ({
+    r,
+    s: paperSource(r, r.isOpenAccess && r.pmcid ? "full_text" : r.abstract ? "abstract_only" : "paywalled", "", at()),
+  }));
+  const ranked = rankSources(prelim.map((p) => p.s)).map((s) => prelim.find((p) => p.s === s)!);
+  return Promise.all(
+    ranked.map(async ({ r, s: p }) => {
+      const full = p.accessLevel === "full_text" ? await fullTextOf(p.pmcid!, ctx) : null;
+      const source = full
+        ? paperSource(r, "full_text", full, at())
+        : r.abstract
+          ? paperSource(r, "abstract_only", r.abstract, at())
+          : paperSource(r, "paywalled", "", at());
+      return ctx.store.add(source);
+    }),
   );
-  const top = rankSources(prelim).slice(0, ctx.config.maxSourcesPerQuestion);
-  const out: StoredSource[] = [];
-  for (const p of top) {
-    const r = records.find((x) => (x.pmcid ?? x.pmid ?? x.doi) === (p.pmcid ?? p.pmid ?? p.doi))!;
-    const full = p.accessLevel === "full_text" ? await fullTextOf(p.pmcid!, ctx) : null;
-    const source = full
-      ? paperSource(r, "full_text", full, at())
-      : r.abstract
-        ? paperSource(r, "abstract_only", r.abstract, at())
-        : paperSource(r, "paywalled", "", at());
-    out.push(ctx.store.add(source));
-  }
-  return out;
 }
 
 function guidelinesFor(q: Question, problem: string, ctx: RetrieveContext): Promise<StoredSource[]> {

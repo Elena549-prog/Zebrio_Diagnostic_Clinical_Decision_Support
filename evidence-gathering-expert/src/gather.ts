@@ -24,7 +24,7 @@ import { decideItem, verifyFindings, type DecidedItem } from "./verify.js";
 export const DEFAULT_CONFIG: Config = {
   maxDiagnoses: 3,
   maxFindingsPerDiagnosis: 3,
-  maxSourcesPerQuestion: 5,
+  maxSourcesPerQuestion: 8,
   concurrency: 4,
   httpTimeoutMs: 15_000,
   requestBudgetMs: 180_000,
@@ -140,6 +140,7 @@ export async function gatherEvidence(request: EvidenceRequest, deps: Deps): Prom
     config,
     errors,
     fullText: new Map(),
+    searches: new Map(),
     guidelines: new Map(),
   };
 
