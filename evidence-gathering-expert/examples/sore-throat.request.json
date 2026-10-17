@@ -1,0 +1,16 @@
+{
+  "requestId": "demo-sore-throat",
+  "presentation": {
+    "chiefComplaint": "Sore throat and fever for 2 days",
+    "history": "Pain on swallowing, fever 38.6°C, no cough, no runny nose. Otherwise well. No known sick contacts reported.",
+    "observations": [
+      "T 38.6°C, HR 88, BP 118/76",
+      "Exudate on tonsils, tender enlarged anterior cervical lymph nodes, no rash"
+    ],
+    "demographics": {
+      "ageYears": 9,
+      "sex": "female",
+      "location": "Aarhus, Denmark"
+    }
+  }
+}

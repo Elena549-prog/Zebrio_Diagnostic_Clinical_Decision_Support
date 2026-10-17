@@ -1,0 +1,76 @@
+{
+  "requestId": "demo-sore-throat",
+  "status": "partial",
+  "generatedAt": "2026-10-17T12:00:00.000Z",
+  "diagnoses": [
+    {
+      "id": "h1",
+      "diagnosis": "Group A streptococcal pharyngitis",
+      "origin": "suggested_by_model",
+      "prior": {
+        "question": "What is the prevalence of group A streptococcal pharyngitis among patients aged 5–15 presenting with sore throat?",
+        "status": "supported",
+        "value": 0.3,
+        "unit": "proportion",
+        "ci95": null,
+        "population": "FIXTURE children 5–15 with sore throat",
+        "setting": "FIXTURE primary care",
+        "denominator": null,
+        "missing": ["ci95", "denominator"],
+        "evidenceIds": ["e1"]
+      },
+      "likelihoodRatios": [
+        {
+          "question": "What is the diagnostic accuracy (likelihood ratio, sensitivity, specificity) of absence of cough for group A streptococcal pharyngitis?",
+          "finding": "absence of cough",
+          "quotedFrom": "no cough",
+          "status": "insufficient",
+          "lrPositive": null,
+          "lrNegative": null,
+          "sensitivity": null,
+          "specificity": null,
+          "ci95": null,
+          "population": null,
+          "setting": null,
+          "denominator": null,
+          "missing": ["lrPositive", "lrNegative", "sensitivity", "specificity", "ci95", "population", "setting", "denominator"],
+          "evidenceIds": [],
+          "note": "FIXTURE: shows what an unanswered question looks like."
+        }
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "id": "e1",
+      "sourceId": "url:fixture",
+      "url": "https://example.invalid/fixture-source",
+      "passage": "FIXTURE passage. Real responses contain an exact quote from the retrieved paper.",
+      "doubleCheck": "agreed",
+      "reason": "FIXTURE reason.",
+      "limitations": [],
+      "stance": "supports",
+      "kind": "literature"
+    }
+  ],
+  "patientFindings": [
+    { "id": "f1", "text": "absence of cough", "quotedFrom": "no cough", "kind": "patient_finding" }
+  ],
+  "sources": [
+    {
+      "id": "url:fixture",
+      "url": "https://example.invalid/fixture-source",
+      "title": "FIXTURE source (not a real paper)",
+      "studyType": "meta-analysis",
+      "year": 2022,
+      "accessLevel": "full_text",
+      "retrievedAt": "2026-10-17T12:00:00.000Z",
+      "provider": "europepmc"
+    }
+  ],
+  "errors": [],
+  "limitations": [
+    "FIXTURE for integration only: values, quote and source are illustrative, not retrieved. Do not use for probability calculation.",
+    "Prototype; not clinical validation."
+  ]
+}
