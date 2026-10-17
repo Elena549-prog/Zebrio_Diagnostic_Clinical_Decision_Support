@@ -35,9 +35,10 @@ Agreement between models alone does not establish source support.
   There is no supplied orchestrator input contract yet. Your example request
   should demonstrate what information the caller needs to provide.
 - The integration owner connects your prototype to the orchestrator and UI.
-  Person 2 owns terminology and the probability module. Deliver provenance and
-  candidate numerical inputs; calculation and approval of numerical eligibility
-  belong to that separate workflow.
+  Person 2 owns medical coding only. Person 3 owns orchestration, integration,
+  and the numerical engine. Deliver provenance and candidate numerical inputs;
+  calculation and approval of numerical eligibility belong to Person 3's
+  separate workflow.
 - Keep literature evidence distinct from patient observations and test results.
   Finding another paper does not constitute a new positive patient test.
 
