@@ -14,7 +14,7 @@
 
 import { SCENARIOS, type Scenario } from "./scenarios.js";
 import { RuntimeStatus } from "./RuntimeStatus.js";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import type { Case, Presentation, Sex } from "./types.js";
 
 interface Props {
@@ -27,6 +27,7 @@ interface Props {
 }
 
 export function Home({ onStartScenario, onStartBlank, busy, onOpenDocs, savedCases = [], onOpenCase }: Props) {
+  const libraryRef = useRef<HTMLDivElement>(null);
   const [blankOpen, setBlankOpen] = useState(false);
   const [complaint, setComplaint] = useState("");
   const [history, setHistory] = useState("");
@@ -38,12 +39,30 @@ export function Home({ onStartScenario, onStartBlank, busy, onOpenDocs, savedCas
   return (
     <div className="home">
       <div className="home-hero">
-        <h1 className="home-title">Zebrio</h1>
+        <div className="home-welcome">
+        <div className="home-welcome-copy">
+        <p className="home-eyebrow">Zebrio · Clinical reasoning workspace</p>
+        <h1 className="home-title">Every possibility.<br /><em>A clearer next step.</em></h1>
         <p className="home-lead">
-          A retraceable differential diagnosis. A clinician and an agent work a
-          case from <strong>presentation</strong> to <strong>working diagnosis</strong>{" "}
-          to <strong>treatment plan</strong>. Every step stays on the tree.
+          Explore the differential, inspect the evidence, and decide what comes
+          next. Every finding and decision stays on the reasoning trail.
         </p>
+        <div className="home-welcome-actions">
+          <button className="home-start" onClick={() => libraryRef.current?.scrollIntoView({ block: "start" })}>Explore cases <span aria-hidden="true">↗</span></button>
+          <button className="ghost" onClick={onOpenDocs}>How it works →</button>
+        </div>
+        <p className="home-disclaimer">Research demo · Synthetic patients · Clinician-led decisions</p>
+        </div>
+        <aside className="home-flow" aria-label="Clinical workflow">
+          <p className="home-eyebrow">A traceable path through the case</p>
+          <ol>
+            <li><span>01</span><div><strong>Start with the presentation</strong><p>Patient history, observations and context.</p></div></li>
+            <li><span>02</span><div><strong>Explore the possibilities</strong><p>Compare hypotheses and inspect source-linked evidence.</p></div></li>
+            <li><span>03</span><div><strong>Choose the next step</strong><p>Enter findings, review the diagnosis and confirm the plan.</p></div></li>
+          </ol>
+          <div className="home-flow-note">The agent supports. You decide.</div>
+        </aside>
+        </div>
 
         <RuntimeStatus />
 
@@ -58,6 +77,8 @@ export function Home({ onStartScenario, onStartBlank, busy, onOpenDocs, savedCas
           <span className="muted small">Available until the local server restarts.</span>
         </div>}
 
+        <details className="home-about">
+        <summary>About the workspace and your role</summary>
         <div className="home-split">
           <div className="home-split-col agent">
             <div className="home-split-head">What the agent does</div>
@@ -101,13 +122,12 @@ export function Home({ onStartScenario, onStartBlank, busy, onOpenDocs, savedCas
           </div>
         </div>
 
-        <button className="home-recipes" onClick={onOpenDocs}>
-          Recipes →
-        </button>
+        </details>
       </div>
 
-      <div className="home-scenarios">
-        <h2>Run a scenario</h2>
+      <div className="home-scenarios" id="case-library" ref={libraryRef}>
+        <div className="home-library-heading"><div><p className="home-eyebrow">Case library</p>
+        <h2>Choose where to begin</h2></div><span className="home-library-count">{SCENARIOS.length} example cases</span></div>
         <p className="muted small">
           All patients here are synthetic. The guided tour is pre-scripted and
           makes no API calls. Every other card starts a live case: each round
@@ -140,11 +160,14 @@ export function Home({ onStartScenario, onStartBlank, busy, onOpenDocs, savedCas
                   .filter(Boolean)
                   .join(" · ")}
               </div>
+              <span className="scenario-open">{s.tutorial ? "Take the guided tour" : "Open live case"}<span aria-hidden="true">↗</span></span>
             </button>
           ))}
           <button className="scenario-card blank" onClick={() => setBlankOpen((open) => !open)} disabled={busy} aria-expanded={blankOpen}>
+            <span className="scenario-mode">Your own scenario</span>
             <h3>+ Blank case</h3>
             <p className="muted small">Write your own presentation.</p>
+            <span className="scenario-open">Start a new case <span aria-hidden="true">+</span></span>
           </button>
         </div>
         {blankOpen && (
