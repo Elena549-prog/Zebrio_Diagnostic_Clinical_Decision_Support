@@ -11,6 +11,7 @@
  */
 
 import { TUTORIAL_STEPS } from "./tutorialCase.js";
+import { demoSuggestions, intentLabel } from "./demoSuggestions.js";
 
 interface Props {
   step: number;
@@ -23,6 +24,8 @@ export function TutorialRail({ step, onStep, onExitToLive }: Props) {
   const total = TUTORIAL_STEPS.length;
   const isLast = step === total - 1;
   const isGate = s.spotlight === "hitl-gate";
+  const suggestions = demoSuggestions(s.case);
+  const proposedTest = s.case.tests.find((t) => t.status === "proposed" || t.status === "ordered");
 
   const cue =
     s.spotlight === "presentation"
@@ -74,11 +77,31 @@ export function TutorialRail({ step, onStep, onExitToLive }: Props) {
       <div className="na-card tut-card">
         <div className="na-card-icon">★</div>
         <div className="na-card-text">
-          <div className="na-card-label">Tutorial · {s.label}</div>
+          <div className="na-card-label">{isGate && proposedTest ? `Proposed test: ${proposedTest.name}` : `Tutorial · ${s.label}`}</div>
           <div className="na-card-reason">{s.caption}</div>
           {cue && <div className="tut-cue">👉 {cue}</div>}
         </div>
       </div>
+
+      {isGate && suggestions.length > 0 && (
+        <div className="demo-suggestions">
+          <div className="demo-suggestions-label label-caps">Example results for this demo</div>
+          <p className="small muted">Illustrative choices. All continue to the same scripted result in this guided tour.</p>
+          <div className="demo-suggestions-row">
+            {suggestions.map((example) => (
+              <button
+                key={example.intent}
+                className={`demo-chip ${example.intent}`}
+                title={intentLabel(example.intent)}
+                onClick={() => onStep(step + 1)}
+              >
+                <span className="demo-chip-badge">{example.badge}</span>
+                <span className="demo-chip-hint">{example.hint}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* step actions */}
       <div className="na-actions">

@@ -13,6 +13,7 @@
 import { useEffect, useState } from "react";
 import type { Case } from "./types.js";
 import * as api from "./api.js";
+import { demoSuggestions, intentLabel, type DemoSuggestion } from "./demoSuggestions.js";
 
 interface Props {
   c: Case;
@@ -69,6 +70,8 @@ export function NextAction({ c, onUpdated, busy, setBusy, onNewCase }: Props) {
   const steps = completedSteps(c);
   const stage = stageLabel(c);
   const awaitingTest = c.awaitingHitl && !c.pendingDiagnosis;
+  const selectedTest = pendingTests.find((t) => t.id === testId) ?? pendingTests[0];
+  const suggestions = demoSuggestions(c, selectedTest?.id);
   const diagnosisCandidate = c.pendingDiagnosis
     ? c.hypotheses[c.pendingDiagnosis.hypothesisId]
     : Object.values(c.hypotheses).filter((h) => h.status === "live").sort((a, b) => b.probability - a.probability)[0];
@@ -116,18 +119,19 @@ export function NextAction({ c, onUpdated, busy, setBusy, onNewCase }: Props) {
   }
 
   /** Record the clinician's test result, then advance the reasoning round. */
-  async function addResultAndAdvance() {
-    const s = summary.trim();
+  async function addResultAndAdvance(example?: DemoSuggestion) {
+    const s = (example ? `Synthetic demo result — ${example.summary}` : summary).trim();
     if (busy || !s) return;
     setBusy(true);
     setErr(null);
     try {
       const afterFinding = await api.addFinding(c.id, {
         summary: s,
-        detail: detail || undefined,
-        direction,
+        detail: example ? example.detail : detail || undefined,
+        direction: example?.direction ?? direction,
         source: "clinician",
-        testId: testId || undefined,
+        testId: example?.testId ?? (testId || undefined),
+        hypothesisIds: example?.hypothesisIds,
       });
       onUpdated(afterFinding);
       const afterAdvance = await api.advance(c.id);
@@ -137,6 +141,15 @@ export function NextAction({ c, onUpdated, busy, setBusy, onNewCase }: Props) {
     } finally {
       setBusy(false);
     }
+  }
+
+  /** Restore the original one-click demo path using the chosen result directly. */
+  function applySuggestion(example: DemoSuggestion) {
+    setSummary(`Synthetic demo result — ${example.summary}`);
+    setDetail(example.detail ?? "");
+    setDirection(example.direction);
+    if (example.testId) setTestId(example.testId);
+    void addResultAndAdvance(example);
   }
 
   /** Add a free observation/result without advancing (e.g. a side finding). */
@@ -185,7 +198,7 @@ export function NextAction({ c, onUpdated, busy, setBusy, onNewCase }: Props) {
           <>
             <div className="na-card-icon">→</div>
             <div className="na-card-text">
-              <div className="na-card-label">The engine proposes a test</div>
+              <div className="na-card-label">Proposed test{selectedTest ? `: ${selectedTest.name}` : ""}</div>
               <div className="na-card-reason">{c.hitlPrompt}</div>
             </div>
           </>
@@ -288,6 +301,26 @@ export function NextAction({ c, onUpdated, busy, setBusy, onNewCase }: Props) {
                 </option>
               ))}
             </select>
+          )}
+          {awaitingTest && suggestions.length > 0 && (
+            <div className="demo-suggestions">
+              <div className="demo-suggestions-label label-caps">Example results for this demo</div>
+              <p className="small muted">Synthetic examples. Clicking records the example and advances the reasoning.</p>
+              <div className="demo-suggestions-row">
+                {suggestions.map((example) => (
+                  <button
+                    key={example.intent}
+                    className={`demo-chip ${example.intent}`}
+                    title={intentLabel(example.intent)}
+                    disabled={busy}
+                    onClick={() => applySuggestion(example)}
+                  >
+                    <span className="demo-chip-badge">{example.badge}</span>
+                    <span className="demo-chip-hint">{example.hint}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
           )}
           <input
             placeholder="Finding summary, e.g. “chest X-ray: right lower lobe consolidation”"

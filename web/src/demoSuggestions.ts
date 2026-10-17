@@ -16,7 +16,7 @@
  * than placeholders. They're classified by `intent` so the UI can badge them.
  */
 
-import type { Case, Hypothesis } from "./types.js";
+import type { Case } from "./types.js";
 
 export type SuggestionIntent = "horse" | "zebra" | "against";
 
@@ -37,10 +37,11 @@ export interface DemoSuggestion {
 
 /** Build up to 3 demo suggestions for the current HITL gate. Returns [] when
  *  there's no gate (no proposed test, no live hypotheses). */
-export function demoSuggestions(c: Case): DemoSuggestion[] {
-  if (!c.awaitingHitl) return [];
-  const proposed = c.tests.filter((t) => t.status === "proposed");
-  const test = proposed[0];
+export function demoSuggestions(c: Case, testId?: string): DemoSuggestion[] {
+  if (!c.awaitingHitl || c.pendingDiagnosis) return [];
+  const pending = c.tests.filter((t) => t.status === "proposed" || t.status === "ordered");
+  const test = testId ? pending.find((t) => t.id === testId) : pending[0];
+  if (!test) return [];
   const live = Object.values(c.hypotheses)
     .filter((h) => h.status === "live")
     .sort((a, b) => b.probability - a.probability);
