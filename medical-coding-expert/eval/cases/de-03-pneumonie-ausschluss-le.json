@@ -1,0 +1,97 @@
+{
+  "id": "de-03-pneumonie-ausschluss-le",
+  "title": "Lobärpneumonie, Lungenembolie ausgeschlossen",
+  "language": "de",
+  "source": "synthetic",
+  "sourceNote": "Typical internal-medicine discharge letter.",
+  "tests": [
+    "specific code without organism",
+    "negated hypothesis"
+  ],
+  "request": {
+    "requestId": "eval-de-03",
+    "excerpts": [
+      {
+        "id": "ex1",
+        "text": "Diagnose: Lobärpneumonie rechter Unterlappen. Blut- und Sputumkulturen ohne Erregernachweis. Therapie mit Ampicillin/Sulbactam."
+      },
+      {
+        "id": "ex2",
+        "text": "CT-Angiographie Thorax: kein Nachweis einer Lungenarterienembolie."
+      }
+    ],
+    "evidence": [
+      {
+        "id": "ev1",
+        "kind": "patient_finding",
+        "text": "CRP 212 mg/l, Leukozyten 17,4 /nl, Temperatur 39,1 °C."
+      }
+    ],
+    "hypotheses": [
+      {
+        "id": "h1",
+        "name": "Pneumonie"
+      },
+      {
+        "id": "h2",
+        "name": "Lungenembolie"
+      }
+    ]
+  },
+  "expected": [
+    {
+      "id": "pneumonia",
+      "match": {
+        "hypothesisId": "h1",
+        "conditionIncludes": [
+          "pneumon"
+        ],
+        "inputRefs": [
+          "ex1"
+        ]
+      },
+      "assertion": [
+        "documented"
+      ],
+      "status": [
+        "assigned"
+      ],
+      "acceptableCodes": [
+        "J18.1"
+      ],
+      "forbiddenCodes": [
+        "J18.9",
+        "J13",
+        "J14",
+        "J15",
+        "J16"
+      ],
+      "requiredInputRefs": [
+        "ex1"
+      ],
+      "notes": "BfArM J18.1 'Lobärpneumonie, nicht näher bezeichnet'. No organism, so no J13-J15; lobar is documented, so J18.9 is under-specific."
+    },
+    {
+      "id": "pe",
+      "match": {
+        "hypothesisId": "h2",
+        "conditionIncludes": [
+          "embol"
+        ],
+        "inputRefs": [
+          "ex2"
+        ]
+      },
+      "assertion": [
+        "negated"
+      ],
+      "status": [
+        "no_supported_code"
+      ],
+      "forbiddenCodes": [
+        "I26"
+      ],
+      "notes": "Ruled out on CT angiography."
+    }
+  ]
+}

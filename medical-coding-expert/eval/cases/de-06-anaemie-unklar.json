@@ -1,0 +1,67 @@
+{
+  "id": "de-06-anaemie-unklar",
+  "title": "Anämie unklarer Genese",
+  "language": "de",
+  "source": "synthetic",
+  "sourceNote": "Underspecified documentation; the hypothesis suggests a subtype.",
+  "tests": [
+    "underspecified -> general code or question",
+    "hypothesis is only a hint"
+  ],
+  "request": {
+    "requestId": "eval-de-06",
+    "excerpts": [
+      {
+        "id": "ex1",
+        "text": "Anämie (Hb 9,8 g/dl), Ursache bislang unklar. Weitere Abklärung ambulant geplant."
+      }
+    ],
+    "evidence": [],
+    "hypotheses": [
+      {
+        "id": "h1",
+        "name": "Eisenmangelanämie"
+      }
+    ]
+  },
+  "expected": [
+    {
+      "id": "anemia",
+      "match": {
+        "conditionIncludes": [
+          "anäm",
+          "anaem",
+          "anem"
+        ],
+        "inputRefs": [
+          "ex1"
+        ]
+      },
+      "assertion": [
+        "documented"
+      ],
+      "status": [
+        "assigned",
+        "needs_clarification"
+      ],
+      "acceptableCodes": [
+        "D64.9"
+      ],
+      "forbiddenCodes": [
+        "D50",
+        "D51",
+        "D52",
+        "D53",
+        "D62",
+        "D63"
+      ],
+      "notes": "BfArM D64.9 'Anämie, nicht näher bezeichnet' is a correctly supported general code; a clarification question is also fine. Iron deficiency (D50) is only a hypothesis."
+    }
+  ],
+  "forbiddenAssignedCodes": [
+    "D50",
+    "D51",
+    "D52",
+    "D53"
+  ]
+}

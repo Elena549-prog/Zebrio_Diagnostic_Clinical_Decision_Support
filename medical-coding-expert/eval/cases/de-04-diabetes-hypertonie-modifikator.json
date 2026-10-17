@@ -1,0 +1,101 @@
+{
+  "id": "de-04-diabetes-hypertonie-modifikator",
+  "title": "Diabetes Typ 2 und Hypertonie (5. Stelle aus Modifikator)",
+  "language": "de",
+  "source": "teaching-style",
+  "sourceNote": "Teaching scenario E11.90 / I10.90: the 5th character comes from the chapter's modifier table.",
+  "tests": [
+    "modifier-built 5th digit",
+    "known pipeline limitation"
+  ],
+  "request": {
+    "requestId": "eval-de-04",
+    "excerpts": [
+      {
+        "id": "ex1",
+        "text": "Diabetes mellitus Typ 2, mit Metformin eingestellt, nicht entgleist. Keine diabetischen Folgeerkrankungen bekannt."
+      },
+      {
+        "id": "ex2",
+        "text": "Essentielle arterielle Hypertonie, medikamentös gut eingestellt, keine hypertensive Krise."
+      }
+    ],
+    "evidence": [
+      {
+        "id": "ev1",
+        "kind": "patient_finding",
+        "text": "HbA1c 6,8 %. RR 132/84 mmHg."
+      }
+    ]
+  },
+  "expected": [
+    {
+      "id": "t2dm",
+      "match": {
+        "conditionIncludes": [
+          "diabet"
+        ],
+        "inputRefs": [
+          "ex1"
+        ]
+      },
+      "assertion": [
+        "documented"
+      ],
+      "status": [
+        "assigned",
+        "needs_clarification"
+      ],
+      "acceptableCodes": [
+        "E11.90"
+      ],
+      "idealCode": "E11.90",
+      "candidateCodes": [
+        "E11.9-",
+        "E11.-"
+      ],
+      "forbiddenCodes": [
+        "E10",
+        "E14",
+        "E11.91",
+        "E11.7"
+      ],
+      "notes": "Ideal: E11.90 (E11.9- + 5th digit 0 'nicht als entgleist bezeichnet'). The pipeline does not assemble modifier codes yet, so needs_clarification with an E11 candidate is tolerated."
+    },
+    {
+      "id": "htn",
+      "match": {
+        "conditionIncludes": [
+          "hyperton"
+        ],
+        "inputRefs": [
+          "ex2"
+        ]
+      },
+      "assertion": [
+        "documented"
+      ],
+      "status": [
+        "assigned",
+        "needs_clarification"
+      ],
+      "acceptableCodes": [
+        "I10.90",
+        "I10.00"
+      ],
+      "idealCode": "I10.90",
+      "candidateCodes": [
+        "I10.9-",
+        "I10.0-",
+        "I10.-"
+      ],
+      "forbiddenCodes": [
+        "I10.91",
+        "I10.01",
+        "I11",
+        "I15"
+      ],
+      "notes": "Ideal: I10.90 (5th digit 0 'Ohne Angabe einer hypertensiven Krise'); I10.00 acceptable. No crisis documented, so ...1 is wrong."
+    }
+  ]
+}
