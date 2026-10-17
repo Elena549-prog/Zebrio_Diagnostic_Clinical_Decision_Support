@@ -19,10 +19,12 @@ interface Props {
   c: Case | null;
   onGo: (v: View) => void;
   onNewCase: () => void;
+  caseActions?: ReactNode;
+  busy?: boolean;
   children: ReactNode;
 }
 
-export function AppShell({ view, c, onGo, onNewCase, children }: Props) {
+export function AppShell({ view, c, onGo, onNewCase, caseActions, busy = false, children }: Props) {
   const inCase = (view === "workspace" || view === "tutorial") && !!c;
   return (
     <div className="app">
@@ -43,6 +45,7 @@ export function AppShell({ view, c, onGo, onNewCase, children }: Props) {
           </nav>
         </div>
         <div className="appbar-actions">
+          {view === 'workspace' && caseActions}
           {inCase ? (
             <div className="patient-header">
               <span className="ph-name">{c!.title}</span>
@@ -55,7 +58,7 @@ export function AppShell({ view, c, onGo, onNewCase, children }: Props) {
                   .filter(Boolean)
                   .join(" · ")}
               </span>
-              <button className="ghost" onClick={onNewCase}>+ New case</button>
+              <button className="ghost" onClick={onNewCase} disabled={busy}>+ New case</button>
             </div>
           ) : (
             <div className="appbar-search">

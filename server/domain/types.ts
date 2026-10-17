@@ -144,6 +144,8 @@ export interface Finding {
   /** Structured detail (e.g. a lab value with units). */
   detail?: string;
   source: FindingSource;
+  /** A simulated input in a what-if case, not an actual patient observation. */
+  hypothetical?: boolean;
   direction: FindingDirection;
   /** Which hypothesis ids this finding bears on. */
   hypothesisIds: string[];
@@ -226,6 +228,7 @@ export interface CaseEvent {
 /** What kind of step produced a history entry (drives the scrubber's labels). */
 export type HistoryKind =
   | "intake"
+  | "fork"
   | "round"
   | "finding"
   | "diagnosis"
@@ -261,9 +264,19 @@ export interface HistoryEntry {
   eventCount: number;
 }
 
+export interface ForkOrigin {
+  parentCaseId: string;
+  parentTitle: string;
+  parentFrameSeq: number;
+  parentFrameLabel: string;
+  forkedAt: string;
+}
+
 export interface Case {
   id: string;
   title: string;
+  /** Presence marks a separate hypothetical exploration, never the parent record. */
+  forkOrigin?: ForkOrigin;
   status: CaseStatus;
   presentation: Presentation;
   /** The full hypothesis tree, keyed by id. */

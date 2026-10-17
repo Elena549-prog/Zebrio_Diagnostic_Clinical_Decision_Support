@@ -9,6 +9,7 @@ import { askText, getRuntimeConfig, requireAnthropicKey } from './anthropic/runt
 import { store, appendEvent } from './domain/case-store.js';
 import { capture } from './domain/history.js';
 import { createCase } from './domain/case-factory.js';
+import { forkCase } from './domain/fork.js';
 import { recordFinding, resultTest, runRound, setWorkingDiagnosis } from './domain/engine.js';
 import { applyEvidence, attachEvidenceTargets, fetchEvidence } from './domain/evidence.js';
 import { groundLinks } from './domain/parse.js';
@@ -94,6 +95,18 @@ export function createApp(overrides: Partial<typeof defaults> = {}) {
   app.get('/api/cases/:id', (req, res) => { const c = lookup(req.params.id, res); if (c) res.json(store.snapshot(c.id)); });
   app.delete('/api/cases/:id', (req, res) => { if (unlocked(req.params.id, res)) res.status(store.delete(req.params.id) ? 204 : 404).end(); });
 
+  app.post('/api/cases/:id/forks', (req, res) => {
+    const parent = lookup(req.params.id, res);
+    if (!parent || !unlocked(parent.id, res)) return;
+    const frameSeq = req.body?.frameSeq;
+    if (!Number.isSafeInteger(frameSeq) || !parent.history.some((frame) => frame.seq === frameSeq)) {
+      res.status(400).json({ error: 'Select a valid timeline step.', code: 'INVALID_FORK_FRAME' }); return;
+    }
+    const fork = forkCase(parent, frameSeq);
+    store.create(fork);
+    res.status(201).json(store.snapshot(fork.id));
+  });
+
   app.post('/api/cases/:id/advance', async (req, res) => {
     const c = lookup(req.params.id, res);
     if (!c || !unlocked(c.id, res)) return;
@@ -119,7 +132,7 @@ export function createApp(overrides: Partial<typeof defaults> = {}) {
           const codes = await services.assignMedicalCodes({
             requestId: `${draft.id}-round-${draft.round}`,
             excerpts: [{ id: 'presentation', text: JSON.stringify(draft.presentation) }],
-            evidence: draft.findings.map((f) => ({ id: f.id, text: [f.summary, f.detail].filter(Boolean).join(' '), kind: (f.source === 'literature' || f.source === 'web' ? 'literature' : 'patient_finding') as 'literature' | 'patient_finding' })),
+            evidence: draft.findings.filter((f) => !f.hypothetical).map((f) => ({ id: f.id, text: [f.summary, f.detail].filter(Boolean).join(' '), kind: (f.source === 'literature' || f.source === 'web' ? 'literature' : 'patient_finding') as 'literature' | 'patient_finding' })),
             hypotheses: targets.map((h) => ({ id: h.id, name: h.name })),
           }, { signal: request.signal });
           for (const code of codes.results) {
@@ -213,7 +226,7 @@ export function createApp(overrides: Partial<typeof defaults> = {}) {
     const request = requestSignal(req, res);
     try {
       services.requireInference();
-      const reply = await services.askText('chat', 'You are Arbor clinical decision support. Discuss the supplied case and uncertainty. Never invent patient observations, URLs or probabilities. Cite only supplied S<number> refs; never change case state.', `CASE DATA: ${JSON.stringify(c.presentation)}\nDIFFERENTIAL: ${JSON.stringify(Object.values(c.hypotheses).map((h) => ({ name: h.name, status: h.status })))}\nFINDINGS: ${JSON.stringify(c.findings)}\nSOURCES: ${renderSourcePool(c.sources)}\nCLINICIAN QUESTION: ${req.body.message}`, { signal: request.signal });
+      const reply = await services.askText('chat', 'You are Arbor clinical decision support. Discuss the supplied case and uncertainty. Never invent patient observations, URLs or probabilities. Findings marked hypothetical belong to a what-if exploration and are not actual patient results. Cite only supplied S<number> refs; never change case state.', `CASE MODE: ${c.forkOrigin ? 'HYPOTHETICAL WHAT-IF EXPLORATION' : 'clinical record'}\nCASE DATA: ${JSON.stringify(c.presentation)}\nDIFFERENTIAL: ${JSON.stringify(Object.values(c.hypotheses).map((h) => ({ name: h.name, status: h.status })))}\nFINDINGS: ${JSON.stringify(c.findings)}\nSOURCES: ${renderSourcePool(c.sources)}\nCLINICIAN QUESTION: ${req.body.message}`, { signal: request.signal });
       res.json({ reply: groundLinks(rewriteMarkers(reply, mergeSources(c.sources, undefined, c.round).refMap, 'chat'), c.sources) });
     } catch (error) { if (!res.destroyed) failure(res, error); }
     finally { request.dispose(); }

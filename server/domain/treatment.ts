@@ -7,7 +7,8 @@ import type { Case, TreatmentPlan } from './types.js';
 interface RawPlan { summary?: string; steps?: { title: string; detail?: string; sourceRef?: string }[]; caseFinding?: { summary?: string; sites?: { label: string; sourceRef?: string; note?: string }[] } }
 export async function buildTreatmentPlan(c: Case, opts: { signal?: AbortSignal } = {}): Promise<TreatmentPlan> {
   if (!c.workingDiagnosis) throw new Error('Confirm the working diagnosis first.');
-  const prompt = `CLINICIAN-CONFIRMED WORKING DIAGNOSIS: ${c.workingDiagnosis.name}
+  const prompt = `CASE MODE: ${c.forkOrigin ? 'HYPOTHETICAL WHAT-IF EXPLORATION. Discuss conditional possibilities only; hypothetical findings are not actual patient results.' : 'clinical record'}
+CLINICIAN-CONFIRMED WORKING DIAGNOSIS: ${c.workingDiagnosis.name}
 PRESENTATION: ${JSON.stringify(c.presentation)}
 FINDINGS: ${JSON.stringify(c.findings)}
 SOURCE POOL: ${renderSourcePool(c.sources)}

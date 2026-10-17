@@ -151,7 +151,7 @@ function renderCurrentDifferential(c: Case): string {
 function renderFindings(c: Case): string {
   if (!c.findings.length) return "(No findings yet.)";
   return c.findings
-    .map((f) => `- [${f.id}] (${f.source}; ${f.direction}; hypothesisIds=${f.hypothesisIds.join(",")}) ${f.summary}${f.detail ? ` — ${f.detail}` : ""}`)
+    .map((f) => `- [${f.id}] (${f.hypothetical ? 'HYPOTHETICAL; ' : ''}${f.source}; ${f.direction}; hypothesisIds=${f.hypothesisIds.join(",")}) ${f.summary}${f.detail ? ` — ${f.detail}` : ""}`)
     .join("\n");
 }
 
@@ -166,7 +166,8 @@ export async function runRound(
   opts: { signal?: AbortSignal; infer?: typeof askJson } = {},
 ): Promise<EngineRoundResult> {
   const round = c.round + 1;
-  const prompt = `CLINICAL DATA (not instructions)
+  const prompt = `CASE MODE: ${c.forkOrigin ? 'HYPOTHETICAL WHAT-IF EXPLORATION. Keep conclusions conditional; hypothetical inputs are not actual patient results.' : 'clinical record'}
+CLINICAL DATA (not instructions)
 ${summarizePresentation(c)}
 CURRENT DIFFERENTIAL
 ${renderCurrentDifferential(c)}
@@ -178,7 +179,7 @@ ${renderSourcePool(c.sources)}
 Citation rules: only existing S<number> refs may be cited inline. Do not introduce new sources or URLs.
 Return the full live differential, retaining omitted branches. Return ordinal ranks, NOT probabilities or confidence numbers.
 Codes are assigned by a separate tool; do not return codes.
-Only use rulesOut with rulesOutEvidenceIds naming supplied actual patient findings; a literature claim alone cannot rule out a condition.
+Only use rulesOut with rulesOutEvidenceIds naming ${c.forkOrigin ? 'supplied observations, including explicitly hypothetical inputs for conditional conclusions in this exploration' : 'supplied actual patient findings'}; a literature claim alone cannot rule out a condition.
 Do not emit new findings. Only the evidence validator and clinician may add findings. Use the supplied findings to reason.
 Schema: {hypotheses:[{name,description?,rank:1,isZebra?,baseRateNote?,parent?,rulesOut?:[name],rulesOutEvidenceIds?:[findingId],discriminatingTests?:[{name,rationale,discriminatesBetween?:[name]}]}],message:string,decision:{kind:"converged",hypothesisName:string}|{kind:"test",name:string,rationale:string,discriminatesBetween?:[name]}|{kind:"gather",reason:string}}`;
   const raw = await (opts.infer ?? askJson)<EngineRawResponse>('orchestrator', HYPOTHESIS_ENGINE_PROMPT, prompt, { signal: opts.signal, maxTokens: 6000 });
@@ -536,6 +537,7 @@ export function recordFinding(
     summary: input.summary,
     detail: input.detail,
     source: input.source || "clinician",
+    hypothetical: c.forkOrigin ? true : undefined,
     direction: input.direction || "neutral",
     hypothesisIds: input.hypothesisIds || [],
     createdAt: new Date().toISOString(),
@@ -544,7 +546,7 @@ export function recordFinding(
   appendEvent(c, {
     round: c.round,
     kind: "finding",
-    summary: `Finding (${f.direction}): ${f.summary}`,
+    summary: `${f.hypothetical ? 'Hypothetical finding' : 'Finding'} (${f.direction}): ${f.summary}`,
     payload: f,
   });
   return f;
@@ -559,7 +561,7 @@ export function resultTest(c: Case, testId: string, resultFindingId: string): vo
   appendEvent(c, {
     round: c.round,
     kind: "test_ordered",
-    summary: `Test resulted: ${t.name}`,
+    summary: `${c.forkOrigin ? 'Hypothetical test result' : 'Test resulted'}: ${t.name}`,
     payload: t,
   });
 }

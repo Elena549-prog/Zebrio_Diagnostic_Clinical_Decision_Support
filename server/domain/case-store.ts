@@ -59,6 +59,8 @@ export const store = new CaseStore();
 export function appendEvent(c: Case, ev: Omit<CaseEvent, "id" | "createdAt">): CaseEvent {
   const full: CaseEvent = {
     ...ev,
+    // Historical event payloads must not acquire later mutations through aliases.
+    payload: ev.payload === undefined ? undefined : structuredClone(ev.payload),
     id: `evt_${c.id}_${store.seq()}`,
     createdAt: new Date().toISOString(),
   };

@@ -228,6 +228,7 @@ function FindingRow({
               : undefined
           }
         >
+          {f.hypothetical && <span className="hypothetical-badge">Hypothetical</span>}
           <Cited text={f.summary} sources={sources} onCite={onCite} />
           <SourceChips ids={f.sourceIndices} sources={sources} onCite={onCite} />
         </div>

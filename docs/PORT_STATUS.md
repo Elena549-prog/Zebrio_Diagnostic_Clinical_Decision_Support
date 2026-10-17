@@ -17,7 +17,7 @@ by this new app.
   round rollback, and explicit clinician confirmation of working diagnosis.
 - Local ignored `.env` with authorized credentials; blank `.env.example` for
   sharing. Credentials are not returned by health checks or browser bundles.
-- Final typechecks, 60 automated tests, production build, and browser smoke
+- Final typechecks, 64 automated tests, production build, and browser smoke
   checks pass. Dependency audit reported no known vulnerabilities after updates.
 - Independent live probes passed for all three configured Claude models.
   A synthetic case completed one real round and a read-only chat; the clinician
@@ -67,4 +67,5 @@ original Corti Arbor and Person 3's integration/numerical-engine checklist.
 `npm run typecheck`, `npm test`, and `npm run build` are offline checks.
 `npm run test:live` deliberately spends API/search credits.
 
-Changes are local; this port has not been committed or pushed by the agent.
+The application baseline is committed locally on `main`. Timeline forking is
+documented in [FORK_VERIFICATION.md](FORK_VERIFICATION.md). No push was requested.

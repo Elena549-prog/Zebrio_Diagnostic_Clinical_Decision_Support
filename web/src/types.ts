@@ -82,6 +82,7 @@ export interface Finding {
   summary: string;
   detail?: string;
   source: string;
+  hypothetical?: boolean;
   direction: "supports" | "against" | "neutral";
   hypothesisIds: string[];
   /** @deprecated superseded by `sourceIndices` + the case Source pool. */
@@ -138,6 +139,7 @@ export interface CaseEvent {
 /** What kind of step produced a history entry (drives the scrubber's labels). */
 export type HistoryKind =
   | "intake"
+  | "fork"
   | "round"
   | "finding"
   | "diagnosis"
@@ -173,9 +175,18 @@ export interface HistoryEntry {
   eventCount: number;
 }
 
+export interface ForkOrigin {
+  parentCaseId: string;
+  parentTitle: string;
+  parentFrameSeq: number;
+  parentFrameLabel: string;
+  forkedAt: string;
+}
+
 export interface Case {
   id: string;
   title: string;
+  forkOrigin?: ForkOrigin;
   status: CaseStatus;
   presentation: Presentation;
   hypotheses: Record<string, Hypothesis>;

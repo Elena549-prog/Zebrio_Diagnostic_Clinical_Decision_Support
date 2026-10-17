@@ -276,9 +276,10 @@ export function NextAction({ c, onUpdated, busy, setBusy, onNewCase }: Props) {
       </div>
 
       {/* inline HITL finding form, co-located with the gate */}
-      {awaitingTest && (
+      {(awaitingTest || (c.forkOrigin && !c.workingDiagnosis)) && (
         <div className="na-finding">
-          <div className="na-finding-head">Enter the test result</div>
+          <div className="na-finding-head">{c.forkOrigin ? 'Enter a hypothetical finding' : 'Enter the test result'}</div>
+          {c.forkOrigin && <p className="small muted">Assumed for this exploration only, not an actual patient result.</p>}
           {proposedTests.length > 0 && (
             <select value={testId} onChange={(e) => setTestId(e.target.value)}>
               {proposedTests.map((t) => (

@@ -204,6 +204,7 @@ export function DetailPanel({ c, selectedId, onUpdated, busy, setBusy, interacti
               <ul>
                 {h.evidenceFor.map((e, i) => (
                   <li key={i} className="supports">
+                    {findingsById[e.findingId]?.hypothetical && <span className="hypothetical-badge">Hypothetical</span>}
                     <Cited
                       text={findingsById[e.findingId]?.summary || e.weight}
                       sources={c.sources}
@@ -220,6 +221,7 @@ export function DetailPanel({ c, selectedId, onUpdated, busy, setBusy, interacti
               <ul>
                 {h.evidenceAgainst.map((e, i) => (
                   <li key={i} className="against">
+                    {findingsById[e.findingId]?.hypothetical && <span className="hypothetical-badge">Hypothetical</span>}
                     <Cited
                       text={findingsById[e.findingId]?.summary || e.weight}
                       sources={c.sources}

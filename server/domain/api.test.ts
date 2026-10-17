@@ -4,7 +4,8 @@ import { test } from 'node:test';
 import { createApp } from '../index.js';
 import { createCase } from './case-factory.js';
 import { store } from './case-store.js';
-import { mergeEngineResponse } from './engine.js';
+import { mergeEngineResponse, recordFinding, setWorkingDiagnosis } from './engine.js';
+import { capture } from './history.js';
 import { MissingAnthropicKeyError } from '../anthropic/runtime.js';
 import type { Case, EngineRoundResult } from './types.js';
 
@@ -90,6 +91,7 @@ test('in-flight round locks other mutations and duplicate advances', async () =>
       assert.equal((await post(`${url}/api/cases/${c.id}/advance`)).status, 409);
       assert.equal((await post(`${url}/api/cases/${c.id}/finding`, { summary: 'Concurrent' })).status, 409);
       assert.equal((await fetch(`${url}/api/cases/${c.id}`, { method: 'DELETE' })).status, 409);
+      assert.equal((await post(`${url}/api/cases/${c.id}/forks`, { frameSeq: 0 })).status, 409);
     } finally { release(); }
     assert.equal((await running).status, 200);
     assert.equal(c.round, 1);
@@ -140,5 +142,121 @@ test('verified coding suggestions retain their clickable reference and rationale
     const frame = c.history.find((h) => h.kind === 'round')!;
     assert.equal(Object.values(frame.hypotheses)[0]!.codes![0]!.url, url);
     assert.equal(c.workingDiagnosis, undefined);
+  });
+});
+
+test('fork copies the selected past step without future leakage and isolates parent, sibling and inherited history', async () => {
+  const parent = caseOf();
+  proposed(parent);
+  parent.awaitingHitl = true;
+  parent.pendingDiagnosis = undefined;
+  parent.hitlPrompt = 'Enter the requested test result.';
+  parent.tests.push({ id: 'past-test', name: 'Past proposed test', rationale: 'Fixture', status: 'proposed', discriminatesBetween: [] });
+  parent.sources.push({ index: 1, title: 'Past source', url: 'https://example.org/past', type: 'web', addedRound: 1 });
+  const hypothesis = Object.values(parent.hypotheses)[0]!;
+  hypothesis.codes = [{ system: 'Fixture', code: 'TEST', url: 'https://example.org/code', reasoning: 'Retain reference metadata' }];
+  recordFinding(parent, { summary: 'Original observed finding' });
+  const past = capture(parent, 'round', 'Round one');
+  parent.findings[0]!.detail = 'Future annotation that must not leak into an earlier event';
+  recordFinding(parent, { summary: 'Future finding that must not leak' });
+  parent.sources.push({ index: 2, title: 'Future source', url: 'https://example.org/future', type: 'web', addedRound: 2 });
+  parent.tests.push({ id: 'future-test', name: 'Future test', rationale: 'Fixture', status: 'proposed', discriminatesBetween: [] });
+  parent.round = 2;
+  parent.probabilityCalculation = { status: 'computed', mode: 'illustrative', value: 0.9, prior: 0.1, likelihoodRatio: 81, modelId: 'future-fixture', modelVersion: '1' };
+  capture(parent, 'round', 'Future round');
+  let inferenceCalls = 0;
+  await serve({ ...mockServices, runRound: async (draft) => { inferenceCalls++; return proposed(draft); } }, async (url) => {
+    const before = await (await fetch(`${url}/api/cases/${parent.id}`)).json();
+    const response = await post(`${url}/api/cases/${parent.id}/forks`, { frameSeq: past.seq, snapshot: { findings: [{ summary: 'Forged client state' }] } });
+    assert.equal(response.status, 201);
+    const fork = await response.json() as Case;
+    assert.notEqual(fork.id, parent.id);
+    assert.equal(fork.forkOrigin?.parentCaseId, parent.id);
+    assert.equal(fork.forkOrigin?.parentFrameSeq, past.seq);
+    assert.equal(fork.round, 1);
+    assert.deepEqual(fork.findings.map((f) => f.summary), ['Original observed finding']);
+    assert.equal(fork.findings[0]!.hypothetical, undefined);
+    assert.deepEqual(fork.sources.map((s) => s.url), ['https://example.org/past']);
+    assert.deepEqual(fork.tests.map((t) => t.id), ['past-test']);
+    assert.equal(fork.awaitingHitl, true);
+    assert.equal(fork.history.length, past.seq + 2);
+    assert.equal(fork.history.at(-1)?.kind, 'fork');
+    assert.equal(Object.values(fork.hypotheses)[0]!.codes![0]!.url, 'https://example.org/code');
+    assert.equal(fork.probabilityMode, 'unavailable');
+    assert.equal(fork.probabilityCalculation?.status, 'unavailable');
+    assert.ok(!JSON.stringify(fork.events).includes('Future finding'));
+    assert.ok(!JSON.stringify(fork.events).includes('Future annotation'));
+    assert.ok(!JSON.stringify(fork.history).includes('Future finding'));
+    assert.equal(inferenceCalls, 0);
+    assert.equal((await post(`${url}/api/cases/${fork.id}/advance`)).status, 409);
+    const sibling = await (await post(`${url}/api/cases/${parent.id}/forks`, { frameSeq: past.seq })).json() as Case;
+    const changed = await post(`${url}/api/cases/${fork.id}/finding`, { summary: 'Assumed alternate result', testId: 'past-test', hypothetical: false });
+    assert.equal(changed.status, 200);
+    const updated = await changed.json() as Case;
+    assert.equal(updated.findings.at(-1)?.hypothetical, true);
+    assert.equal(updated.awaitingHitl, false);
+    assert.equal(updated.tests[0]?.status, 'resulted');
+    assert.equal(updated.history[past.seq]!.findings.length, 1);
+    assert.equal(updated.history[past.seq]!.tests[0]?.status, 'proposed');
+    assert.deepEqual(await (await fetch(`${url}/api/cases/${parent.id}`)).json(), before);
+    assert.deepEqual(await (await fetch(`${url}/api/cases/${sibling.id}`)).json(), sibling);
+    const nested = await (await post(`${url}/api/cases/${fork.id}/forks`, { frameSeq: updated.history.at(-1)!.seq })).json() as Case;
+    assert.equal(nested.forkOrigin?.parentCaseId, fork.id);
+    assert.equal(nested.findings.at(-1)?.hypothetical, true);
+    assert.equal((await post(`${url}/api/cases/${fork.id}/advance`)).status, 200);
+    assert.equal(inferenceCalls, 1);
+    assert.deepEqual(await (await fetch(`${url}/api/cases/${parent.id}`)).json(), before);
+    for (const id of [fork.id, sibling.id, nested.id]) assert.equal((await fetch(`${url}/api/cases/${id}`, { method: 'DELETE' })).status, 204);
+  });
+});
+
+test('forking a completed step reopens only the exploration for diagnostic reconsideration', async () => {
+  const parent = caseOf(); proposed(parent);
+  const hypothesis = Object.values(parent.hypotheses)[0]!;
+  setWorkingDiagnosis(parent, hypothesis.id, undefined, 'Fixture confirmation');
+  parent.treatmentPlan = { summary: 'Original plan', steps: [], createdAt: '2026-10-17T00:00:00Z' };
+  parent.status = 'closed';
+  const completed = capture(parent, 'treatment', 'Original treatment');
+  await serve({ ...mockServices, runRound: async (draft) => proposed(draft) }, async (url) => {
+    const before = await (await fetch(`${url}/api/cases/${parent.id}`)).json();
+    const fork = await (await post(`${url}/api/cases/${parent.id}/forks`, { frameSeq: completed.seq })).json() as Case;
+    assert.equal(fork.status, 'reasoning');
+    assert.equal(fork.workingDiagnosis, undefined);
+    assert.equal(fork.pendingDiagnosis, undefined);
+    assert.equal(fork.treatmentPlan, undefined);
+    assert.equal(fork.hypotheses[hypothesis.id]?.status, 'live');
+    assert.equal(fork.history[completed.seq]?.workingDiagnosis?.name, 'Candidate A');
+    assert.equal(fork.history.at(-1)?.workingDiagnosis, undefined);
+    assert.equal((await post(`${url}/api/cases/${fork.id}/treat`)).status, 400);
+    assert.equal((await post(`${url}/api/cases/${fork.id}/advance`)).status, 200);
+    assert.deepEqual(await (await fetch(`${url}/api/cases/${parent.id}`)).json(), before);
+  });
+});
+
+test('invalid fork requests leave the case store and parent unchanged', async () => {
+  const parent = caseOf();
+  await serve(mockServices, async (url) => {
+    const before = await (await fetch(`${url}/api/cases/${parent.id}`)).json();
+    const count = (await (await fetch(`${url}/api/cases`)).json() as Case[]).length;
+    for (const frameSeq of [-1, 0.5, '0', null, 999, undefined]) {
+      assert.equal((await post(`${url}/api/cases/${parent.id}/forks`, { frameSeq })).status, 400);
+    }
+    assert.equal((await post(`${url}/api/cases/missing/forks`, { frameSeq: 0 })).status, 404);
+    assert.equal((await (await fetch(`${url}/api/cases`)).json() as Case[]).length, count);
+    assert.deepEqual(await (await fetch(`${url}/api/cases/${parent.id}`)).json(), before);
+  });
+});
+
+test('hypothetical findings never authorize a documented patient coding assignment', async () => {
+  const parent = caseOf();
+  let codingInputs: string[] = [];
+  await serve({ ...mockServices, runRound: async (draft) => proposed(draft), assignMedicalCodes: async (request) => {
+    codingInputs = request.evidence.map((f) => f.text);
+    return emptyCodes(request);
+  } }, async (url) => {
+    const fork = await (await post(`${url}/api/cases/${parent.id}/forks`, { frameSeq: 0 })).json() as Case;
+    assert.equal((await post(`${url}/api/cases/${fork.id}/finding`, { summary: 'Assumed diagnosis solely for this exploration' })).status, 200);
+    assert.equal((await post(`${url}/api/cases/${fork.id}/advance`)).status, 200);
+    assert.ok(!codingInputs.some((value) => value.includes('Assumed diagnosis solely')));
   });
 });

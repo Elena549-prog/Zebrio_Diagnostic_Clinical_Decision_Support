@@ -48,7 +48,44 @@ export function App() {
   const [chatOpen, setChatOpen] = useState(false);
   /** Selected history frame, or null when watching the present. */
   const [frameIdx, setFrameIdx] = useState<number | null>(null);
+  const [forkingEnabled, setForkingEnabled] = useState(false);
+  const [caseOptions, setCaseOptions] = useState<Case[]>([]);
+  const [workspaceError, setWorkspaceError] = useState<string | null>(null);
+  const activeCaseIdRef = useRef<string | null>(null);
   const unsubRef = useRef<(() => void) | null>(null);
+
+  function activateCase(next: Case) {
+    activeCaseIdRef.current = next.id;
+    setCase(next);
+    setSelectedId(null);
+    setFrameIdx(null);
+    setChatOpen(false);
+    setWorkspaceError(null);
+  }
+
+  // Ignore delayed updates from a parent after switching to an exploration.
+  function updateActiveCase(next: Case) {
+    if (activeCaseIdRef.current === next.id) setCase(next);
+  }
+
+  async function openCase(id: string) {
+    if (busy) return;
+    setBusy(true);
+    setWorkspaceError(null);
+    try { activateCase(await api.getCase(id)); go('workspace'); }
+    catch (e) { setWorkspaceError((e as Error).message); }
+    finally { setBusy(false); }
+  }
+
+  async function forkFromFrame() {
+    const frame = frameIdx === null ? undefined : c?.history[frameIdx];
+    if (!c || !frame || !forkingEnabled || busy) return;
+    setBusy(true);
+    setWorkspaceError(null);
+    try { activateCase(await api.forkCase(c.id, frame.seq)); }
+    catch (e) { setWorkspaceError((e as Error).message); }
+    finally { setBusy(false); }
+  }
 
   // Keep the view in sync with the hash (back button, shareable URL).
   useEffect(() => {
@@ -77,17 +114,29 @@ export function App() {
   // Subscribe to the live SSE stream for the active case.
   useEffect(() => {
     if (!c) return;
+    let subscribed = true;
+    const caseId = c.id;
     if (unsubRef.current) unsubRef.current();
     unsubRef.current = api.streamCase(c.id, (ev) => {
+      if (!subscribed || activeCaseIdRef.current !== caseId) return;
       if (ev.kind === "snapshot" && ev.payload) {
-        setCase(ev.payload as Case);
+        updateActiveCase(ev.payload as Case);
       } else if (ev.kind === "round" || ev.kind === "finding" || ev.kind === "diagnosis" || ev.kind === "treatment") {
-        api.getCase(c.id).then(setCase).catch(() => {});
+        api.getCase(caseId).then((next) => {
+          if (subscribed) updateActiveCase(next);
+        }).catch(() => {});
       }
     });
     return () => {
+      subscribed = false;
       if (unsubRef.current) unsubRef.current();
     };
+  }, [c?.id]);
+
+  useEffect(() => {
+    let active = true;
+    api.listCases().then((cases) => { if (active) setCaseOptions(cases); }).catch(() => {});
+    return () => { active = false; };
   }, [c?.id]);
 
   // A tutorial scenario enters the scripted walk-through (no live API);
@@ -104,9 +153,7 @@ export function App() {
     setBusy(true);
     try {
       const created = await api.createCase(s.presentation, s.title);
-      setCase(created);
-      setSelectedId(null);
-      setFrameIdx(null);
+      activateCase(created);
       go("workspace");
     } catch (e) {
       alert(`Failed to start: ${(e as Error).message}\nCheck the live setup notice on the home page.`);
@@ -127,9 +174,7 @@ export function App() {
     setBusy(true);
     try {
       const created = await api.createCase(presentation, title);
-      setCase(created);
-      setSelectedId(null);
-      setFrameIdx(null);
+      activateCase(created);
       go("workspace");
     } catch (e) {
       alert((e as Error).message);
@@ -139,9 +184,13 @@ export function App() {
   }
 
   function newCase() {
+    if (busy) return;
+    activeCaseIdRef.current = null;
     setCase(null);
     setSelectedId(null);
     setFrameIdx(null);
+    setChatOpen(false);
+    setWorkspaceError(null);
     go("home");
   }
 
@@ -151,7 +200,22 @@ export function App() {
   const shellCase = view === "tutorial" ? TUTORIAL_STEPS[0]!.case : c;
 
   return (
-    <AppShell view={view} c={inCase ? shellCase : null} onGo={go} onNewCase={newCase}>
+    <AppShell view={view} c={inCase ? shellCase : null} onGo={go} onNewCase={newCase} busy={busy}
+      caseActions={c && <div className="fork-controls">
+        {caseOptions.length > 1 && <select aria-label="Switch case or exploration" value={c.id} disabled={busy}
+          onChange={(e) => openCase(e.target.value)}>
+          {caseOptions.map((option) => <option key={option.id} value={option.id}>
+            {option.title} · {option.id.slice(-5)}
+          </option>)}
+        </select>}
+        <button type="button" role="switch" aria-checked={forkingEnabled} aria-label="Forking"
+          className={`fork-switch ${forkingEnabled ? 'enabled' : ''}`}
+          onClick={() => setForkingEnabled((value) => !value)}>
+          <span className="fork-switch-track" aria-hidden="true"><span /></span>
+          Forking <span className="fork-switch-state">{forkingEnabled ? 'On' : 'Off'}</span>
+        </button>
+      </div>}
+    >
       {view === "docs" ? (
         <Docs />
       ) : view === "tutorial" ? (
@@ -169,6 +233,11 @@ export function App() {
           return (
         <div className={`workspace ${reviewing ? "reviewing" : ""}`}>
           <aside className="pane left">
+            {c.forkOrigin && <div className="exploration-banner" role="note">
+              <strong>What-if exploration</strong>
+              <p className="small">Forked after “{c.forkOrigin.parentFrameLabel}”. New manual findings are hypothetical. The original case is unchanged.</p>
+              <button className="ghost" disabled={busy} onClick={() => openCase(c.forkOrigin!.parentCaseId)}>Return to parent case</button>
+            </div>}
             {reviewing ? (
               <div className="review-note">
                 <div className="review-title">Reviewing a past step</div>
@@ -176,11 +245,16 @@ export function App() {
                   Showing the case as it stood at <strong>{frame!.label}</strong>. Actions are
                   paused while you look back — return to now to continue the case.
                 </p>
+                {forkingEnabled && <>
+                  <p className="muted small">To try a different result, select the step before that result.</p>
+                  <button onClick={forkFromFrame} disabled={busy}>{busy ? 'Opening exploration…' : 'Fork from here'}</button>
+                </>}
               </div>
             ) : (
               <NextAction
+                key={c.id}
                 c={c}
-                onUpdated={setCase}
+                onUpdated={updateActiveCase}
                 busy={busy}
                 setBusy={setBusy}
                 onNewCase={newCase}
@@ -190,6 +264,7 @@ export function App() {
             <EvidencePanel c={vc} onSelectHypothesis={setSelectedId} />
           </aside>
           <main className="pane center">
+            {workspaceError && <div className="na-err" role="alert">{workspaceError}</div>}
             <div className="probability-notice" role="note">{probabilityExplanation(vc)}</div>
             <div className="center-head">
               <h3>Reasoning tree</h3>
@@ -213,20 +288,21 @@ export function App() {
             ) : (
               <RankedDifferential c={vc} selectedId={selectedId} onSelect={setSelectedId} />
             )}
-            <Timeline c={c} frameIdx={frameIdx} onScrub={setFrameIdx} />
+            <Timeline key={c.id} c={c} frameIdx={frameIdx} onScrub={setFrameIdx} />
           </main>
           <aside className="pane right">
             <DetailPanel
+              key={c.id}
               c={vc}
               selectedId={selectedId}
-              onUpdated={setCase}
+              onUpdated={updateActiveCase}
               busy={busy}
               setBusy={setBusy}
               interactive={!reviewing}
             />
             {/* The toggle is the dock's header, so the control and the thread
                 it opens read as one unit anchored to the bottom of the pane. */}
-            <div className={`chat-dock ${chatOpen ? "open" : ""}`}>
+            {!reviewing && <div className={`chat-dock ${chatOpen ? "open" : ""}`}>
               <button
                 className="chat-toggle ghost"
                 onClick={() => setChatOpen((v) => !v)}
@@ -235,14 +311,16 @@ export function App() {
                 <span>Ask the engine</span>
                 <span className="chat-caret">{chatOpen ? "▾" : "▴"}</span>
               </button>
-              {chatOpen && <ChatPanel c={c} onUpdated={setCase} busy={busy} setBusy={setBusy} />}
-            </div>
+              {chatOpen && <ChatPanel key={c.id} c={c} onUpdated={updateActiveCase} busy={busy} setBusy={setBusy} />}
+            </div>}
           </aside>
         </div>
           );
         })()
       ) : (
         <Home
+          savedCases={caseOptions}
+          onOpenCase={openCase}
           onStartScenario={startScenario}
           onStartBlank={startBlank}
           busy={busy}

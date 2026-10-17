@@ -15,16 +15,18 @@
 import { SCENARIOS, type Scenario } from "./scenarios.js";
 import { RuntimeStatus } from "./RuntimeStatus.js";
 import { useState } from "react";
-import type { Presentation, Sex } from "./types.js";
+import type { Case, Presentation, Sex } from "./types.js";
 
 interface Props {
   onStartScenario: (s: Scenario) => void;
   onStartBlank: (presentation: Presentation, title: string) => void;
   busy: boolean;
   onOpenDocs: () => void;
+  savedCases?: Case[];
+  onOpenCase?: (id: string) => void;
 }
 
-export function Home({ onStartScenario, onStartBlank, busy, onOpenDocs }: Props) {
+export function Home({ onStartScenario, onStartBlank, busy, onOpenDocs, savedCases = [], onOpenCase }: Props) {
   const [blankOpen, setBlankOpen] = useState(false);
   const [complaint, setComplaint] = useState("");
   const [history, setHistory] = useState("");
@@ -44,6 +46,17 @@ export function Home({ onStartScenario, onStartBlank, busy, onOpenDocs }: Props)
         </p>
 
         <RuntimeStatus />
+
+        {savedCases.length > 0 && onOpenCase && <div className="saved-case-picker">
+          <label htmlFor="saved-case">Resume a case or exploration</label>
+          <select id="saved-case" defaultValue="" disabled={busy} onChange={(e) => {
+            if (e.target.value) onOpenCase(e.target.value);
+          }}>
+            <option value="" disabled>Select a case…</option>
+            {savedCases.map((item) => <option value={item.id} key={item.id}>{item.title} · {item.id.slice(-5)}</option>)}
+          </select>
+          <span className="muted small">Available until the local server restarts.</span>
+        </div>}
 
         <div className="home-split">
           <div className="home-split-col agent">

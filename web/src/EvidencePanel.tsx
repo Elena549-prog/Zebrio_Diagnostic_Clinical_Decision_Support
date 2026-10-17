@@ -83,7 +83,7 @@ export function EvidencePanel({ c, onSelectHypothesis }: Props) {
                     <Cited text={t.rationale} sources={c.sources} onCite={focusSource} />
                   </div>
                 </div>
-                <span className={`test-status ${t.status}`}>{t.status}</span>
+                <span className={`test-status ${t.status}`}>{t.resultFindingId && c.findings.find((f) => f.id === t.resultFindingId)?.hypothetical ? 'hypothetical result' : t.status}</span>
               </div>
             ))}
           </div>

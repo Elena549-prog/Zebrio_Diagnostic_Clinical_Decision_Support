@@ -48,6 +48,14 @@ export async function getCase(id: string): Promise<Case> {
   return j(await fetch(`${BASE}/cases/${id}`)) as Promise<Case>;
 }
 
+export async function forkCase(id: string, frameSeq: number): Promise<Case> {
+  return j(await fetch(`${BASE}/cases/${encodeURIComponent(id)}/forks`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ frameSeq }),
+  })) as Promise<Case>;
+}
+
 export async function deleteCase(id: string): Promise<void> {
   await j(await fetch(`${BASE}/cases/${id}`, { method: "DELETE" }));
 }

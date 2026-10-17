@@ -1012,3 +1012,31 @@ a.source-title:hover { color: var(--accent); text-decoration: underline; }
      page, instead of squeezing the rails into short inner scroll boxes. */
   .pane.left, .pane.right { max-height: none; overflow: visible; }
 }
+
+/* Optional timeline exploration controls. Disabled by default in app state. */
+.fork-controls { display: flex; align-items: center; gap: 10px; min-width: 0; }
+.fork-controls select { max-width: 190px; min-width: 0; font-size: 12px; }
+.fork-switch { display: inline-flex; align-items: center; gap: 7px; white-space: nowrap; background: var(--surface-container-lowest); color: var(--on-surface); border: 1px solid var(--outline-variant); font-size: 12px; box-shadow: none; }
+.fork-switch:hover:not(:disabled) { background: var(--surface-container-low); }
+.fork-switch.enabled { border-color: var(--primary); color: var(--on-primary-fixed); background: var(--primary-fixed); }
+.fork-switch-track { display: inline-flex; align-items: center; width: 28px; height: 16px; padding: 2px; border-radius: 20px; background: var(--outline); }
+.fork-switch-track > span { width: 12px; height: 12px; border-radius: 50%; background: white; transition: transform 120ms ease; }
+.fork-switch.enabled .fork-switch-track { background: var(--primary); }
+.fork-switch.enabled .fork-switch-track > span { transform: translateX(12px); }
+.fork-switch-state { min-width: 17px; font-weight: 700; }
+.exploration-banner { background: var(--primary-fixed); color: var(--on-primary-fixed); border: 1px solid var(--primary-fixed-dim); border-radius: var(--r-md); padding: 12px; margin-bottom: 12px; }
+.exploration-banner p { margin: 6px 0 10px; }
+.exploration-banner button { font-size: 12px; }
+.hypothetical-badge { display: inline-block; border: 1px solid var(--hitl-border); border-radius: var(--r-full); padding: 1px 6px; margin-right: 6px; font-size: 10px; font-weight: 700; color: var(--hitl); background: var(--hitl-container); vertical-align: baseline; }
+.review-note button { margin-top: 6px; }
+.saved-case-picker { display: flex; align-items: center; flex-wrap: wrap; gap: 10px; margin: 16px 0; }
+.saved-case-picker label { font-size: 13px; font-weight: 600; }
+.saved-case-picker select { max-width: 360px; min-width: 0; }
+@media (max-width: 1100px) {
+  .appbar { flex-wrap: wrap; height: auto; min-height: 72px; }
+  .appbar-actions { flex-wrap: wrap; justify-content: flex-end; }
+  .fork-controls { flex-wrap: wrap; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .fork-switch-track > span { transition: none; }
+}
