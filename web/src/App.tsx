@@ -13,6 +13,7 @@
  */
 
 import { useEffect, useRef, useState } from "react";
+import { EvidenceAttributionProvider } from "./EvidenceAttributionUI.js";
 import { DecisionTree } from "./DecisionTree.js";
 import { EvidencePanel } from "./EvidencePanel.js";
 import { ChatPanel } from "./ChatPanel.js";
@@ -231,6 +232,7 @@ export function App() {
           const vc = frame ? caseAtFrame(c, frame) : c;
           const reviewing = !!frame;
           return (
+        <EvidenceAttributionProvider c={vc} selectedId={selectedId}>
         <div className={`workspace ${reviewing ? "reviewing" : ""}`}>
           <aside className="pane left">
             {c.forkOrigin && <div className="exploration-banner" role="note">
@@ -315,6 +317,7 @@ export function App() {
             </div>}
           </aside>
         </div>
+        </EvidenceAttributionProvider>
           );
         })()
       ) : (

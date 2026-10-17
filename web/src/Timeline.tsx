@@ -150,7 +150,7 @@ export function Timeline({ c, frameIdx, onScrub, stepMode = false }: Props) {
           }}
           disabled={frames.length < 2}
           title={playing ? "Pause (space)" : "Replay the reasoning (space)"}
-          aria-label={playing ? "Pause" : "Play"}
+          aria-label={playing ? "Pause" : "Replay case"}
         >
           {playing ? "❚❚" : "▶"}
         </button>

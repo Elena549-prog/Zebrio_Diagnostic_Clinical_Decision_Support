@@ -84,6 +84,13 @@
 
   /* focus ring — one consistent, visible ring for keyboard users */
   --focus-ring: 0 0 0 2px var(--surface-container-lowest), 0 0 0 4px color-mix(in srgb, var(--primary) 70%, transparent);
+  /* Attribution accents from ui/01-design-library/visual-languages/A-attribution. */
+  --evidence-for-wash: rgba(96, 165, 250, 0.18);
+  --evidence-for-line: #2563eb;
+  --evidence-against-wash: rgba(248, 113, 113, 0.18);
+  --evidence-against-line: #b3261e;
+  --evidence-neutral-wash: rgba(79, 94, 108, 0.09);
+  --ease-inspect: cubic-bezier(0.4, 0, 0.2, 1);
 
   /* elevation — fine, warm-neutral shadows; outlines do most of the work */
   --shadow: 0 1px 2px rgba(38, 33, 24, 0.05);
@@ -1104,4 +1111,31 @@ a.source-title:hover { color: var(--accent); text-decoration: underline; }
 }
 @media (prefers-reduced-motion: reduce) {
   .fork-switch-track > span { transition: none; }
+  *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; scroll-behavior: auto !important; }
 }
+
+/* Trace stored evidence links: preview on hover/focus, select to hold, Esc clears. */
+.evidence-tally { display: inline-flex; align-items: center; gap: 6px; flex-wrap: wrap; font-size: 11px; line-height: 1.35; }
+.evidence-tally > span { border: 1px solid currentColor; border-radius: var(--r-full); padding: 1px 5px; }
+.tally-for { color: #245b9b; background: #e8f0fb; }
+.tally-against { color: #8b3028; background: #fbece8; }
+.node-card .evidence-tally { margin-top: 3px; gap: 5px; }
+.ranked-body > .evidence-tally { display: flex; margin: 7px 0; }
+.finding-origin { margin-top: 4px; color: var(--on-surface-variant); font: 11px/1.4 ui-monospace, monospace; letter-spacing: 0.035em; text-transform: uppercase; }
+.finding[data-attribution], .hypothesis-evidence-list > li[data-attribution] { transition: background 150ms var(--ease-inspect), box-shadow 150ms var(--ease-inspect); border-radius: var(--r-sm); }
+.finding[data-attribution="supports"], .hypothesis-evidence-list > li[data-attribution="supports"], .ranked-item[data-attribution="supports"] { background: var(--evidence-for-wash); box-shadow: inset 3px 0 var(--evidence-for-line); }
+.finding[data-attribution="against"], .hypothesis-evidence-list > li[data-attribution="against"], .ranked-item[data-attribution="against"] { background: var(--evidence-against-wash); box-shadow: inset 3px 0 var(--evidence-against-line); }
+.finding[data-attribution="neutral"], .hypothesis-evidence-list > li[data-attribution="neutral"] { background: var(--evidence-neutral-wash); }
+.finding[data-attribution="mixed"], .hypothesis-evidence-list > li[data-attribution="mixed"] { background: linear-gradient(90deg, var(--evidence-for-wash), var(--evidence-against-wash)); }
+.finding[data-attribution="focused"], .hypothesis-evidence-list > li[data-attribution="focused"] { background: var(--primary-fixed); box-shadow: inset 3px 0 var(--primary); }
+.hypothesis-evidence-list > li[data-attribution] { padding: 5px 7px; }
+.tree-node[data-attribution="supports"] .node-card { box-shadow: 0 0 0 3px var(--evidence-for-line), var(--shadow-lift); }
+.tree-node[data-attribution="against"] .node-card { box-shadow: 0 0 0 3px var(--evidence-against-line), var(--shadow-lift); }
+.tree-node[data-attribution="mixed"] .node-card { box-shadow: -3px 0 var(--evidence-for-line), 3px 0 var(--evidence-against-line), var(--shadow-lift); }
+.tree-node[data-attribution="neutral"] .node-card { box-shadow: 0 0 0 3px var(--outline); }
+.tree-node:focus-visible { outline: none; }
+.tree-node:focus-visible .node-card { box-shadow: 0 0 0 3px var(--surface), 0 0 0 6px var(--primary); }
+.tree-node .node-card { transition: box-shadow 150ms var(--ease-inspect), transform 150ms var(--ease-inspect); }
+.node-card.root .node-card-name { font-weight: 700; }
+.node-attribution-label { position: absolute; left: 8px; bottom: -18px; padding: 1px 6px; border-radius: var(--r-full); background: var(--surface-container-lowest); border: 1px solid var(--outline-variant); color: var(--on-surface); font-size: 11px; line-height: 1.3; white-space: nowrap; }
+.organics.selected-path { stroke: var(--primary); stroke-width: 3; opacity: 1; }

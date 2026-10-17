@@ -16,6 +16,7 @@ import { useState } from "react";
 import { Cited, SourceChips } from "./Cite.js";
 import type { Case, Finding, Hypothesis, Source } from "./types.js";
 import { probabilityLabel } from "./probabilityDisplay.js";
+import { useEvidenceAttribution } from "./EvidenceAttributionUI.js";
 
 interface Props {
   c: Case;
@@ -202,13 +203,23 @@ function FindingRow({
   sources: Source[];
   onCite?: (index: number) => void;
 }) {
+  const attribution = useEvidenceAttribution();
   const [open, setOpen] = useState(false);
+  const relation = attribution.relation("finding", f.id);
   const expandable = !!(f.detail || f.citation || f.sourceIndices?.length);
 
   return (
-    <div className={`finding ${f.direction}${open ? " open" : ""}`}>
-      <div className="finding-dir" aria-hidden>
-        {dirIcon(f.direction)}
+    <div className={`finding ${f.direction}${open ? " open" : ""}`}
+      data-attribution={relation}
+      data-finding-id={f.id}
+      onPointerEnter={() => attribution.preview({ kind: "finding", id: f.id }, "pointer")}
+      onPointerLeave={() => attribution.preview(null, "pointer")}
+      onFocus={() => attribution.preview({ kind: "finding", id: f.id }, "keyboard")}
+      onBlur={(event) => { if (!event.currentTarget.contains(event.relatedTarget)) attribution.preview(null, "keyboard"); }}
+      onClick={() => attribution.hold({ kind: "finding", id: f.id })}
+    >
+      <div className="finding-dir" aria-hidden style={{ color: relation === "against" ? "var(--against)" : relation === "supports" ? "var(--evidence-for-line)" : undefined }}>
+        {relation === "mixed" ? "±" : dirIcon(relation === "supports" || relation === "against" || relation === "neutral" ? relation : f.direction)}
       </div>
       <div className="finding-body">
         <div
@@ -222,6 +233,8 @@ function FindingRow({
               ? (e) => {
                   if (e.key === "Enter" || e.key === " ") {
                     e.preventDefault();
+                    e.stopPropagation();
+                    attribution.hold({ kind: "finding", id: f.id });
                     setOpen((o) => !o);
                   }
                 }
@@ -232,6 +245,7 @@ function FindingRow({
           <Cited text={f.summary} sources={sources} onCite={onCite} />
           <SourceChips ids={f.sourceIndices} sources={sources} onCite={onCite} />
         </div>
+        <div className="finding-origin">{f.source === "literature" || f.source === "web" ? "Literature" : f.source === "clinician" ? "Clinician" : f.source}</div>
         {open && (
           <div className="finding-expand">
             {f.detail && (

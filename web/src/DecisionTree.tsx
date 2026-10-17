@@ -22,6 +22,7 @@
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import type { Case, Hypothesis } from "./types.js";
 import { probabilityLabel } from "./probabilityDisplay.js";
+import { EvidenceTally, useEvidenceAttribution } from "./EvidenceAttributionUI.js";
 
 interface LayoutNode {
   h: Hypothesis;
@@ -36,7 +37,7 @@ interface LayoutNode {
 
 /** Min node size; cards grow wider/taller to fit their text (foreignObject). */
 const NODE_W = 240;
-const NODE_H = 72;
+const NODE_H = 88;
 const GAP_X = 160;
 const GAP_Y = 36;
 const MIN_SCALE = 0.3;
@@ -186,6 +187,7 @@ interface Props {
 interface ViewTransform { tx: number; ty: number; k: number }
 
 export function DecisionTree({ c, selectedId, onSelect }: Props) {
+  const attribution = useEvidenceAttribution();
   const nodeIds = Object.keys(c.hypotheses).sort().join(",");
 
   const [, forceRender] = useState(0);
@@ -361,12 +363,18 @@ export function DecisionTree({ c, selectedId, onSelect }: Props) {
     .filter((h) => h.status === "live")
     .sort((a, b) => b.probability - a.probability)[0];
   const topLiveId = topLive?.id;
+  const selectedPath = new Set<string>();
+  let ancestor = selectedId ? c.hypotheses[selectedId] : undefined;
+  while (ancestor && !selectedPath.has(ancestor.id)) {
+    selectedPath.add(ancestor.id);
+    ancestor = ancestor.parentId ? c.hypotheses[ancestor.parentId] : undefined;
+  }
 
   return (
     <>
       <div className="canvas-toolbar">
-        <span className="label-caps canvas-hint">
-          Drag nodes · drag the canvas to pan · scroll to zoom
+        <span className="label-caps canvas-hint" title="Hover or focus to trace linked evidence. Click holds the selection; Esc clears highlights. Drag nodes to arrange, drag the canvas to pan, and scroll to zoom.">
+          Hover / focus to trace evidence · Esc clears
         </span>
         <div className="canvas-tools">
           <button className="ghost icon-sq" title="Zoom out" onClick={() => zoomAt(centerX(wrapRef), centerY(wrapRef), 1 / 1.2)}>−</button>
@@ -412,7 +420,7 @@ export function DecisionTree({ c, selectedId, onSelect }: Props) {
                 <g key={`edge-${n.h.id}`}>
                   <path
                     d={path}
-                    className="organics"
+                    className={`organics${selectedPath.has(n.h.id) ? " selected-path" : ""}`}
                     strokeWidth={dim ? 1.5 : 2}
                     strokeDasharray={dim ? "4 4" : undefined}
                     opacity={dim ? 0.45 : 0.7}
@@ -436,11 +444,36 @@ export function DecisionTree({ c, selectedId, onSelect }: Props) {
               const pct = isRoot ? "" : probabilityLabel(c, n.h);
               const focus = isTop && n.h.status === "live";
               const dragging = dragId === n.h.id;
+              const relation = attribution.relation("hypothesis", n.h.id);
               return (
                 <g
                   key={n.h.id}
                   transform={`translate(${n.x}, ${n.y})`}
                   className={`tree-node ${n.isNew ? "node-enter" : ""} ${dragging ? "node-dragging" : ""}`}
+                  role={isRoot ? undefined : "button"}
+                  tabIndex={isRoot ? undefined : 0}
+                  aria-label={isRoot ? undefined : `${n.h.name}, ${n.h.status}${n.h.isZebra ? ", zebra" : ""}, ${n.h.evidenceFor.length} supporting findings, ${n.h.evidenceAgainst.length} contradicting findings`}
+                  aria-pressed={isRoot ? undefined : selected}
+                  data-attribution={isRoot ? undefined : relation}
+                  data-hypothesis-id={isRoot ? undefined : n.h.id}
+                  onPointerEnter={() => { if (!isRoot) attribution.preview({ kind: "hypothesis", id: n.h.id }, "pointer"); }}
+                  onPointerLeave={() => attribution.preview(null, "pointer")}
+                  onFocus={() => attribution.preview({ kind: "hypothesis", id: n.h.id }, "keyboard")}
+                  onBlur={() => attribution.preview(null, "keyboard")}
+                  onKeyDown={(event) => {
+                    if (isRoot) return;
+                    if (event.key === "Enter" || event.key === " ") {
+                      event.preventDefault(); event.stopPropagation();
+                      attribution.hold({ kind: "hypothesis", id: n.h.id });
+                      onSelect(n.h.id);
+                    } else if (["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].includes(event.key)) {
+                      event.preventDefault(); event.stopPropagation();
+                      const buttons = [...(gRef.current?.querySelectorAll<SVGGElement>('.tree-node[role="button"]') ?? [])];
+                      const index = buttons.indexOf(event.currentTarget);
+                      const direction = ["ArrowUp", "ArrowLeft"].includes(event.key) ? -1 : 1;
+                      buttons[(index + direction + buttons.length) % buttons.length]?.focus();
+                    }
+                  }}
                   onPointerDown={(e) => onNodePointerDown(e, n)}
                   onClick={(e) => {
                     if (isRoot) return;
@@ -449,6 +482,7 @@ export function DecisionTree({ c, selectedId, onSelect }: Props) {
                       return;
                     }
                     e.stopPropagation();
+                    attribution.hold({ kind: "hypothesis", id: n.h.id });
                     onSelect(n.h.id);
                   }}
                   style={{ cursor: isRoot ? "default" : dragging ? "grabbing" : "grab" }}
@@ -464,7 +498,7 @@ export function DecisionTree({ c, selectedId, onSelect }: Props) {
                       }}
                     >
                       <div className="node-card-head">
-                        <span className="node-card-name">{n.h.name}</span>
+                        <span className="node-card-name" title={n.h.name}>{n.h.name}</span>
                         {n.h.isZebra && n.h.status === "live" && <span className="zebra-mark">🦓</span>}
                       </div>
                       {!isRoot && (
@@ -476,6 +510,8 @@ export function DecisionTree({ c, selectedId, onSelect }: Props) {
                         </div>
                       )}
                       {isRoot && <div className="node-card-sub">Presentation</div>}
+                      {!isRoot && <EvidenceTally h={n.h} />}
+                      {!isRoot && relation && relation !== "focused" && <span className="node-attribution-label">{relation === "supports" ? "+ Linked support" : relation === "against" ? "− Linked counterevidence" : relation === "mixed" ? "± Mixed links" : "• Linked observation"}</span>}
                       {n.h.status === "ruled_out" && <div className="node-strike" />}
                     </div>
                   </foreignObject>

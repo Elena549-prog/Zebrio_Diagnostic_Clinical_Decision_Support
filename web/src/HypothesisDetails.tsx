@@ -2,6 +2,7 @@ import { useEffect, useId, useRef, useState, type KeyboardEvent } from "react";
 import { Cited, SourceChips } from "./Cite.js";
 import { probabilityLabel, probabilityMode } from "./probabilityDisplay.js";
 import { RarityReference, rarityLabel } from "./RarityReference.js";
+import { EvidenceTally, useEvidenceAttribution } from "./EvidenceAttributionUI.js";
 import type { Case, Hypothesis } from "./types.js";
 
 type Tab = "overview" | "evidence" | "reference";
@@ -13,6 +14,7 @@ const TABS: { id: Tab; label: string }[] = [
 
 /** Existing hypothesis fields, reorganized without generating clinical summaries. */
 export function HypothesisDetails({ c, h }: { c: Case; h: Hypothesis }) {
+  const attribution = useEvidenceAttribution();
   const [tab, setTab] = useState<Tab>("overview");
   const [descOpen, setDescOpen] = useState(false);
   const id = useId();
@@ -54,7 +56,22 @@ export function HypothesisDetails({ c, h }: { c: Case; h: Hypothesis }) {
   function evidenceItems(items: Hypothesis["evidenceFor"], direction: "supports" | "against") {
     return <ul className="hypothesis-evidence-list">{items.map((item, index) => {
       const finding = c.findings.find((candidate) => candidate.id === item.findingId);
-      return <li key={`${item.findingId}-${index}`} className={direction}>
+      return <li key={`${item.findingId}-${index}`} className={direction}
+        data-attribution={attribution.relation("finding", item.findingId)}
+        data-finding-id={item.findingId}
+        onPointerEnter={() => attribution.preview({ kind: "finding", id: item.findingId }, "pointer")}
+        onPointerLeave={() => attribution.preview(null, "pointer")}
+        onFocus={() => attribution.preview({ kind: "finding", id: item.findingId }, "keyboard")}
+        onBlur={(event) => { if (!event.currentTarget.contains(event.relatedTarget)) attribution.preview(null, "keyboard"); }}
+        onClick={() => attribution.hold({ kind: "finding", id: item.findingId })}
+        onKeyDown={(event) => {
+          if (event.target === event.currentTarget && (event.key === "Enter" || event.key === " ")) {
+            event.preventDefault(); event.stopPropagation();
+            attribution.hold({ kind: "finding", id: item.findingId });
+          }
+        }}
+        tabIndex={0}
+      >
         {finding?.hypothetical && <span className="hypothetical-badge">Hypothetical</span>}
         <Cited text={finding?.summary || item.weight} sources={c.sources} />
         <SourceChips ids={finding?.sourceIndices} sources={c.sources} />
@@ -78,6 +95,7 @@ export function HypothesisDetails({ c, h }: { c: Case; h: Hypothesis }) {
       <div className="hypothesis-tags">
         {probabilityMode(c) !== "illustrative" && ordinalIndex >= 0 && <span className="hypothesis-rank">Agent rank #{ordinalIndex + 1} (model judgment)</span>}
         {label && <span className="zebra-tag">{label}</span>}
+        <EvidenceTally h={h} />
       </div>
       <p className="small muted hypothesis-probability">{probabilityMode(c, h) === "unavailable" ? "Clinical probability" : "Probability"}: <b>{probabilityLabel(c, h)}</b></p>
     </header>

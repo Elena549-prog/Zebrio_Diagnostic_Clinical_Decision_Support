@@ -11,6 +11,7 @@
 import type { Case, Hypothesis } from "./types.js";
 import { probabilityLabel } from "./probabilityDisplay.js";
 import { rarityLabel } from './RarityReference.js';
+import { EvidenceTally, useEvidenceAttribution } from "./EvidenceAttributionUI.js";
 
 interface Props {
   c: Case;
@@ -19,6 +20,7 @@ interface Props {
 }
 
 export function RankedDifferential({ c, selectedId, onSelect }: Props) {
+  const attribution = useEvidenceAttribution();
   const live = Object.values(c.hypotheses)
     .filter((h) => h.status === "live" || h.status === "branched")
     .sort((a, b) => b.probability - a.probability);
@@ -35,7 +37,23 @@ export function RankedDifferential({ c, selectedId, onSelect }: Props) {
           <li
             key={h.id}
             className={`ranked-item ${selectedId === h.id ? "sel" : ""} ${h.status === "branched" ? "branched" : ""}`}
-            onClick={() => onSelect(h.id)}
+            role="button"
+            tabIndex={0}
+            aria-label={`Inspect ${h.name}`}
+            aria-pressed={selectedId === h.id}
+            data-attribution={attribution.relation("hypothesis", h.id)}
+            data-hypothesis-id={h.id}
+            onPointerEnter={() => attribution.preview({ kind: "hypothesis", id: h.id }, "pointer")}
+            onPointerLeave={() => attribution.preview(null, "pointer")}
+            onFocus={() => attribution.preview({ kind: "hypothesis", id: h.id }, "keyboard")}
+            onBlur={() => attribution.preview(null, "keyboard")}
+            onClick={() => { attribution.hold({ kind: "hypothesis", id: h.id }); onSelect(h.id); }}
+            onKeyDown={(event) => {
+              if (event.key === "Enter" || event.key === " ") {
+                event.preventDefault(); event.stopPropagation();
+                attribution.hold({ kind: "hypothesis", id: h.id }); onSelect(h.id);
+              }
+            }}
           >
             <div className="ranked-rank">{i + 1}</div>
             <div className="ranked-body">
@@ -47,6 +65,7 @@ export function RankedDifferential({ c, selectedId, onSelect }: Props) {
                 <div className="ranked-bar-fill" style={{ width: `${Math.max(h.probability * 100, 3)}%` }} />
               </div>
               {rarityLabel(h, c.probabilityMode === 'illustrative') && <span className="zebra-tag">{rarityLabel(h, c.probabilityMode === 'illustrative')}</span>}
+              <EvidenceTally h={h} />
               {h.baseRateNote && <div className="ranked-baserate muted small">{h.baseRateNote}</div>}
               {h.status === "branched" && <div className="ranked-flag muted small">branched into children</div>}
             </div>
@@ -59,7 +78,9 @@ export function RankedDifferential({ c, selectedId, onSelect }: Props) {
           <div className="ranked-ruledout-head muted small">Ruled out (kept for the trail)</div>
           <ul>
             {ruledOut.map((h) => (
-              <li key={h.id} className={`ruled-item ${selectedId === h.id ? "sel" : ""}`} onClick={() => onSelect(h.id)}>
+              <li key={h.id} className={`ruled-item ${selectedId === h.id ? "sel" : ""}`} role="button" tabIndex={0} aria-label={`Inspect ruled-out ${h.name}`}
+                onClick={() => onSelect(h.id)}
+                onKeyDown={(event) => { if (event.key === "Enter" || event.key === " ") { event.preventDefault(); event.stopPropagation(); onSelect(h.id); } }}>
                 <span className="ruled-name">{h.name}</span>
                 {rarityLabel(h, c.probabilityMode === 'illustrative') && <span className="zebra-tag" title={rarityLabel(h, c.probabilityMode === 'illustrative')!}>🦓</span>}
               </li>

@@ -15,6 +15,7 @@
  */
 
 import { useEffect, useState } from "react";
+import { EvidenceAttributionProvider } from "./EvidenceAttributionUI.js";
 import { DecisionTree } from "./DecisionTree.js";
 import { EvidencePanel } from "./EvidencePanel.js";
 import { DetailPanel } from "./DetailPanel.js";
@@ -51,11 +52,12 @@ export function Tutorial({ onExitToLive, onExitToHome }: Props) {
   }
 
   return (
+    <EvidenceAttributionProvider c={c} selectedId={selectedId}>
     <div className="workspace">
       <aside className="pane left">
         <TutorialRail step={step} onStep={go} onExitToLive={onExitToLive} />
         <div className="na-divider" />
-        <EvidencePanel c={c} />
+        <EvidencePanel c={c} onSelectHypothesis={setSelectedId} />
       </aside>
       <main className="pane center">
         <div className="probability-notice" role="note">{probabilityExplanation(c)}</div>
@@ -105,5 +107,6 @@ export function Tutorial({ onExitToLive, onExitToHome }: Props) {
         </button>
       </aside>
     </div>
+    </EvidenceAttributionProvider>
   );
 }
