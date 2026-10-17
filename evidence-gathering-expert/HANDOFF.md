@@ -28,7 +28,7 @@ Europe PMC, PubMed and DuckDuckGo need no key. Tests need no key and no network.
 ## Commands
 
 ```bash
-npm test                                             # 65 tests, no keys, no network
+npm test                                             # 66 tests, no keys, no network
 npm run typecheck
 npm run evidence -- examples/sore-throat.request.json  # live run; JSON on stdout, summary with links on stderr, saved to out/<requestId>.json
 npx tsx --env-file=../.env.local scripts/trace-live.ts # live run with a full request/model trace in out/trace.json
@@ -197,3 +197,19 @@ is a design decision for the team; it was left unchanged here.
 - Identifier screening is pattern-based; unusual formats can slip through. Real patient
   data needs a DPIA, a legal basis and DPAs with Anthropic (zero retention) first.
 - Live behaviour depends on today's search results and model output; tests use fixtures.
+
+## Population check relaxed (2026-10-17)
+
+The second check used to reject a correct quote whose only problem was a population
+different from the patient's (e.g. all ages vs 5–15, primary care vs emergency). That was
+the main cause of `insufficient`. Now, when the second check says the quote and numbers are
+right and only the population or setting differs (`populationMismatchOnly`), the item is
+`supported` and the difference is added to the evidence `limitations` and the item `note`
+("Population differs from the patient: ..."). Quote-in-text, number-in-quote and source
+rules are unchanged. **The probability step should read `note`/`limitations` before
+using such a value.**
+
+Live golden runs after this change: **7 / 34 supported** (chest pain 2, breathlessness 5,
+dysuria 0), all with a population warning. Examples: stable angina 6% of ED patients with
+suspected cardiac ischaemia; orthopnoea LR 39.1 for heart failure in primary care;
+community-acquired pneumonia 35% of acute respiratory failure in elderly patients.

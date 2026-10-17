@@ -64,7 +64,7 @@ export async function doubleCheck(llm: LlmClient, q: Question, f: VerifiedFindin
     `Extracted numbers: ${numbers || "none"}`,
     `<quote>\n${escapeData(f.quote)}\n</quote>`,
   ].join("\n");
-  return parseJson<{ agree: boolean; reason: string }>(
+  return parseJson<{ agree: boolean; populationMismatchOnly?: boolean; reason: string }>(
     await llm.complete({ task: "double-check", system: DOUBLE_CHECK_SYSTEM, user, schema: DOUBLE_CHECK_SCHEMA }),
     "double-check",
   );

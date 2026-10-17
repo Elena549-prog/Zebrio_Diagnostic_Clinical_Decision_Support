@@ -22,7 +22,9 @@ None of them needs an API key.
 - Sources are ranked: guideline > systematic review / meta-analysis > RCT >
   observational > other > case report, newer first; up to 8 per question.
 - A number only counts when its exact quote is found in the text we retrieved and an
-  independent second check agrees. Every result links to the page it came from.
+  independent second check agrees. If the study population differs from the patient
+  (e.g. all ages, another care setting), the number still counts but carries a written
+  warning. Every result links to the page it came from.
 - DuckDuckGo has no official API and often blocks automated searches; when it does,
   guidelines are skipped (never bypassed) and papers still work.
 - Patient text is never sent to these services: search queries contain medical

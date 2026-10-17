@@ -162,8 +162,16 @@ export async function gatherEvidence(request: EvidenceRequest, deps: Deps): Prom
       if (f.stance === "supports" && !NUMBER_FIELDS[q.kind].some((k) => f.numbers[k] != null)) continue;
       try {
         const verdict = await doubleCheck(llm, q, f, store.get(f.sourceId)!);
-        f.doubleCheck = verdict.agree ? "agreed" : "disagreed";
-        if (!verdict.agree) f.notes.push(`Second check disagreed: ${verdict.reason}`);
+        // A study whose only problem is a different population still counts; the
+        // difference travels with the evidence as a limitation for the calculator to weigh.
+        const populationOnly = !verdict.agree && verdict.populationMismatchOnly === true;
+        f.doubleCheck = verdict.agree || populationOnly ? "agreed" : "disagreed";
+        if (populationOnly) {
+          const warning = `Population differs from the patient: ${verdict.reason}`;
+          f.limitations = [...f.limitations, warning];
+          f.notes.push(warning);
+        }
+        else if (!verdict.agree) f.notes.push(`Second check disagreed: ${verdict.reason}`);
       } catch (e) {
         f.doubleCheck = "disagreed";
         f.notes.push("Second check could not run, so this is not counted as support.");

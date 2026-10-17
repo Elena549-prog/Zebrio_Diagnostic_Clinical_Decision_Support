@@ -328,6 +328,30 @@ describe("gatherEvidence end to end (no network, no keys)", () => {
     expect(res.diagnoses[0]!.prior.status).toBe("supported");
   });
 
+  it("a population that only differs from the patient's is a warning, not a rejection", async () => {
+    const base = scriptedLlm();
+    const verdict = (populationOnly: boolean) =>
+      ({
+        async complete(req: LlmRequest) {
+          if (req.task === "double-check") {
+            return JSON.stringify({ agree: false, populationMismatchOnly: populationOnly, reason: "Study population is all ages, not children 5–15." });
+          }
+          return base.complete(req);
+        },
+      }) satisfies LlmClient;
+
+    const warned = await gatherEvidence(request, { llm: verdict(true), fetch: world(), now: fixedNow });
+    const prior = warned.diagnoses[0]!.prior;
+    expect(prior.status).toBe("supported");
+    expect(prior.value).toBe(0.37);
+    const ev = warned.evidence.find((e) => e.id === prior.evidenceIds[0])!;
+    expect(ev.doubleCheck).toBe("agreed");
+    expect(ev.limitations.join(" ")).toMatch(/Population differs.*all ages/);
+
+    const rejected = await gatherEvidence(request, { llm: verdict(false), fetch: world(), now: fixedNow });
+    expect(rejected.diagnoses[0]!.prior.status).toBe("insufficient");
+  });
+
   it("a contradicting finding also needs the independent second check", async () => {
     const base = scriptedLlm();
     const llm: LlmClient & { tasks: string[] } = {
