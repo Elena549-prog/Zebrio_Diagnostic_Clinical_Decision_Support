@@ -9,7 +9,12 @@ export function forkCase(parent: Case, frameSeq: number): Case {
   const frame = parent.history[index];
   if (!Number.isSafeInteger(frameSeq) || !frame) throw new RangeError('Select a valid timeline step.');
   const now = new Date().toISOString();
-  const testGate = frame.awaitingHitl && !frame.pendingDiagnosis && !frame.workingDiagnosis && !frame.treatmentPlan;
+  // Reopening a conclusion must restore any unanswered test it had overridden.
+  const pendingTest = frame.tests.find((test) => test.status === 'proposed' || test.status === 'ordered');
+  const testGate = Boolean(pendingTest);
+  const testPrompt = frame.awaitingHitl && !frame.pendingDiagnosis && frame.hitlPrompt
+    ? frame.hitlPrompt
+    : pendingTest ? `Review ${pendingTest.name} and enter a hypothetical result to continue this exploration.` : undefined;
   const c: Case = {
     id: newId('case'),
     title: `What-if: ${parent.title.replace(/^What-if: /, '')}`.slice(0, 160),
@@ -27,7 +32,7 @@ export function forkCase(parent: Case, frameSeq: number): Case {
     probabilityMode: 'unavailable',
     probabilityCalculation: unavailableProbability('What-if exploration. No reviewed clinical probability model is configured.'),
     awaitingHitl: testGate,
-    hitlPrompt: testGate ? frame.hitlPrompt : undefined,
+    hitlPrompt: testGate ? testPrompt : undefined,
     createdAt: now,
     updatedAt: now,
   };

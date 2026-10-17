@@ -14,6 +14,9 @@ Other cases cover invalid/missing frames, busy-parent rejection, retained test
 gates, reopened diagnosis/treatment frames, server-enforced hypothetical manual
 inputs, and exclusion of those inputs from documented-patient coding evidence.
 Inference is injected in these tests; creating a fork requires no inference.
+An additional regression covers reopening a clinician-confirmed diagnosis that
+still has an unanswered proposed test: the fork restores the gate and rejects
+advance until an explicit hypothetical result is entered.
 Historical event payloads are copied at creation so later annotations cannot
 leak into earlier events through shared object references.
 
