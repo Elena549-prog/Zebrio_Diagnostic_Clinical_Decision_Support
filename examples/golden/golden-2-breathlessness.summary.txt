@@ -1,0 +1,113 @@
+
+Evidence for request golden-2-breathlessness: partial
+
+Acute decompensated heart failure (suggested by model, not a diagnosis)
+  Base rate: supported = 0.47
+      [e1] https://pubmed.ncbi.nlm.nih.gov/12124404/
+            "The final diagnosis was dyspnea due to congestive heart failure in 744 patients (47 percent), dyspnea due to noncardiac causes in 72 patients with a history of left ventricular dysfunction (5 percent), and no finding of congestive heart failure in 770 patients (49 percent)."
+  orthopnea (patient: "sleeps on three pillows"): insufficient
+  nt-probnp (patient: "NT-proBNP 4800 pg/ml"): insufficient
+      [e2] https://pubmed.ncbi.nlm.nih.gov/16293638/
+            "An age-independent cut-point of 300 pg/mL had 98% negative predictive value to exclude acute HF."
+  jugular venous pressure (patient: "jugular venous pressure raised"): supported = spec 0.7
+      [e3] https://pubmed.ncbi.nlm.nih.gov/19586584/
+            "Clinical features with relatively high specificity included history of myocardial infarction (89%), orthopnoea (89%), oedema (72%), elevated jugular venous pressure (70%), cardiomegaly (85%), added heart sounds (99%), lung crepitations (81%) and hepatomegaly (97%)."
+
+Community-acquired pneumonia (suggested by model, not a diagnosis)
+  Base rate: insufficient
+  absence of fever (patient: "no fever"): insufficient
+  absence of purulent sputum (patient: "no coloured sputum"): insufficient
+  c-reactive protein (patient: "CRP 9 mg/l"): insufficient
+
+Pulmonary embolism (suggested by model, not a diagnosis)
+  Base rate: supported = 0.18
+      [e4] https://europepmc.org/article/PMC/PMC1550946
+            "The main causes of ARF were cardiogenic pulmonary edema (43%), community-acquired pneumonia (35%), acute exacerbation of chronic respiratory disease (32%), pulmonary embolism (18%), and acute asthma (3%); 47% had more than two diagnoses."
+  absence of pleuritic chest pain (patient: "no chest pain"): insufficient
+  bilateral leg edema (patient: "Pitting oedema of both legs"): insufficient
+  atrial fibrillation (patient: "Known atrial fibrillation"): insufficient
+
+Sources:
+  pmid:34425083  abstract_only  meta-analysis  https://pubmed.ncbi.nlm.nih.gov/34425083/
+  pmid:28228456  abstract_only  meta-analysis  https://pubmed.ncbi.nlm.nih.gov/28228456/
+  pmid:15294881  abstract_only  systematic-review  https://pubmed.ncbi.nlm.nih.gov/15294881/
+  pmid:39353506  abstract_only  rct  https://pubmed.ncbi.nlm.nih.gov/39353506/
+  pmid:40162945  abstract_only  other  https://pubmed.ncbi.nlm.nih.gov/40162945/
+  pmid:38307421  abstract_only  other  https://pubmed.ncbi.nlm.nih.gov/38307421/
+  pmid:16368291  abstract_only  other  https://pubmed.ncbi.nlm.nih.gov/16368291/
+  pmid:15542419  abstract_only  other  https://pubmed.ncbi.nlm.nih.gov/15542419/
+  pmid:41765089  abstract_only  meta-analysis  https://pubmed.ncbi.nlm.nih.gov/41765089/
+  pmid:16293638  abstract_only  observational  https://pubmed.ncbi.nlm.nih.gov/16293638/
+  pmid:42643040  abstract_only  other  https://pubmed.ncbi.nlm.nih.gov/42643040/
+  pmid:31222929  abstract_only  other  https://pubmed.ncbi.nlm.nih.gov/31222929/
+  pmid:19586584  abstract_only  meta-analysis  https://pubmed.ncbi.nlm.nih.gov/19586584/
+  pmcid:PMC8081753  abstract_only  other  https://europepmc.org/article/PMC/PMC8081753
+  pmid:2913385  abstract_only  other  https://pubmed.ncbi.nlm.nih.gov/2913385/
+  pmcid:PMC9705668  full_text  other  https://europepmc.org/article/PMC/PMC9705668
+  pmcid:PMC11098714  full_text  other  https://europepmc.org/article/PMC/PMC11098714
+  pmcid:PMC13561325  full_text  other  https://europepmc.org/article/PMC/PMC13561325
+  pmid:12124404  abstract_only  observational  https://pubmed.ncbi.nlm.nih.gov/12124404/
+  pmid:42339539  abstract_only  other  https://pubmed.ncbi.nlm.nih.gov/42339539/
+  pmcid:PMC6202181  abstract_only  other  https://europepmc.org/article/PMC/PMC6202181
+  pmid:15820160  abstract_only  other  https://pubmed.ncbi.nlm.nih.gov/15820160/
+  pmid:10387935  abstract_only  other  https://pubmed.ncbi.nlm.nih.gov/10387935/
+  pmcid:PMC13455772  full_text  other  https://europepmc.org/article/PMC/PMC13455772
+  pmcid:PMC2684577  full_text  meta-analysis  https://europepmc.org/article/PMC/PMC2684577
+  pmcid:PMC2667420  full_text  meta-analysis  https://europepmc.org/article/PMC/PMC2667420
+  url:https://www.nice.org.uk/guidance/cg187/evidence/appendix-a-summary-of-evidence-from-surveillance-pdf-4671249230  full_text  guideline  https://www.nice.org.uk/guidance/cg187/evidence/appendix-a-summary-of-evidence-from-surveillance-pdf-4671249230
+  url:https://www.nice.org.uk/guidance/cg95/evidence/appendix-a-summary-of-evidence-pdf-6901592654  full_text  guideline  https://www.nice.org.uk/guidance/cg95/evidence/appendix-a-summary-of-evidence-pdf-6901592654
+  url:https://www.nice.org.uk/guidance/htg779/documents/consultation-comments-and-responses  full_text  guideline  https://www.nice.org.uk/guidance/htg779/documents/consultation-comments-and-responses
+  pmid:26970760  abstract_only  systematic-review  https://pubmed.ncbi.nlm.nih.gov/26970760/
+  pmid:8531309  abstract_only  meta-analysis  https://pubmed.ncbi.nlm.nih.gov/8531309/
+  pmid:39283629  abstract_only  other  https://pubmed.ncbi.nlm.nih.gov/39283629/
+  pmid:9412574  abstract_only  other  https://pubmed.ncbi.nlm.nih.gov/9412574/
+  pmcid:PMC1821031  full_text  other  https://europepmc.org/article/PMC/PMC1821031
+  pmcid:PMC13499573  full_text  other  https://europepmc.org/article/PMC/PMC13499573
+  pmcid:PMC1550946  full_text  other  https://europepmc.org/article/PMC/PMC1550946
+  pmcid:PMC3615022  full_text  meta-analysis  https://europepmc.org/article/PMC/PMC3615022
+  pmid:20729231  abstract_only  meta-analysis  https://pubmed.ncbi.nlm.nih.gov/20729231/
+  pmid:10683053  abstract_only  rct  https://pubmed.ncbi.nlm.nih.gov/10683053/
+  pmid:42398699  abstract_only  observational  https://pubmed.ncbi.nlm.nih.gov/42398699/
+  pmid:2785261  abstract_only  other  https://pubmed.ncbi.nlm.nih.gov/2785261/
+  pmcid:PMC2875480  full_text  other  https://europepmc.org/article/PMC/PMC2875480
+  url:https://www.nice.org.uk/guidance/ng250/documents/draft-scope  full_text  guideline  https://www.nice.org.uk/guidance/ng250/documents/draft-scope
+  url:https://www.nice.org.uk/guidance/gid-ng10357/documents/450  full_text  guideline  https://www.nice.org.uk/guidance/gid-ng10357/documents/450
+  url:https://www.nice.org.uk/guidance/ng250/evidence/g-information-for-parents-and-carers-of-babies-children-and-young-people-about-expected-symptoms-pdf-15432554132  full_text  guideline  https://www.nice.org.uk/guidance/ng250/evidence/g-information-for-parents-and-carers-of-babies-children-and-young-people-about-expected-symptoms-pdf-15432554132
+  pmcid:PMC13170508  full_text  other  https://europepmc.org/article/PMC/PMC13170508
+  pmid:31241140  abstract_only  meta-analysis  https://pubmed.ncbi.nlm.nih.gov/31241140/
+  pmid:29340593  abstract_only  meta-analysis  https://pubmed.ncbi.nlm.nih.gov/29340593/
+  pmid:16973986  abstract_only  observational  https://pubmed.ncbi.nlm.nih.gov/16973986/
+  pmid:1712384  abstract_only  other  https://pubmed.ncbi.nlm.nih.gov/1712384/
+  pmid:2513195  abstract_only  other  https://pubmed.ncbi.nlm.nih.gov/2513195/
+  pmid:22700780  abstract_only  observational  https://pubmed.ncbi.nlm.nih.gov/22700780/
+  pmid:42130141  abstract_only  other  https://pubmed.ncbi.nlm.nih.gov/42130141/
+  pmcid:PMC1746322  abstract_only  other  https://europepmc.org/article/PMC/PMC1746322
+  pmcid:PMC135491  abstract_only  meta-analysis  https://europepmc.org/article/PMC/PMC135491
+  pmid:10744147  abstract_only  rct  https://pubmed.ncbi.nlm.nih.gov/10744147/
+  pmid:42747147  abstract_only  other  https://pubmed.ncbi.nlm.nih.gov/42747147/
+  pmid:16840398  abstract_only  other  https://pubmed.ncbi.nlm.nih.gov/16840398/
+  pmid:15163775  abstract_only  other  https://pubmed.ncbi.nlm.nih.gov/15163775/
+  pmid:15304025  abstract_only  other  https://pubmed.ncbi.nlm.nih.gov/15304025/
+  pmid:11788208  abstract_only  other  https://pubmed.ncbi.nlm.nih.gov/11788208/
+  pmcid:PMC13391829  full_text  other  https://europepmc.org/article/PMC/PMC13391829
+  pmcid:PMC2718410  abstract_only  observational  https://europepmc.org/article/PMC/PMC2718410
+  pmid:41621021  abstract_only  other  https://pubmed.ncbi.nlm.nih.gov/41621021/
+  pmid:21277143  abstract_only  other  https://pubmed.ncbi.nlm.nih.gov/21277143/
+  pmid:20696966  abstract_only  other  https://pubmed.ncbi.nlm.nih.gov/20696966/
+  pmid:18524457  abstract_only  other  https://pubmed.ncbi.nlm.nih.gov/18524457/
+  pmid:14665764  abstract_only  other  https://pubmed.ncbi.nlm.nih.gov/14665764/
+  pmid:3355304  abstract_only  other  https://pubmed.ncbi.nlm.nih.gov/3355304/
+  pmid:20546118  abstract_only  meta-analysis  https://pubmed.ncbi.nlm.nih.gov/20546118/
+  pmid:19726018  abstract_only  systematic-review  https://pubmed.ncbi.nlm.nih.gov/19726018/
+  pmid:17155963  abstract_only  meta-analysis  https://pubmed.ncbi.nlm.nih.gov/17155963/
+  pmid:15096330  abstract_only  meta-analysis  https://pubmed.ncbi.nlm.nih.gov/15096330/
+  pmcid:PMC13157281  full_text  observational  https://europepmc.org/article/PMC/PMC13157281
+  pmcid:PMC7745997  full_text  meta-analysis  https://europepmc.org/article/PMC/PMC7745997
+  url:https://www.nice.org.uk/guidance/ng158/evidence/e-outpatient-treatment-for-lowrisk-pulmonary-embolism-pdf-8710588338  full_text  guideline  https://www.nice.org.uk/guidance/ng158/evidence/e-outpatient-treatment-for-lowrisk-pulmonary-embolism-pdf-8710588338
+  url:https://applications.emro.who.int/imemrf/Pak_J_Med_Sci/Pak_J_Med_Sci_2012_28_1_223_224.pdf  full_text  guideline  https://applications.emro.who.int/imemrf/Pak_J_Med_Sci/Pak_J_Med_Sci_2012_28_1_223_224.pdf
+  url:https://www.nice.org.uk/guidance/ng158/update/NG158/documents/evidence-review-5  full_text  guideline  https://www.nice.org.uk/guidance/ng158/update/NG158/documents/evidence-review-5
+  pmid:42717288  abstract_only  meta-analysis  https://pubmed.ncbi.nlm.nih.gov/42717288/
+  pmid:37326322  abstract_only  rct  https://pubmed.ncbi.nlm.nih.gov/37326322/
+  pmid:42690345  abstract_only  other  https://pubmed.ncbi.nlm.nih.gov/42690345/
+  pmid:15867411  abstract_only  other  https://pubmed.ncbi.nlm.nih.gov/15867411/
+

@@ -84,6 +84,17 @@ The orchestrator (Person 3) should send the same `presentation` object through t
 whole pipeline. For Person 2, the free text maps onto `excerpts[]` (one excerpt each
 for chief complaint, history and each observation).
 
+## Fixed demo result
+
+Live results vary from run to run, so a good run of example 2 is saved for the demo:
+
+- `golden-2-breathlessness.response.json`: the full response (2026-10-17, Tavily on).
+- `golden-2-breathlessness.summary.txt`: the readable summary with clickable source links.
+
+It has 3 verified numbers out of 12 (heart failure base rate 47%, raised JVP specificity
+0.70, pulmonary embolism base rate 18%), each with an exact quote, a link and a
+population warning. Show this file on stage; run live only as an extra.
+
 ## Ground rules
 
 - Keep these examples synthetic. Never replace them with real patient data.

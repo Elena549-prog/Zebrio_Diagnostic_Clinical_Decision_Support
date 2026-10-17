@@ -230,3 +230,10 @@ Live check (golden 2): 3 credits, six guideline pages retrieved (NICE acute and 
 heart failure, NICE pneumonia, others). Overview pages rarely state numbers, so no
 guideline quote was verified in that run. Known gap: every page on an allowed domain is
 labelled `guideline`, including a journal PDF hosted on who.int.
+
+Update (same day): the Tavily query now targets guideline **evidence reviews**
+("… guideline evidence review diagnostic accuracy", 3 results, still 1 credit). Live
+runs now return NICE evidence documents (long PDFs with many sensitivity/specificity
+mentions) instead of overview pages. In two runs of golden 2 (3/12 and 2/12 supported)
+no guideline quote became a verified number yet. Tavily credits used this month: 12.
+A good run is saved as a fixed demo result in `examples/golden/`.

@@ -65,7 +65,8 @@ export async function searchGuidelinesTavily(http: Http, apiKey: string, terms: 
     method: "POST",
     headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
     body: JSON.stringify({
-      query: `${terms} guideline`,
+      // Guideline evidence reviews (often long PDFs) state the numbers; overview pages don't.
+      query: `${terms} guideline evidence review diagnostic accuracy`,
       search_depth: "basic",
       max_results: maxResults,
       include_answer: false,
