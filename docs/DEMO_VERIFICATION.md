@@ -27,3 +27,15 @@ Verifier: GPT-6.1-Sol, medium. Product baseline: `675f8f0`, with concurrent hypo
 - Before the interruption, the only application-console resource error seen was the missing favicon. Afterwards, SSE reconnects reported connection refused because both development servers were down.
 - Collaborative preview transport failed repeatedly with `Preview automation click timed out after 15000ms.`, `Preview snapshot failed: Preview automation snapshot timed out after 15000ms.`, and `Preview automation evaluate timed out after 15000ms.` Verification continued using the Playwright CLI skill, own `demo_verify` browser session, tabs 0 (tour/strep) and 1 (golden). Transport failures were not counted as application failures.
 - Parent reported 85 offline tests, type checks and builds passing; this verifier did not repeat those concurrent checks.
+
+## Subsequent integration checks
+
+After the live run, the parent preserved the team's newer medical-coding module
+integration from `b721957`. The live workflow above exercised the earlier coding
+adapter; it does not establish a positive live assignment by the newly merged
+module. Its adapter/module checks, type checks and production build passed.
+The final working-tree suite passed 90 application/UI tests and 115 coding tests
+(three UI tests belong to concurrent attribution work). A Windows CRLF-only
+example-fixture comparison was made portable. Services were restarted against
+the rebuilt server; API health and the web entry point returned HTTP 200.
+The final restart cleared the synthetic verification case from memory.

@@ -45,5 +45,5 @@ it("examples/response.json matches the current implementation", async () => {
   const response = await assignMedicalCodes(request, { deps: { ...deps(), model: scripted, config: testConfig } });
   const json = JSON.stringify(response, null, 2) + "\n";
   if (process.env.UPDATE_FIXTURE) writeFileSync(responsePath, json);
-  expect(json).toBe(readFileSync(responsePath, "utf8"));
+  expect(json).toBe(readFileSync(responsePath, "utf8").replace(/\r\n/g, "\n"));
 });
