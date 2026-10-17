@@ -106,7 +106,7 @@ describe("retrieveCatalogue per concept", () => {
   });
 
   it("searches at most maxSearchesPerProvider concepts and reports which", async () => {
-    const out = await retrieveCatalogue(["a", "b", "c"], deps(), testConfig);
+    const out = await retrieveCatalogue(["a", "b", "c"], deps(), { ...testConfig, maxSearchesPerProvider: 2 });
     expect(out.searchedTerms).toEqual(["a", "b"]);
   });
 });
@@ -161,6 +161,24 @@ describe("retrieveCatalogue catalogue navigation", () => {
     expect(calls).toContain(CATALOGUE_INDEX_URL); // navigation ran for "Pneumonie J18.9"
     expect(out.pages.map((p) => p.url)).toEqual([BLOCK_J40_J47]);
     expect(calls.filter((u) => u.includes("block-"))).toEqual([BLOCK_J40_J47]);
+  });
+
+  it("navigates when search only finds a block page that cannot contain the hinted code", async () => {
+    const calls: string[] = [];
+    const wrongBlock = BLOCK_J40_J47.replace("block-j40-j47", "block-i30-i52");
+    const out = await retrieveCatalogue(
+      ["Status asthmaticus J46"],
+      deps({ tavily: fakeTavily([[wrongBlock]]), directFetch: serving(calls) }),
+      { ...testConfig, maxPages: 1 },
+    );
+    expect(out.pages.map((p) => p.url)).toEqual([BLOCK_J40_J47]);
+    expect(out.notes.join(" ")).toContain("cannot contain J46");
+  });
+
+  it("orders hinted symptom codes (R) after diagnoses when the search budget is tight", async () => {
+    const tavily = fakeTavily([[BLOCK_J40_J47]]);
+    const out = await retrieveCatalogue(["Dyspnoe R06.0", "Status asthmaticus J46"], deps({ tavily }), { ...testConfig, maxSearchesPerProvider: 1 });
+    expect(out.searchedTerms).toEqual(["Status asthmaticus J46"]);
   });
 
   it("notes a failed navigation and returns no pages", async () => {

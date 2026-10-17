@@ -190,10 +190,29 @@ describe("assignMedicalCodes", () => {
       cond({ condition: "B", searchTerms: "Bronchitis" }),
       cond({ condition: "C", searchTerms: "Emphysem" }),
     ];
-    const out = await run(fakeModel(conditions, [sel()]));
+    const out = await run(fakeModel(conditions, [sel()]), { config: { ...testConfig, maxSearchesPerProvider: 1 } });
     expect(out.results.map((r) => r.status)).toEqual(["assigned", "unavailable", "unavailable"]);
-    expect(out.results[1]!.rationale).toContain("No coding decision");
+    expect(out.results[1]!.rationale).toContain("budget");
     expect(out.results[2]!.rationale).toContain("budget");
+  });
+});
+
+describe("codes built beyond the retrieved entries", () => {
+  it("falls back to the verified heading as needs_clarification instead of dropping the code", async () => {
+    const out = await run(fakeModel([cond({ condition: "Allergic asthma" })], [sel({ code: "J45.09" })]));
+    expect(out.results[0]).toMatchObject({ status: "needs_clarification", code: null });
+    expect(out.results[0]!.candidates?.map((c) => c.code)).toContain("J45.0-");
+    expect(out.results[0]!.rationale).toContain("Rejected J45.09");
+  });
+});
+
+describe("duplicate assignments", () => {
+  it("merges conditions that were assigned the same code into one result", async () => {
+    const conditions = [cond(), cond({ condition: "Akutes schweres Asthma", hypothesisId: null, inputRefs: ["ev1"] })];
+    const out = await run(fakeModel(conditions, [sel(), sel({ conditionIndex: 1 })]));
+    expect(out.results).toHaveLength(1);
+    expect(out.results[0]).toMatchObject({ code: "J46", inputRefs: ["ex1", "ev1"] });
+    expect(out.results[0]!.rationale).toContain("Akutes schweres Asthma");
   });
 });
 

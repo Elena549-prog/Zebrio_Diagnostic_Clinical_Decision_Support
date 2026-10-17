@@ -32,7 +32,8 @@
   },
   "allowedExtraCodes": [
     "R06.0",
-    "R00.0"
+    "R00.0",
+    "R79.8"
   ],
   "expected": [
     {

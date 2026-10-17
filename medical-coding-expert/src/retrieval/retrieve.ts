@@ -10,7 +10,7 @@ import { parseCatalogueHtml, parseCatalogueText, type CatalogueEntry } from "../
 import type { CodingConfig } from "../config.ts";
 import type { RetrievalProvider, SearchProvider } from "../types.ts";
 import { isAllowedCatalogueUrl, normalizeCatalogueUrl, toCurrentEditionUrl } from "../urlPolicy.ts";
-import { createCatalogueNavigator } from "./catalogueNavigation.ts";
+import { createCatalogueNavigator, likelyCategories } from "./catalogueNavigation.ts";
 import { toProviderError } from "./errors.ts";
 import type { CallOptions, DirectFetcher, PageExtractor, SearchAdapter } from "./types.ts";
 
@@ -50,6 +50,18 @@ interface Located {
   /** Found via another edition's file name; must be fetched directly. */
   mapped: boolean;
   by: SearchProvider | "navigation";
+}
+
+/** Whether a block page's file name ("block-j40-j47.htm") names a range containing the category. */
+function blockCovers(url: string, category: string): boolean {
+  const m = /\/block-([a-z]\d{2})-([a-z]\d{2})\.htm/.exec(url);
+  return !!m && m[1]!.toUpperCase() <= category && category <= m[2]!.toUpperCase();
+}
+
+/** Symptom codes (chapter R) are searched after diagnoses, so a tight budget goes to diagnoses. */
+function bySearchPriority(terms: string[]): string[] {
+  const isSymptom = (t: string) => likelyCategories(t)[0]?.startsWith("R") ?? false;
+  return [...terms.filter((t) => !isSymptom(t)), ...terms.filter(isSymptom)];
 }
 
 /** Keep official 2026 pages; map other editions of catalogue pages to their 2026 counterpart. */
@@ -102,12 +114,12 @@ export async function retrieveCatalogue(
   }
 
   const navigate = createCatalogueNavigator(deps.directFetch);
-  async function navigateConcept(term: string): Promise<Located[]> {
+  async function navigateConcept(term: string, why = `Web search found no usable page for "${term}"`): Promise<Located[]> {
     try {
       const hit = await navigate(term, opts);
       if (!hit) return [];
       notes.push(
-        `Web search found no usable page for "${term}"; located ${hit.url} by navigating the official 2026 catalogue from its index (${hit.locator} used only to pick the block; codes and labels come only from that page)`,
+        `${why}; located ${hit.url} by navigating the official 2026 catalogue from its index (${hit.locator} used only to pick the block; codes and labels come only from that page)`,
       );
       return [{ url: hit.url, mapped: false, by: "navigation" }];
     } catch (err) {
@@ -117,7 +129,7 @@ export async function retrieveCatalogue(
   }
 
   // 1. Discovery, per concept, within the per-provider search budget.
-  const searchedTerms = terms.slice(0, config.maxSearchesPerProvider);
+  const searchedTerms = bySearchPriority(terms).slice(0, config.maxSearchesPerProvider);
   const perTerm: Located[][] = [];
   if (deps.state.tavilyDisabledReason) notes.push(`Tavily skipped: ${deps.state.tavilyDisabledReason}`);
   for (const term of searchedTerms) {
@@ -125,6 +137,13 @@ export async function retrieveCatalogue(
     if (!deps.state.tavilyDisabledReason) found = await searchConcept(deps.tavily, term, config.tavilyRetries);
     if (!found.length) found = await searchConcept(deps.duckduckgo, term, 0);
     if (!found.length) found = await navigateConcept(term);
+    // Search ranking can return a real but unrelated block page; prefer the
+    // block whose range contains the hinted code, keeping search hits after it.
+    const hinted = likelyCategories(term)[0];
+    if (hinted && found.length && !found.some((l) => blockCovers(l.url, hinted))) {
+      const nav = await navigateConcept(term, `Search results for "${term}" cannot contain ${hinted}`);
+      found = [...nav, ...found.filter((l) => !nav.some((n) => n.url === l.url))];
+    }
     perTerm.push(found);
   }
 

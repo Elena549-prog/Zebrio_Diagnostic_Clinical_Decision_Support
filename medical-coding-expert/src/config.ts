@@ -26,8 +26,8 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env, overrides: Part
   return {
     model: env.CLAUDE_MODEL || "claude-sonnet-5-5",
     effort: EFFORTS.includes(effort) ? effort : "medium",
-    maxSearchesPerProvider: 2,
-    maxPages: 3,
+    maxSearchesPerProvider: 8,
+    maxPages: 8,
     maxClaudeTurns: 4,
     timeoutMs: 20_000,
     claudeTimeoutMs: 45_000,

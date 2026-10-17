@@ -114,5 +114,5 @@ export function parseCatalogueText(markdown: string): CatalogueEntry[] {
 
 /** Normalise "j46", "J46 ", "J45.0-" to catalogue form "J46" / "J45.0". */
 export function normalizeCode(raw: string): string {
-  return raw.trim().toUpperCase().replace(/[-\s]+$/, "");
+  return raw.trim().toUpperCase().replace(/[-.\s]+$/, "");
 }

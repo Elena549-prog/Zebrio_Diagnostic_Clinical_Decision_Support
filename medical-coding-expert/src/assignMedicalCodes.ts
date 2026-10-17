@@ -8,6 +8,7 @@ import { createClaudeModel } from "./llm/claude.ts";
 import { ModelUnavailableError, type CodingModel, type InterpretedCondition, type Selection } from "./llm/model.ts";
 import { createDirectFetcher } from "./retrieval/directFetch.ts";
 import { createDuckDuckGo } from "./retrieval/duckduckgo.ts";
+import { likelyCategories } from "./retrieval/catalogueNavigation.ts";
 import { processProviderState, retrieveCatalogue, type RetrievalDeps, type RetrievedPage } from "./retrieval/retrieve.ts";
 import { createTavily } from "./retrieval/tavily.ts";
 import type { Candidate, CodingRequest, CodingResponse, CodingResult, Reference } from "./types.ts";
@@ -89,6 +90,16 @@ const NOT_CODED: Partial<Record<InterpretedCondition["assertion"], string>> = {
   historical: "Documented as a past condition; history codes (Z86/Z87) are out of scope for this version.",
 };
 
+/** Nearest retrieved heading ("J45.0-", then "J45.-") above a code that is not itself an entry. */
+function verifiedHeading(raw: string, index: Map<string, VerifiedEntry>): VerifiedEntry | undefined {
+  const code = normalizeCode(raw);
+  for (const parent of [code.slice(0, 5), code.slice(0, 3)]) {
+    const v = parent !== code ? index.get(normalizeCode(parent)) : undefined;
+    if (v && v.entry.entryKind === "category") return v;
+  }
+  return undefined;
+}
+
 /** Turns a model selection into a result, trusting only retrieved entries. */
 export function verifySelection(
   condition: InterpretedCondition,
@@ -108,8 +119,11 @@ export function verifySelection(
     if (!candidates.some((c) => c.code === v.entry.displayCode)) candidates.push(candidateFor(v));
   };
   selection.candidateCodes.forEach(consider);
-  const chosen = selection.code ? index.get(normalizeCode(selection.code)) : undefined;
-  if (selection.code && !chosen) rejected.push(selection.code);
+  const exact = selection.code ? index.get(normalizeCode(selection.code)) : undefined;
+  if (selection.code && !exact) rejected.push(selection.code);
+  // A code built beyond the listed entries (e.g. from a modifier table) is
+  // never assigned, but its verified heading still answers "which category".
+  const chosen = exact ?? (selection.code ? verifiedHeading(selection.code, index) : undefined);
 
   const rejectionNote = rejected.length
     ? ` Rejected ${rejected.join(", ")}: not found as an entry on a retrieved official 2026 page.`
@@ -176,7 +190,34 @@ export function verifySelection(
 }
 
 /** Entries sent to Claude for selection; a chapter page can hold hundreds. */
-const MAX_ENTRIES_FOR_SELECTION = 150;
+const MAX_ENTRIES_FOR_SELECTION = 250;
+
+/** Entries in a category hinted by any condition's search terms go first, so the cap never cuts them. */
+function bySelectionRelevance(entries: CatalogueEntry[], terms: string[]): CatalogueEntry[] {
+  const hinted = new Set(terms.flatMap(likelyCategories));
+  const relevant = (e: CatalogueEntry) => hinted.has(e.code.slice(0, 3));
+  return [...entries.filter(relevant), ...entries.filter((e) => !relevant(e))];
+}
+
+/**
+ * The model sometimes splits one diagnosis into parts (appendicitis and its
+ * peritonitis) and assigns the same code to each. Code it once, keeping the
+ * first result and folding in the others' inputs.
+ */
+export function mergeDuplicateAssignments(results: CodingResult[]): CodingResult[] {
+  const out: CodingResult[] = [];
+  for (const r of results) {
+    const first = r.status === "assigned" && r.code ? out.find((o) => o.status === "assigned" && o.code === r.code) : undefined;
+    if (!first) {
+      out.push(r);
+      continue;
+    }
+    first.inputRefs = [...new Set([...first.inputRefs, ...r.inputRefs])];
+    first.rationale += ` Also covers "${r.condition}", coded once.`;
+    first.hypothesisId ??= r.hypothesisId;
+  }
+  return out;
+}
 
 /**
  * Web queries get generic catalogue wording only. Long digit runs (dates, ids)
@@ -283,7 +324,7 @@ export async function assignMedicalCodes(request: CodingRequest, options: Assign
       limitations.push("Claude turn budget exhausted before code selection.");
     } else if (toCode.length) {
       // 4. Claude selects among retrieved entries; code verifies.
-      const entries = [...index.values()].map((v) => v.entry);
+      const entries = bySelectionRelevance([...index.values()].map((v) => v.entry), toCode.map(({ terms }) => terms));
       if (entries.length > MAX_ENTRIES_FOR_SELECTION) {
         limitations.push(`Only the first ${MAX_ENTRIES_FOR_SELECTION} of ${entries.length} retrieved entries were offered for selection.`);
       }
@@ -305,6 +346,6 @@ export async function assignMedicalCodes(request: CodingRequest, options: Assign
     for (const { c, i } of toCode) results[i] ??= unavailable(c, "Code selection did not complete.");
   }
 
-  response.results = results as CodingResult[];
+  response.results = mergeDuplicateAssignments(results as CodingResult[]);
   return response;
 }

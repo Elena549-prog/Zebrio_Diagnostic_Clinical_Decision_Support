@@ -65,5 +65,6 @@ describe("decodeEntities", () => {
 describe("normalizeCode", () => {
   it("strips the category dash and whitespace", () => {
     expect(normalizeCode(" j45.0- ")).toBe("J45.0");
+    expect(normalizeCode("E11.-")).toBe("E11");
   });
 });
