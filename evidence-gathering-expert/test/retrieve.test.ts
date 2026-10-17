@@ -37,6 +37,26 @@ describe("Europe PMC adapter (saved real responses)", () => {
   });
 });
 
+describe("PubMed rate limits", () => {
+  it("waits and retries after a 429 instead of failing", async () => {
+    let n = 0;
+    const f = fakeFetch([
+      [/esearch\.fcgi/, () => (n++ === 0 ? new Response("rate", { status: 429, headers: { "retry-after": "0" } }) : json({ esearchresult: { idlist: [] } }))],
+    ]);
+    expect(await searchPubMed(new Http(f, 1000, 1), "x")).toEqual([]);
+    expect(f.calls).toHaveLength(2);
+  });
+
+  it("spaces requests to the same rate-limited host even when called in parallel", async () => {
+    const times: number[] = [];
+    const f = fakeFetch([[/esearch\.fcgi/, () => (times.push(Date.now()), json({ esearchresult: { idlist: [] } }))]]);
+    const h = new Http(f, 1000, 0);
+    await Promise.all([searchPubMed(h, "a"), searchPubMed(h, "b"), searchPubMed(h, "c")]);
+    const gaps = times.slice(1).map((t, i) => t - times[i]!);
+    for (const g of gaps) expect(g).toBeGreaterThanOrEqual(300);
+  });
+});
+
 describe("PubMed adapter (saved real responses)", () => {
   it("searches, fetches and parses abstracts", async () => {
     const f = fakeFetch([

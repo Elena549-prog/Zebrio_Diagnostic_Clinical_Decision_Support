@@ -188,6 +188,41 @@ describe("gatherEvidence end to end (no network, no keys)", () => {
     expect(res.errors.map((e) => e.message).join(" ")).toMatch(/DuckDuckGo/);
   });
 
+  it("searches papers with plain concept words, not exact phrases or patient wording", async () => {
+    const noisy = {
+      presentingProblem: "acute sore throat fever",
+      diagnoses: [
+        {
+          name: "Group A streptococcal pharyngitis",
+          searchTerm: "streptococcal pharyngitis children",
+          findings: [{ name: "Cough", searchTerm: "absence of cough pharyngitis", quotedFrom: "no cough", presence: "absent" }],
+        },
+      ],
+    };
+    const base = scriptedLlm();
+    const llm: LlmClient = { complete: async (req) => (req.task === "analyse" ? JSON.stringify(noisy) : base.complete(req)) };
+    const fetchFn = world();
+    const res = await gatherEvidence(request, { llm, fetch: fetchFn, now: fixedNow });
+    const queries = fetchFn.calls
+      .filter((c) => c.includes("/rest/search?"))
+      .map((c) => new URL(c).searchParams.get("query")!);
+    // Title/abstract only: full-text matching returned off-topic papers in live runs.
+    expect(queries).toContain(
+      'TITLE_ABS:(streptococcal pharyngitis) AND TITLE_ABS:(cough) AND TITLE_ABS:("likelihood ratio" OR sensitivity OR specificity OR "diagnostic accuracy" OR "clinical prediction")',
+    );
+    expect(queries).toContain(
+      "TITLE_ABS:(streptococcal pharyngitis) AND TITLE_ABS:(prevalence OR proportion OR incidence OR aetiology OR etiology) AND TITLE_ABS:(sore throat fever)",
+    );
+    expect(res.diagnoses[0]!.likelihoodRatios[0]!.finding).toBe("absence of cough");
+  });
+
+  it("stops asking DuckDuckGo after it blocks once, and papers still work", async () => {
+    const fetchFn = world({ ddg: () => html("anomaly", 202) });
+    const res = await gatherEvidence(request, { llm: scriptedLlm(), fetch: fetchFn, now: fixedNow });
+    expect(fetchFn.calls.filter((c) => c.includes("duckduckgo")).length).toBe(1);
+    expect(res.diagnoses[0]!.prior.status).toBe("supported");
+  });
+
   it("rejects a request with identifiers before calling anything", async () => {
     const llm = scriptedLlm();
     const fetchFn = world();

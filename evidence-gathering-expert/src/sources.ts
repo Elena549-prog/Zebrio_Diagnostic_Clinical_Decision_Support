@@ -35,8 +35,8 @@ export function rankSources<T extends Pick<Source, "studyType" | "year" | "acces
   return [...sources].sort(
     (a, b) =>
       RANK[a.studyType] - RANK[b.studyType] ||
-      ACCESS_RANK[a.accessLevel] - ACCESS_RANK[b.accessLevel] ||
-      (b.year ?? 0) - (a.year ?? 0),
+      (b.year ?? 0) - (a.year ?? 0) ||
+      ACCESS_RANK[a.accessLevel] - ACCESS_RANK[b.accessLevel],
   );
 }
 

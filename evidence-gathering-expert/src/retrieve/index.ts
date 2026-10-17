@@ -18,6 +18,8 @@ export interface RetrieveContext {
   errors: ErrorEntry[];
   fullText: Map<string, Promise<string | null>>;
   guidelines: Map<string, Promise<StoredSource[]>>;
+  /** DuckDuckGo searches run one at a time, so a block is seen before the next search starts. */
+  ddgQueue?: Promise<unknown>;
 }
 
 export interface Retrieved {
@@ -27,34 +29,32 @@ export interface Retrieved {
 
 const PASSAGE_CHARS = 3500;
 
-const phrase = (t: string) => (t.includes(" ") ? `"${t}"` : t);
+const LR_TERMS = '("likelihood ratio" OR sensitivity OR specificity OR "diagnostic accuracy" OR "clinical prediction")';
+const PRIOR_TERMS = "(prevalence OR proportion OR incidence OR aetiology OR etiology)";
 
-function ageTerms(band: string | null): string | null {
-  if (band === "0–4" || band === "5–15") return "(child OR children OR paediatric OR pediatric)";
-  if (band === "65+") return "(elderly OR older OR aged)";
-  return null;
-}
+/** Candidates taken from the top of the relevance order before ranking by study type. */
+const RELEVANCE_POOL = 10;
 
-export function paperQuery(q: Question, problem: string): string {
-  const parts = [phrase(q.diagnosis.searchTerm)];
+/**
+ * Plain concept words, grouped. Live runs showed exact-phrase quoting returns nothing and
+ * full-text matching returns off-topic papers, so Europe PMC searches title and abstract only.
+ */
+export function paperQuery(q: Question, problem: string, field: "" | "TITLE_ABS:" = ""): string {
+  const parts = [`(${q.diagnosis.searchTerm})`];
   if (q.kind === "prior") {
-    parts.push("(prevalence OR incidence OR proportion OR aetiology OR etiology)");
-    if (problem) parts.push(phrase(problem));
+    parts.push(PRIOR_TERMS);
+    if (problem) parts.push(`(${problem})`);
   } else {
-    parts.push(phrase(q.finding!.searchTerm));
-    parts.push('("likelihood ratio" OR sensitivity OR specificity OR "diagnostic accuracy" OR "clinical score")');
+    parts.push(`(${q.finding!.searchTerm})`, LR_TERMS);
   }
-  const age = ageTerms(q.ageBand);
-  if (age) parts.push(age);
-  return parts.join(" AND ");
+  return parts.map((p) => field + p).join(" AND ");
 }
 
 async function searchPapers(q: Question, problem: string, ctx: RetrieveContext): Promise<PaperRecord[]> {
-  const query = paperQuery(q, problem);
   const { health, http, errors } = ctx;
   if (!health.disabled("europepmc")) {
     try {
-      const r = await searchEuropePmc(http, query, 15);
+      const r = await searchEuropePmc(http, paperQuery(q, problem, "TITLE_ABS:"), RELEVANCE_POOL);
       health.ok("europepmc");
       if (r.length) return r;
     } catch (e) {
@@ -64,7 +64,7 @@ async function searchPapers(q: Question, problem: string, ctx: RetrieveContext):
   }
   if (!health.disabled("pubmed")) {
     try {
-      const r = await searchPubMed(http, query, 8);
+      const r = await searchPubMed(http, paperQuery(q, problem), RELEVANCE_POOL);
       health.ok("pubmed");
       return r;
     } catch (e) {
@@ -113,14 +113,16 @@ function guidelinesFor(q: Question, problem: string, ctx: RetrieveContext): Prom
   const key = q.diagnosis.id;
   let p = ctx.guidelines.get(key);
   if (!p) {
-    p = (async () => {
+    const previous = ctx.ddgQueue ?? Promise.resolve();
+    p = previous.then(async () => {
       if (ctx.health.disabled("duckduckgo")) return [];
       let urls: string[];
       try {
         urls = await searchGuidelines(ctx.http, [q.diagnosis.searchTerm, problem].filter(Boolean).join(" "), 1);
         ctx.health.ok("duckduckgo");
       } catch (e) {
-        ctx.health.fail("duckduckgo");
+        if (e instanceof ProviderBlocked) ctx.health.block("duckduckgo");
+        else ctx.health.fail("duckduckgo");
         const why = e instanceof ProviderBlocked ? "blocked or challenged; guidelines skipped" : (e as Error).message;
         ctx.errors.push({ step: "retrieve", message: `DuckDuckGo: ${why}` });
         return [];
@@ -144,7 +146,8 @@ function guidelinesFor(q: Question, problem: string, ctx: RetrieveContext): Prom
         );
       }
       return found;
-    })();
+    });
+    ctx.ddgQueue = p.catch(() => undefined);
     ctx.guidelines.set(key, p);
   }
   return p;

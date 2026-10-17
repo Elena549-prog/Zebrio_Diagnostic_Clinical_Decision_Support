@@ -5,7 +5,7 @@
   "type": "module",
   "description": "Finds medical papers for a patient presentation and returns verified, cited evidence for probability calculation.",
   "scripts": {
-    "evidence": "tsx --env-file-if-exists=../.env.local --env-file-if-exists=.env.local src/cli.ts",
+    "evidence": "tsx --env-file-if-exists=../.env.local src/cli.ts",
     "test": "vitest run",
     "typecheck": "tsc --noEmit"
   },

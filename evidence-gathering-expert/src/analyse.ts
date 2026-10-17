@@ -46,6 +46,19 @@ export function cleanTerm(term: string): string {
     .join(" ");
 }
 
+// Words that narrow a literature search without naming a concept (age is ranked, not searched).
+const NOISE = new Set(["absence", "absent", "no", "not", "without", "lack", "of", "acute", "children", "child", "pediatric", "paediatric", "adult", "adults", "patients", "patient", "in", "with", "the", "a"]);
+
+/** The bare concept for a search: cleaned, no negation or age words, minus any words in `exclude`. */
+export function conceptTerm(term: string, exclude = ""): string {
+  const skip = new Set(cleanTerm(exclude).toLowerCase().split(" "));
+  return cleanTerm(term)
+    .toLowerCase()
+    .split(" ")
+    .filter((w) => w && !NOISE.has(w) && !skip.has(w))
+    .join(" ");
+}
+
 export async function analyse(llm: LlmClient, p: MinimisedPresentation, config: Config): Promise<Analysis> {
   const raw = parseJson<RawAnalysis>(
     await llm.complete({ task: "analyse", system: ANALYSE_SYSTEM, user: presentationText(p), schema: ANALYSE_SCHEMA }),
@@ -57,18 +70,20 @@ export async function analyse(llm: LlmClient, p: MinimisedPresentation, config: 
   const seen = new Map<string, FindingHint>();
 
   const diagnoses = (raw.diagnoses ?? [])
-    .filter((d) => cleanTerm(d.searchTerm ?? d.name))
+    .filter((d) => conceptTerm(d.searchTerm || d.name))
     .slice(0, config.maxDiagnoses)
-    .map((d, i) => ({
+    .map((d, i) => {
+      const dxTerm = conceptTerm(d.searchTerm || d.name);
+      return {
       id: `h${i + 1}`,
       name: d.name.trim(),
-      searchTerm: cleanTerm(d.searchTerm || d.name),
+      searchTerm: dxTerm,
       findings: (d.findings ?? [])
         .filter((f) => {
           // The model may only use what the presentation actually says.
           const ok = f.quotedFrom?.trim().length > 0 && source.includes(normalise(f.quotedFrom));
           if (!ok) rejected.push("a suggested finding is not written in the presentation");
-          return ok && cleanTerm(f.searchTerm || f.name);
+          return ok && (conceptTerm(f.searchTerm, dxTerm) || conceptTerm(f.name, dxTerm));
         })
         .slice(0, config.maxFindingsPerDiagnosis)
         .map((f) => {
@@ -78,16 +93,17 @@ export async function analyse(llm: LlmClient, p: MinimisedPresentation, config: 
           const hint: FindingHint = {
             id: `f${++findingSeq}`,
             name: f.name.trim(),
-            searchTerm: cleanTerm(f.searchTerm || f.name),
+            searchTerm: conceptTerm(f.searchTerm, dxTerm) || conceptTerm(f.name, dxTerm),
             quotedFrom: f.quotedFrom.trim(),
             presence: f.presence === "absent" ? "absent" : "present",
           };
           seen.set(key, hint);
           return hint;
         }),
-    }));
+      };
+    });
 
-  return { presentingProblem: cleanTerm(raw.presentingProblem ?? ""), diagnoses, rejected };
+  return { presentingProblem: conceptTerm(raw.presentingProblem ?? ""), diagnoses, rejected };
 }
 
 export function findingLabel(f: FindingHint): string {
