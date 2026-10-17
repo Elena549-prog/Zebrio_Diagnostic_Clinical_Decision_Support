@@ -13,7 +13,8 @@ way it does rather than trusting an answer.
 
 Zebrio is a hackathon research prototype built with Claude. It grew out of
 **Arbor** (`corti-dx-arbor`); the running app still shows the name *Arbor* in
-places, and the GitHub repository has not been renamed.
+places. The repository is hosted at
+[Zebrio_Diagnostic_Clinical_Decision_Support](https://github.com/Elena549-prog/Zebrio_Diagnostic_Clinical_Decision_Support).
 
 > [!WARNING]
 > **Not a medical device.** Zebrio is not clinically validated and must not be
