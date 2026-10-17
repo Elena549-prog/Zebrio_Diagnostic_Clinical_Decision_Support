@@ -1,0 +1,19 @@
+{
+  "requestId": "golden-2-breathlessness",
+  "presentation": {
+    "chiefComplaint": "Increasing shortness of breath for 10 days, now also when lying flat",
+    "history": "Breathless after a few steps, now sleeps on three pillows and wakes up at night short of breath. Both ankles swollen, gained about 3 kg in one week. Dry cough at night, no fever, no chest pain, no coloured sputum. Known atrial fibrillation, hypertension and a heart attack years ago. Stopped her water tablets two weeks ago because of frequent urination. Never smoked.",
+    "observations": [
+      "T 36.9°C, BP 158/92, HR 104 irregular, RR 24, SpO2 90% on room air",
+      "Fine crackles over both lung bases, jugular venous pressure raised",
+      "Pitting oedema of both legs up to mid-shin",
+      "NT-proBNP 4800 pg/ml, CRP 9 mg/l"
+    ],
+    "demographics": {
+      "ageYears": 79,
+      "sex": "female",
+      "location": "Kiel, Germany",
+      "comorbidities": ["atrial fibrillation", "hypertension", "previous myocardial infarction"]
+    }
+  }
+}

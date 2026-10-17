@@ -1,0 +1,872 @@
+{
+  "requestId": "demo-sore-throat",
+  "generatedAt": "2026-10-17T11:57:08.142Z",
+  "diagnoses": [
+    {
+      "id": "h1",
+      "diagnosis": "Group A streptococcal pharyngitis",
+      "origin": "suggested_by_model",
+      "prior": {
+        "question": "What is the prevalence of Group A streptococcal pharyngitis among patients aged 5–15 presenting with pharyngitis fever?",
+        "value": 0.075,
+        "unit": "proportion",
+        "status": "supported",
+        "ci95": null,
+        "population": "children with sore throats",
+        "setting": "Gaborone, Botswana",
+        "denominator": null,
+        "missing": [
+          "ci95",
+          "denominator"
+        ],
+        "evidenceIds": [
+          "e1"
+        ]
+      },
+      "likelihoodRatios": [
+        {
+          "question": "What is the diagnostic accuracy (likelihood ratio, sensitivity, specificity) of tonsillar exudate for Group A streptococcal pharyngitis in patients aged 5–15 with pharyngitis fever?",
+          "finding": "tonsillar exudate",
+          "quotedFrom": "Exudate on tonsils",
+          "lrPositive": null,
+          "lrNegative": null,
+          "sensitivity": null,
+          "specificity": null,
+          "status": "insufficient",
+          "ci95": null,
+          "population": null,
+          "setting": null,
+          "denominator": null,
+          "missing": [
+            "lrPositive",
+            "lrNegative",
+            "sensitivity",
+            "specificity",
+            "ci95",
+            "population",
+            "setting",
+            "denominator"
+          ],
+          "evidenceIds": [
+            "e2",
+            "e3"
+          ],
+          "note": "Second check disagreed: The quote says tonsillar exudate had the highest LR+ for both GAS and non-GAS pharyngitis, giving 1.53 versus 1.71. It is ambiguous which value belongs to which group. The order \"GAS versus non-GAS\" suggests 1.53 is for GAS, but the wording is unclear and could be read the other way. The quote also does not state the population (ages 5-15), so it cannot be confirmed to match the question. The extracted LR+ of 1.53 is therefore not clearly the GAS value. Second check disagreed: The quote does not say which figures belong to tonsillar exudate alone. It describes a change from 23% to 34% sensitivity and from 87% to 85% specificity, which suggests exudate alone compared with a modified or combined predictor. The 23%/87% values are probably the baseline, but the quote does not state that. The population (3-21 years) also differs from the 5-15 year range in the question, and the quote does not give it at all."
+        },
+        {
+          "question": "What is the diagnostic accuracy (likelihood ratio, sensitivity, specificity) of anterior cervical lymphadenopathy for Group A streptococcal pharyngitis in patients aged 5–15 with pharyngitis fever?",
+          "finding": "anterior cervical lymphadenopathy",
+          "quotedFrom": "tender enlarged anterior cervical lymph nodes",
+          "lrPositive": null,
+          "lrNegative": null,
+          "sensitivity": null,
+          "specificity": null,
+          "status": "insufficient",
+          "ci95": null,
+          "population": null,
+          "setting": null,
+          "denominator": null,
+          "missing": [
+            "lrPositive",
+            "lrNegative",
+            "sensitivity",
+            "specificity",
+            "ci95",
+            "population",
+            "setting",
+            "denominator"
+          ],
+          "evidenceIds": []
+        },
+        {
+          "question": "What is the diagnostic accuracy (likelihood ratio, sensitivity, specificity) of absence of cough for Group A streptococcal pharyngitis in patients aged 5–15 with pharyngitis fever?",
+          "finding": "absence of cough",
+          "quotedFrom": "no cough",
+          "lrPositive": null,
+          "lrNegative": null,
+          "sensitivity": null,
+          "specificity": null,
+          "status": "insufficient",
+          "ci95": null,
+          "population": null,
+          "setting": null,
+          "denominator": null,
+          "missing": [
+            "lrPositive",
+            "lrNegative",
+            "sensitivity",
+            "specificity",
+            "ci95",
+            "population",
+            "setting",
+            "denominator"
+          ],
+          "evidenceIds": []
+        }
+      ]
+    },
+    {
+      "id": "h2",
+      "diagnosis": "Infectious mononucleosis",
+      "origin": "suggested_by_model",
+      "prior": {
+        "question": "What is the prevalence of Infectious mononucleosis among patients aged 5–15 presenting with pharyngitis fever?",
+        "value": null,
+        "unit": "proportion",
+        "status": "insufficient",
+        "ci95": null,
+        "population": null,
+        "setting": null,
+        "denominator": null,
+        "missing": [
+          "value",
+          "ci95",
+          "population",
+          "setting",
+          "denominator"
+        ],
+        "evidenceIds": []
+      },
+      "likelihoodRatios": [
+        {
+          "question": "What is the diagnostic accuracy (likelihood ratio, sensitivity, specificity) of tonsillar exudate for Infectious mononucleosis in patients aged 5–15 with pharyngitis fever?",
+          "finding": "tonsillar exudate",
+          "quotedFrom": "Exudate on tonsils",
+          "lrPositive": null,
+          "lrNegative": null,
+          "sensitivity": null,
+          "specificity": null,
+          "status": "insufficient",
+          "ci95": null,
+          "population": null,
+          "setting": null,
+          "denominator": null,
+          "missing": [
+            "lrPositive",
+            "lrNegative",
+            "sensitivity",
+            "specificity",
+            "ci95",
+            "population",
+            "setting",
+            "denominator"
+          ],
+          "evidenceIds": []
+        },
+        {
+          "question": "What is the diagnostic accuracy (likelihood ratio, sensitivity, specificity) of cervical lymphadenopathy for Infectious mononucleosis in patients aged 5–15 with pharyngitis fever?",
+          "finding": "cervical lymphadenopathy",
+          "quotedFrom": "tender enlarged anterior cervical lymph nodes",
+          "lrPositive": null,
+          "lrNegative": null,
+          "sensitivity": null,
+          "specificity": null,
+          "status": "insufficient",
+          "ci95": null,
+          "population": null,
+          "setting": null,
+          "denominator": null,
+          "missing": [
+            "lrPositive",
+            "lrNegative",
+            "sensitivity",
+            "specificity",
+            "ci95",
+            "population",
+            "setting",
+            "denominator"
+          ],
+          "evidenceIds": []
+        },
+        {
+          "question": "What is the diagnostic accuracy (likelihood ratio, sensitivity, specificity) of fever sore throat for Infectious mononucleosis in patients aged 5–15 with pharyngitis fever?",
+          "finding": "fever sore throat",
+          "quotedFrom": "fever 38.6°C",
+          "lrPositive": null,
+          "lrNegative": null,
+          "sensitivity": null,
+          "specificity": null,
+          "status": "insufficient",
+          "ci95": null,
+          "population": null,
+          "setting": null,
+          "denominator": null,
+          "missing": [
+            "lrPositive",
+            "lrNegative",
+            "sensitivity",
+            "specificity",
+            "ci95",
+            "population",
+            "setting",
+            "denominator"
+          ],
+          "evidenceIds": []
+        }
+      ]
+    },
+    {
+      "id": "h3",
+      "diagnosis": "Viral pharyngitis",
+      "origin": "suggested_by_model",
+      "prior": {
+        "question": "What is the prevalence of Viral pharyngitis among patients aged 5–15 presenting with pharyngitis fever?",
+        "value": null,
+        "unit": "proportion",
+        "status": "insufficient",
+        "ci95": null,
+        "population": null,
+        "setting": null,
+        "denominator": null,
+        "missing": [
+          "value",
+          "ci95",
+          "population",
+          "setting",
+          "denominator"
+        ],
+        "evidenceIds": []
+      },
+      "likelihoodRatios": [
+        {
+          "question": "What is the diagnostic accuracy (likelihood ratio, sensitivity, specificity) of absence of cough for Viral pharyngitis in patients aged 5–15 with pharyngitis fever?",
+          "finding": "absence of cough",
+          "quotedFrom": "no cough",
+          "lrPositive": null,
+          "lrNegative": null,
+          "sensitivity": null,
+          "specificity": null,
+          "status": "insufficient",
+          "ci95": null,
+          "population": null,
+          "setting": null,
+          "denominator": null,
+          "missing": [
+            "lrPositive",
+            "lrNegative",
+            "sensitivity",
+            "specificity",
+            "ci95",
+            "population",
+            "setting",
+            "denominator"
+          ],
+          "evidenceIds": []
+        },
+        {
+          "question": "What is the diagnostic accuracy (likelihood ratio, sensitivity, specificity) of absence of rhinorrhea for Viral pharyngitis in patients aged 5–15 with pharyngitis fever?",
+          "finding": "absence of rhinorrhea",
+          "quotedFrom": "no runny nose",
+          "lrPositive": null,
+          "lrNegative": null,
+          "sensitivity": null,
+          "specificity": null,
+          "status": "insufficient",
+          "ci95": null,
+          "population": null,
+          "setting": null,
+          "denominator": null,
+          "missing": [
+            "lrPositive",
+            "lrNegative",
+            "sensitivity",
+            "specificity",
+            "ci95",
+            "population",
+            "setting",
+            "denominator"
+          ],
+          "evidenceIds": []
+        },
+        {
+          "question": "What is the diagnostic accuracy (likelihood ratio, sensitivity, specificity) of absence of exanthem for Viral pharyngitis in patients aged 5–15 with pharyngitis fever?",
+          "finding": "absence of exanthem",
+          "quotedFrom": "no rash",
+          "lrPositive": null,
+          "lrNegative": null,
+          "sensitivity": null,
+          "specificity": null,
+          "status": "insufficient",
+          "ci95": null,
+          "population": null,
+          "setting": null,
+          "denominator": null,
+          "missing": [
+            "lrPositive",
+            "lrNegative",
+            "sensitivity",
+            "specificity",
+            "ci95",
+            "population",
+            "setting",
+            "denominator"
+          ],
+          "evidenceIds": []
+        }
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "id": "e1",
+      "sourceId": "pmcid:PMC12868392",
+      "url": "https://europepmc.org/article/PMC/PMC12868392",
+      "passage": "The prevalence of Group A β‐haemolytic Streptococcus pharyngitis was 7.5% (24/322; 95% CI: 0.50%–0.11%). The mean age of the participants was approximately 12 years.",
+      "doubleCheck": "agreed",
+      "reason": "The quote reports GAS pharyngitis prevalence (7.5%) among children with sore throats, mean age about 12 years, which approximates the 5–15 age group.",
+      "limitations": [
+        "Population is children with sore throat, not specifically fever",
+        "Exact age range of 5–15 not stated in quote; only mean age about 12 years",
+        "Botswana clinics, may not generalize",
+        "The CI in the quote is garbled; the text elsewhere gives 5.5%–11%"
+      ],
+      "stance": "supports",
+      "kind": "literature"
+    },
+    {
+      "id": "e2",
+      "sourceId": "pmid:29045629",
+      "url": "https://pubmed.ncbi.nlm.nih.gov/29045629/",
+      "passage": "Tonsillar exudate had the highest LR+ for both GAS and non-GAS pharyngitis (1.53 versus 1.71).",
+      "doubleCheck": "disagreed",
+      "reason": "Reports a pooled LR+ of 1.53 for tonsillar exudate being present for GAS pharyngitis, using throat culture as the reference standard.",
+      "limitations": [
+        "Meta-analysis of 8 studies, not restricted to ages 5-15",
+        "LR- sensitivity and specificity not given in the abstract",
+        "Pooled population likely includes adults",
+        "Fever not specified"
+      ],
+      "stance": "supports",
+      "kind": "literature"
+    },
+    {
+      "id": "e3",
+      "sourceId": "pmid:33041117",
+      "url": "https://pubmed.ncbi.nlm.nih.gov/33041117/",
+      "passage": "Sensitivity improves (23% to 34%) with minimal change to specificity (87% to 85%).",
+      "doubleCheck": "disagreed",
+      "reason": "The 23% sensitivity and 87% specificity are for tonsillar exudate alone being present (the 34%/85% figures are for petechiae or exudate) for GAS in a mostly school-age pediatric population.",
+      "limitations": [
+        "Age range 3-21 years rather than 5-15 (median age 8, IQR 5-13)",
+        "Likelihood ratios not reported",
+        "Sensitivity and specificity are inferred to refer to exudate alone from the surrounding abstract",
+        "Single pediatric ED, one year",
+        "Fever not specified as an inclusion criterion"
+      ],
+      "stance": "supports",
+      "kind": "literature"
+    }
+  ],
+  "patientFindings": [
+    {
+      "id": "f1",
+      "text": "tonsillar exudate",
+      "quotedFrom": "Exudate on tonsils",
+      "kind": "patient_finding"
+    },
+    {
+      "id": "f2",
+      "text": "anterior cervical lymphadenopathy",
+      "quotedFrom": "tender enlarged anterior cervical lymph nodes",
+      "kind": "patient_finding"
+    },
+    {
+      "id": "f3",
+      "text": "absence of cough",
+      "quotedFrom": "no cough",
+      "kind": "patient_finding"
+    },
+    {
+      "id": "f4",
+      "text": "cervical lymphadenopathy",
+      "quotedFrom": "tender enlarged anterior cervical lymph nodes",
+      "kind": "patient_finding"
+    },
+    {
+      "id": "f5",
+      "text": "fever sore throat",
+      "quotedFrom": "fever 38.6°C",
+      "kind": "patient_finding"
+    },
+    {
+      "id": "f6",
+      "text": "absence of cough",
+      "quotedFrom": "no cough",
+      "kind": "patient_finding"
+    },
+    {
+      "id": "f7",
+      "text": "absence of rhinorrhea",
+      "quotedFrom": "no runny nose",
+      "kind": "patient_finding"
+    },
+    {
+      "id": "f8",
+      "text": "absence of exanthem",
+      "quotedFrom": "no rash",
+      "kind": "patient_finding"
+    }
+  ],
+  "sources": [
+    {
+      "id": "pmid:17201202",
+      "url": "https://pubmed.ncbi.nlm.nih.gov/17201202/",
+      "doiUrl": "https://doi.org/10.1080/09674845.2006.11732740",
+      "title": "Better diagnosis and treatment of throat infections caused by group A beta-haemolytic streptococci.",
+      "pmid": "17201202",
+      "doi": "10.1080/09674845.2006.11732740",
+      "studyType": "other",
+      "year": 2006,
+      "accessLevel": "abstract_only",
+      "retrievedAt": "2026-10-17T11:56:41.540Z",
+      "provider": "europepmc"
+    },
+    {
+      "id": "pmid:41343363",
+      "url": "https://pubmed.ncbi.nlm.nih.gov/41343363/",
+      "doiUrl": "https://doi.org/10.1093/cid/ciaf668",
+      "title": "2025 Clinical Practice Guideline Update by the Infectious Diseases Society of America on Group A Streptococcal Pharyngitis: Risk Assessment Using Clinical Scoring Systems in Children and Adults.",
+      "pmid": "41343363",
+      "doi": "10.1093/cid/ciaf668",
+      "studyType": "guideline",
+      "year": 2026,
+      "accessLevel": "abstract_only",
+      "retrievedAt": "2026-10-17T11:56:41.617Z",
+      "provider": "europepmc"
+    },
+    {
+      "id": "pmid:41692530",
+      "url": "https://pubmed.ncbi.nlm.nih.gov/41692530/",
+      "doiUrl": "https://doi.org/10.1093/cid/ciag098",
+      "title": "Overview of 2025 Clinical Practice Guideline Update by the Infectious Diseases Society of America on Group A Streptococcal (GAS) Pharyngitis: Risk Assessment Using Clinical Scoring Systems in Children and Adults.",
+      "pmid": "41692530",
+      "doi": "10.1093/cid/ciag098",
+      "studyType": "guideline",
+      "year": 2026,
+      "accessLevel": "abstract_only",
+      "retrievedAt": "2026-10-17T11:56:41.617Z",
+      "provider": "europepmc"
+    },
+    {
+      "id": "pmid:29045629",
+      "url": "https://pubmed.ncbi.nlm.nih.gov/29045629/",
+      "doiUrl": "https://doi.org/10.1093/fampra/cmx072",
+      "title": "Signs and symptoms of Group A versus Non-Group A strep throat: A meta-analysis.",
+      "pmid": "29045629",
+      "doi": "10.1093/fampra/cmx072",
+      "studyType": "meta-analysis",
+      "year": 2018,
+      "accessLevel": "abstract_only",
+      "retrievedAt": "2026-10-17T11:56:41.617Z",
+      "provider": "europepmc"
+    },
+    {
+      "id": "pmcid:PMC7652959",
+      "url": "https://europepmc.org/article/PMC/PMC7652959",
+      "doiUrl": "https://doi.org/10.1007/s11606-020-06096-3",
+      "title": "Impact of Clinical Decision Support on Antibiotic Prescribing for Acute Respiratory Infections: a Cluster Randomized Implementation Trial.",
+      "pmid": "32875505",
+      "pmcid": "PMC7652959",
+      "doi": "10.1007/s11606-020-06096-3",
+      "studyType": "rct",
+      "year": 2020,
+      "accessLevel": "abstract_only",
+      "retrievedAt": "2026-10-17T11:56:41.617Z",
+      "provider": "europepmc"
+    },
+    {
+      "id": "pmid:27981538",
+      "url": "https://pubmed.ncbi.nlm.nih.gov/27981538/",
+      "title": "Diagnosis and treatment of acute pharyngitis/tonsillitis: a preliminary observational study in General Medicine.",
+      "pmid": "27981538",
+      "studyType": "observational",
+      "year": 2016,
+      "accessLevel": "abstract_only",
+      "retrievedAt": "2026-10-17T11:56:41.626Z",
+      "provider": "europepmc"
+    },
+    {
+      "id": "pmid:33041117",
+      "url": "https://pubmed.ncbi.nlm.nih.gov/33041117/",
+      "doiUrl": "https://doi.org/10.1016/j.ajem.2020.08.023",
+      "title": "Improving the prediction of streptococcal pharyngitis; time to move past exudate alone.",
+      "pmid": "33041117",
+      "doi": "10.1016/j.ajem.2020.08.023",
+      "studyType": "other",
+      "year": 2021,
+      "accessLevel": "abstract_only",
+      "retrievedAt": "2026-10-17T11:56:41.626Z",
+      "provider": "europepmc"
+    },
+    {
+      "id": "pmcid:PMC13053290",
+      "url": "https://europepmc.org/article/PMC/PMC13053290",
+      "doiUrl": "https://doi.org/10.1155/crdi/5349221",
+      "title": "Myocarditis Following Invasive Group A <i>Streptococcus</i> Infection: Important Differential Diagnostic Distinctions.",
+      "pmid": "41953693",
+      "pmcid": "PMC13053290",
+      "doi": "10.1155/crdi/5349221",
+      "studyType": "other",
+      "year": 2026,
+      "accessLevel": "full_text",
+      "retrievedAt": "2026-10-17T11:56:41.760Z",
+      "provider": "europepmc"
+    },
+    {
+      "id": "pmcid:PMC7777812",
+      "url": "https://europepmc.org/article/PMC/PMC7777812",
+      "title": "117. Natural Language Processing: An Automated Alternative to Determining Inappropriate Group A Streptococcal Testing",
+      "pmcid": "PMC7777812",
+      "studyType": "other",
+      "year": 2020,
+      "accessLevel": "full_text",
+      "retrievedAt": "2026-10-17T11:56:41.889Z",
+      "provider": "europepmc"
+    },
+    {
+      "id": "pmcid:PMC12868392",
+      "url": "https://europepmc.org/article/PMC/PMC12868392",
+      "doiUrl": "https://doi.org/10.1111/tmi.70055",
+      "title": "Prevalence of Group A Streptococcal Pharyngitis and Antibiotic Susceptibility in Paediatric Patients With Sore Throats in Gaborone, Botswana.",
+      "pmid": "41101768",
+      "pmcid": "PMC12868392",
+      "doi": "10.1111/tmi.70055",
+      "studyType": "other",
+      "year": 2026,
+      "accessLevel": "full_text",
+      "retrievedAt": "2026-10-17T11:56:42.705Z",
+      "provider": "europepmc"
+    },
+    {
+      "id": "pmid:41764938",
+      "url": "https://pubmed.ncbi.nlm.nih.gov/41764938/",
+      "doiUrl": "https://doi.org/10.1016/j.msard.2026.107091",
+      "title": "Multiple sclerosis and autoimmunity: learnings from post-streptococcal autoimmunity.",
+      "pmid": "41764938",
+      "doi": "10.1016/j.msard.2026.107091",
+      "studyType": "other",
+      "year": 2026,
+      "accessLevel": "abstract_only",
+      "retrievedAt": "2026-10-17T11:56:42.937Z",
+      "provider": "europepmc"
+    },
+    {
+      "id": "pmid:30020622",
+      "url": "https://pubmed.ncbi.nlm.nih.gov/30020622/",
+      "title": "Lymphadenopathy",
+      "pmid": "30020622",
+      "studyType": "other",
+      "year": 2026,
+      "accessLevel": "abstract_only",
+      "retrievedAt": "2026-10-17T11:56:42.937Z",
+      "provider": "europepmc"
+    },
+    {
+      "id": "pmcid:PMC12579379",
+      "url": "https://europepmc.org/article/PMC/PMC12579379",
+      "doiUrl": "https://doi.org/10.7759/cureus.93697",
+      "title": "A Rare Case of Acalculous Cholecystitis Secondary to Infectious Mononucleosis.",
+      "pmid": "41181770",
+      "pmcid": "PMC12579379",
+      "doi": "10.7759/cureus.93697",
+      "studyType": "other",
+      "year": 2025,
+      "accessLevel": "full_text",
+      "retrievedAt": "2026-10-17T11:56:43.243Z",
+      "provider": "europepmc"
+    },
+    {
+      "id": "pmcid:PMC13084804",
+      "url": "https://europepmc.org/article/PMC/PMC13084804",
+      "doiUrl": "https://doi.org/10.1136/bmjgh-2024-018791",
+      "title": "Implementation and evaluation of a pragmatic community streptococcal treatment programme to improve rheumatic heart disease primary prevention in Uganda.",
+      "pmid": "41956705",
+      "pmcid": "PMC13084804",
+      "doi": "10.1136/bmjgh-2024-018791",
+      "studyType": "other",
+      "year": 2026,
+      "accessLevel": "full_text",
+      "retrievedAt": "2026-10-17T11:56:43.480Z",
+      "provider": "europepmc"
+    },
+    {
+      "id": "pmcid:PMC13366099",
+      "url": "https://europepmc.org/article/PMC/PMC13366099",
+      "doiUrl": "https://doi.org/10.1155/crh/1557951",
+      "title": "The Perilous Journey of Patients With Primary CNS-HLH to Bone Marrow Transplant: A Case Report.",
+      "pmid": "42453865",
+      "pmcid": "PMC13366099",
+      "doi": "10.1155/crh/1557951",
+      "studyType": "other",
+      "year": 2026,
+      "accessLevel": "full_text",
+      "retrievedAt": "2026-10-17T11:56:43.721Z",
+      "provider": "europepmc"
+    },
+    {
+      "id": "pmid:29939666",
+      "url": "https://pubmed.ncbi.nlm.nih.gov/29939666/",
+      "title": "Scarlet Fever",
+      "pmid": "29939666",
+      "studyType": "other",
+      "year": 2026,
+      "accessLevel": "abstract_only",
+      "retrievedAt": "2026-10-17T11:56:43.721Z",
+      "provider": "europepmc"
+    },
+    {
+      "id": "pmid:22248336",
+      "url": "https://pubmed.ncbi.nlm.nih.gov/22248336/",
+      "doiUrl": "https://doi.org/10.3109/13814788.2011.618833",
+      "title": "Validity of a point-of-care based on heterophile antibody detection for the diagnosis of infectious mononucleosis in primary care.",
+      "pmid": "22248336",
+      "doi": "10.3109/13814788.2011.618833",
+      "studyType": "observational",
+      "year": 2012,
+      "accessLevel": "abstract_only",
+      "retrievedAt": "2026-10-17T11:56:44.011Z",
+      "provider": "pubmed"
+    },
+    {
+      "id": "pmid:25621629",
+      "url": "https://pubmed.ncbi.nlm.nih.gov/25621629/",
+      "doiUrl": "https://doi.org/10.3928/00904481-20151226-10",
+      "title": "An adolescent girl with Crohn's disease, fever, and sore throat.",
+      "pmid": "25621629",
+      "doi": "10.3928/00904481-20151226-10",
+      "studyType": "other",
+      "year": 2015,
+      "accessLevel": "abstract_only",
+      "retrievedAt": "2026-10-17T11:56:44.011Z",
+      "provider": "pubmed"
+    },
+    {
+      "id": "pmid:36689975",
+      "url": "https://pubmed.ncbi.nlm.nih.gov/36689975/",
+      "title": "Infectious Mononucleosis: Rapid Evidence Review.",
+      "pmid": "36689975",
+      "studyType": "other",
+      "year": 2023,
+      "accessLevel": "abstract_only",
+      "retrievedAt": "2026-10-17T11:56:45.208Z",
+      "provider": "europepmc"
+    },
+    {
+      "id": "pmcid:PMC7595034",
+      "url": "https://europepmc.org/article/PMC/PMC7595034",
+      "doiUrl": "https://doi.org/10.1038/s41598-020-74555-2",
+      "title": "Patterns of viral pathogens causing upper respiratory tract infections among symptomatic children in Mwanza, Tanzania.",
+      "pmid": "33116166",
+      "pmcid": "PMC7595034",
+      "doi": "10.1038/s41598-020-74555-2",
+      "studyType": "other",
+      "year": 2020,
+      "accessLevel": "full_text",
+      "retrievedAt": "2026-10-17T11:56:57.260Z",
+      "provider": "europepmc"
+    },
+    {
+      "id": "pmid:28557742",
+      "url": "https://pubmed.ncbi.nlm.nih.gov/28557742/",
+      "doiUrl": "https://doi.org/10.1542/peds.2016-3403",
+      "title": "Viral Features and Testing for Streptococcal Pharyngitis.",
+      "pmid": "28557742",
+      "doi": "10.1542/peds.2016-3403",
+      "studyType": "other",
+      "year": 2017,
+      "accessLevel": "abstract_only",
+      "retrievedAt": "2026-10-17T11:56:57.260Z",
+      "provider": "europepmc"
+    },
+    {
+      "id": "pmid:19275067",
+      "url": "https://pubmed.ncbi.nlm.nih.gov/19275067/",
+      "title": "Diagnosis and treatment of streptococcal pharyngitis.",
+      "pmid": "19275067",
+      "studyType": "other",
+      "year": 2009,
+      "accessLevel": "abstract_only",
+      "retrievedAt": "2026-10-17T11:56:57.260Z",
+      "provider": "europepmc"
+    },
+    {
+      "id": "pmid:15066881",
+      "url": "https://pubmed.ncbi.nlm.nih.gov/15066881/",
+      "doiUrl": "https://doi.org/10.1001/archpedi.158.4.391",
+      "title": "Clinical predictors of influenza in children.",
+      "pmid": "15066881",
+      "doi": "10.1001/archpedi.158.4.391",
+      "studyType": "other",
+      "year": 2004,
+      "accessLevel": "abstract_only",
+      "retrievedAt": "2026-10-17T11:56:57.260Z",
+      "provider": "europepmc"
+    },
+    {
+      "id": "pmcid:PMC10604910",
+      "url": "https://europepmc.org/article/PMC/PMC10604910",
+      "doiUrl": "https://doi.org/10.3390/children10101589",
+      "title": "Association between the Clinical, Laboratory and Ultrasound Characteristics and the Etiology of Peripheral Lymphadenopathy in Children.",
+      "pmid": "37892252",
+      "pmcid": "PMC10604910",
+      "doi": "10.3390/children10101589",
+      "studyType": "other",
+      "year": 2023,
+      "accessLevel": "full_text",
+      "retrievedAt": "2026-10-17T11:56:57.607Z",
+      "provider": "europepmc"
+    },
+    {
+      "id": "pmcid:PMC10331660",
+      "url": "https://europepmc.org/article/PMC/PMC10331660",
+      "title": "Gamma globulin combined with acyclovir for children with infectious mononucleosis and their effect on immune function.",
+      "pmid": "37434807",
+      "pmcid": "PMC10331660",
+      "studyType": "other",
+      "year": 2023,
+      "accessLevel": "abstract_only",
+      "retrievedAt": "2026-10-17T11:56:57.608Z",
+      "provider": "europepmc"
+    },
+    {
+      "id": "pmcid:PMC13595444",
+      "url": "https://europepmc.org/article/PMC/PMC13595444",
+      "doiUrl": "https://doi.org/10.1093/femsmc/xtag027",
+      "title": "Development of a clinical scoring tool using machine-learning prediction of monospot positivity in suspected infectious mononucleosis.",
+      "pmid": "42774847",
+      "pmcid": "PMC13595444",
+      "doi": "10.1093/femsmc/xtag027",
+      "studyType": "other",
+      "year": 2026,
+      "accessLevel": "full_text",
+      "retrievedAt": "2026-10-17T11:57:00.258Z",
+      "provider": "europepmc"
+    },
+    {
+      "id": "pmid:32898124",
+      "url": "https://pubmed.ncbi.nlm.nih.gov/32898124/",
+      "doiUrl": "https://doi.org/10.1097/PEC.0000000000002223",
+      "title": "Group A Streptococcal Pharyngitis Testing Appropriateness in Pediatric Acute Care Settings.",
+      "pmid": "32898124",
+      "doi": "10.1097/PEC.0000000000002223",
+      "studyType": "other",
+      "year": 2022,
+      "accessLevel": "abstract_only",
+      "retrievedAt": "2026-10-17T11:57:02.190Z",
+      "provider": "pubmed"
+    },
+    {
+      "id": "pmid:31843329",
+      "url": "https://pubmed.ncbi.nlm.nih.gov/31843329/",
+      "doiUrl": "https://doi.org/10.1016/j.ajem.2019.10.026",
+      "title": "Impact of viral symptoms on the performance of the modified centor score to predict pediatric group A streptococcal pharyngitis.",
+      "pmid": "31843329",
+      "doi": "10.1016/j.ajem.2019.10.026",
+      "studyType": "other",
+      "year": 2020,
+      "accessLevel": "abstract_only",
+      "retrievedAt": "2026-10-17T11:57:02.190Z",
+      "provider": "pubmed"
+    },
+    {
+      "id": "pmid:15978677",
+      "url": "https://pubmed.ncbi.nlm.nih.gov/15978677/",
+      "doiUrl": "https://doi.org/10.1016/j.ijporl.2005.05.012",
+      "title": "Drug eruptions in children with ENT infections.",
+      "pmid": "15978677",
+      "doi": "10.1016/j.ijporl.2005.05.012",
+      "studyType": "other",
+      "year": 2006,
+      "accessLevel": "abstract_only",
+      "retrievedAt": "2026-10-17T11:57:02.190Z",
+      "provider": "pubmed"
+    },
+    {
+      "id": "pmid:11474369",
+      "url": "https://pubmed.ncbi.nlm.nih.gov/11474369/",
+      "title": "Clinical and laboratory findings of cytomegalovirus infection in 115 hospitalized non-immunocompromised adults.",
+      "pmid": "11474369",
+      "studyType": "other",
+      "year": 2001,
+      "accessLevel": "abstract_only",
+      "retrievedAt": "2026-10-17T11:57:02.190Z",
+      "provider": "pubmed"
+    },
+    {
+      "id": "pmid:8546485",
+      "url": "https://pubmed.ncbi.nlm.nih.gov/8546485/",
+      "title": "Arcanobacterium haemolyticum pharyngitis and exanthem. Three case reports and literature review.",
+      "pmid": "8546485",
+      "studyType": "other",
+      "year": 1996,
+      "accessLevel": "abstract_only",
+      "retrievedAt": "2026-10-17T11:57:02.190Z",
+      "provider": "pubmed"
+    },
+    {
+      "id": "pmcid:PMC12657560",
+      "url": "https://europepmc.org/article/PMC/PMC12657560",
+      "doiUrl": "https://doi.org/10.1007/s00431-025-06587-7",
+      "title": "A probiotic containing L. plantarum and P. acidilactici strains for treating upper respiratory infection in children aged 6 months to 5 years: a randomized, double-blind trial.",
+      "pmid": "41296071",
+      "pmcid": "PMC12657560",
+      "doi": "10.1007/s00431-025-06587-7",
+      "studyType": "rct",
+      "year": 2025,
+      "accessLevel": "full_text",
+      "retrievedAt": "2026-10-17T11:57:02.261Z",
+      "provider": "europepmc"
+    },
+    {
+      "id": "pmcid:PMC13420511",
+      "url": "https://europepmc.org/article/PMC/PMC13420511",
+      "doiUrl": "https://doi.org/10.1093/ofid/ofag441",
+      "title": "Point-of-Care Multiplex NAAT for Acute Pharyngitis in the Urgent Care: Detection Patterns, Associated Antimicrobial Prescribing, and Stakeholder Perceptions.",
+      "pmid": "42534379",
+      "pmcid": "PMC13420511",
+      "doi": "10.1093/ofid/ofag441",
+      "studyType": "other",
+      "year": 2026,
+      "accessLevel": "full_text",
+      "retrievedAt": "2026-10-17T11:57:02.452Z",
+      "provider": "europepmc"
+    },
+    {
+      "id": "pmcid:PMC12317263",
+      "url": "https://europepmc.org/article/PMC/PMC12317263",
+      "doiUrl": "https://doi.org/10.1177/23247096251362985",
+      "title": "Streptococcal Pharyngitis Complicated by Clinically Significant Rheumatic Myopericarditis: A Case Report.",
+      "pmid": "40741937",
+      "pmcid": "PMC12317263",
+      "doi": "10.1177/23247096251362985",
+      "studyType": "other",
+      "year": 2025,
+      "accessLevel": "full_text",
+      "retrievedAt": "2026-10-17T11:57:02.839Z",
+      "provider": "europepmc"
+    },
+    {
+      "id": "pmid:30422556",
+      "url": "https://pubmed.ncbi.nlm.nih.gov/30422556/",
+      "title": "Upper Respiratory Tract Infections With Focus on The Common Cold",
+      "pmid": "30422556",
+      "studyType": "other",
+      "year": 2025,
+      "accessLevel": "abstract_only",
+      "retrievedAt": "2026-10-17T11:57:02.839Z",
+      "provider": "europepmc"
+    }
+  ],
+  "errors": [
+    {
+      "step": "retrieve",
+      "message": "DuckDuckGo: blocked or challenged; guidelines skipped"
+    }
+  ],
+  "limitations": [
+    "Prototype; not clinical validation. Values are candidate inputs for a separate probability step, not probabilities.",
+    "Diagnoses are search starting points suggested by a model, not confirmed diagnoses.",
+    "Only status 'supported' values passed code verification and an independent second check."
+  ],
+  "status": "partial"
+}

@@ -1,0 +1,18 @@
+{
+  "requestId": "golden-3-dysuria",
+  "presentation": {
+    "chiefComplaint": "Burning when passing urine for 2 days",
+    "history": "Burning and pain on urination, needs to pass urine very often and urgently, mild discomfort above the pubic bone. No vaginal discharge or itching. No fever, no chills, no back or flank pain. Takes the contraceptive pill, last period two weeks ago. No urinary infection in the past year. Otherwise healthy, no regular medication.",
+    "observations": [
+      "T 36.8°C, BP 118/74, HR 76",
+      "Mild suprapubic tenderness, no costovertebral angle tenderness",
+      "Urine dipstick: leukocytes +++, nitrite positive, blood +",
+      "Urine pregnancy test negative"
+    ],
+    "demographics": {
+      "ageYears": 27,
+      "sex": "female",
+      "location": "Munich, Germany"
+    }
+  }
+}

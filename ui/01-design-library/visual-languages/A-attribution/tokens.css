@@ -1,0 +1,139 @@
+/* Visual language A — "Attribution"
+ * Derived from attnlrp-demo.layerwise.ai + layerwise.ai/manipulation (2026-10-17).
+ * Warm editorial calm, rounded surfaces, and a blue/red relevance heatmap
+ * repurposed as evidence-for / evidence-against.
+ * Fonts (Google Fonts, OFL): Noto Serif, Open Sans, Space Grotesk, Roboto Mono.
+ */
+:root {
+  /* ---- type ---- */
+  --font-display: "Noto Serif", ui-serif, Georgia, serif;
+  --font-ui: "Open Sans", system-ui, sans-serif;
+  --font-label: "Space Grotesk", system-ui, sans-serif;
+  --font-mono: "Roboto Mono", ui-monospace, Menlo, monospace;
+
+  --fs-display: 60px;  --lh-display: 1.05; --ls-display: -0.03em;
+  --fs-h1: 36px;       --lh-h1: 1.1;       --ls-h1: -0.02em;
+  --fs-h2: 30px;       --lh-h2: 1.2;
+  --fs-h3: 24px;       --lh-h3: 1.33;
+  --fs-body: 16px;     --lh-body: 1.5;
+  --fs-ui: 14px;       --lh-ui: 1.43;
+  --fs-small: 12px;    --lh-small: 1.33;
+  --fs-micro: 9.5px;   --ls-micro: 0.05em;   /* UPPERCASE section labels */
+
+  /* ---- neutrals (warm) ---- */
+  --bg: #F5F5F5;
+  --surface: #FFFFFF;
+  --surface-sunken: #F2EEE7;      /* muted */
+  --surface-tint: #ECE3D6;        /* secondary */
+  --pill: #EFEFEF;                /* manipulation nav pill */
+  --pill-hover: #E4E4E4;
+  --ink: #1E130F;                 /* warm near-black */
+  --ink-92: rgba(30, 19, 15, .92);
+  --ink-60: rgba(30, 19, 15, .60);
+  --ink-50: rgba(30, 19, 15, .50);
+  --ink-35: rgba(30, 19, 15, .35);
+  --ink-12: rgba(30, 19, 15, .12);
+  --ink-06: rgba(30, 19, 15, .06);
+  --ink-02: rgba(30, 19, 15, .02);
+  --muted-ink: #655753;
+  --border: #DAD7D0;
+
+  /* ---- brand / action ---- */
+  --primary: #0068CF;
+  --primary-hover: #005BB5;
+  --primary-press: #004E9C;
+  --on-primary: #FFFFFF;
+  --ring: #096DD2;
+  --cta-ios: #007AFF;             /* manipulation --cta, used for links */
+  --accent: #B6DFCD;              /* calm mint — clinician-authored */
+  --on-accent: #0B221D;
+  --destructive: #DF2224;
+  --ok: #00C950;
+
+  /* ---- relevance heat (the signature) ---- */
+  --heat-pos: #60A5FA;            /* evidence FOR  */
+  --heat-pos-strong: #2563EB;
+  --heat-pos-bg: rgba(96, 165, 250, .28);
+  --heat-neg: #F87171;            /* evidence AGAINST */
+  --heat-neg-strong: #DC2626;
+  --heat-neg-bg: rgba(248, 113, 113, .28);
+  --heat-neutral-bg: rgba(30, 19, 15, .06);
+
+  /* ---- Arbor semantics ---- */
+  --hyp-live: var(--ink);
+  --hyp-confirmed: var(--primary);
+  --hyp-ruled-out: var(--ink-35);
+  --hyp-zebra: #A78BFA;           /* violet swatch */
+  --hyp-must-not-miss: #FB923C;   /* orange swatch */
+  --author-agent: #38BDF8;        /* sky swatch */
+  --author-clinician: #2DD4BF;    /* teal swatch */
+  --trusted: #009966;             /* manipulation "trusted" */
+  --untrusted: #E17100;           /* manipulation "untrusted" */
+  --highlight-amber: #FFA100;
+
+  /* ---- shape ---- */
+  --r-pill: 9999px;
+  --r-card: 16px;
+  --r-panel: 11.2px;
+  --r-control: 14px;
+  --r-figure: 24px;
+
+  /* ---- depth ---- */
+  --shadow-rest: none;
+  --shadow-hover: 0 8px 32px rgba(0, 0, 0, .05);
+  --shadow-pop: 0 12px 40px rgba(30, 19, 15, .10);
+  --swatch-ring: inset 0 0 0 1px var(--ink-12);
+  --focus: 0 0 0 3px rgba(9, 109, 210, .35);
+
+  /* ---- motion ---- */
+  --ease-standard: cubic-bezier(.4, 0, .2, 1);   /* Tailwind default */
+  --ease-reveal: cubic-bezier(0, 0, .2, 1);
+  --dur-fast: 150ms;
+  --dur-hover: 160ms;
+  --dur-plop: 600ms;
+  --dur-reveal: 700ms;
+
+  /* ---- space ---- */
+  --sp-1: 4px; --sp-2: 8px; --sp-3: 12px; --sp-4: 16px;
+  --sp-5: 24px; --sp-6: 32px; --sp-7: 48px; --sp-8: 64px;
+}
+
+/* Dark — from attnlrp .dark */
+:root[data-theme="dark"] {
+  --bg: #1E1E1E;
+  --surface: #323232;
+  --surface-sunken: #262321;
+  --surface-tint: #2C2926;
+  --pill: #3A3A3A;
+  --pill-hover: #454545;
+  --ink: #FFFFFF;
+  --ink-92: rgba(255, 255, 255, .92);
+  --ink-60: rgba(255, 255, 255, .60);
+  --ink-50: rgba(255, 255, 255, .50);
+  --ink-35: rgba(255, 255, 255, .35);
+  --ink-12: rgba(255, 255, 255, .12);
+  --ink-06: rgba(255, 255, 255, .06);
+  --ink-02: rgba(255, 255, 255, .02);
+  --muted-ink: #ABA7A3;
+  --border: rgba(255, 255, 255, .10);
+  --primary: #0E85FB;
+  --primary-hover: #3A9BFC;
+  --primary-press: #0B6ED0;
+  --on-primary: #0F0D0B;
+  --ring: #0E85FB;
+  --heat-pos-bg: rgba(96, 165, 250, .32);
+  --heat-neg-bg: rgba(248, 113, 113, .32);
+  --shadow-hover: 0 8px 32px rgba(0, 0, 0, .35);
+}
+
+@keyframes a-fade-in-token { from { opacity: 0; transform: translateY(.1em); } to { opacity: 1; transform: none; } }
+@keyframes a-plop { 0% { opacity: 0; } 65% { opacity: .7; } 100% { opacity: .2; } }
+@keyframes a-highlight-reveal { from { transform: scaleX(0); } to { transform: scaleX(1); } }   /* block elements */
+@keyframes a-highlight-sweep { to { background-size: 100% 50%; } }                             /* inline text that wraps */
+@keyframes a-trace-flow { to { stroke-dashoffset: -20; } }
+@keyframes a-hint { 0%, 100% { box-shadow: inset 0 0 0 0 rgba(5, 150, 105, 0); } 50% { box-shadow: inset 0 0 0 2px rgba(5, 150, 105, .5); } }
+@keyframes a-spin { to { transform: rotate(720deg); } }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 1ms !important; animation-iteration-count: 1 !important; transition-duration: 1ms !important; }
+}

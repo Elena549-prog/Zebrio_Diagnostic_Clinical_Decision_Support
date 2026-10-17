@@ -1,0 +1,416 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Attribution Specimen</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif:ital,wght@0,400;0,600;1,400&family=Open+Sans:wght@400;500;600;700&family=Roboto+Mono:wght@400;500&family=Space+Grotesk:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="tokens.css">
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink-92); font: 400 var(--fs-body)/var(--lh-body) var(--font-ui); -webkit-font-smoothing: antialiased; }
+  .wrap { max-width: 1120px; margin: 0 auto; padding: 48px 24px 96px; }
+  .micro { font: 600 var(--fs-micro)/1.3 var(--font-ui); letter-spacing: var(--ls-micro); text-transform: uppercase; color: var(--ink-50); }
+  .label { font: 500 13px/1.4 var(--font-label); color: var(--ink-60); }
+  h1.display { font: 400 var(--fs-display)/var(--lh-display) var(--font-display); letter-spacing: var(--ls-display); color: var(--ink); margin: 8px 0 12px; }
+  .dek { font-size: 18px; color: var(--ink-60); max-width: 640px; margin: 0; }
+  section { margin-top: 64px; }
+  section > h2 { font: 400 var(--fs-h2)/var(--lh-h2) var(--font-display); color: var(--ink); margin: 6px 0 20px; }
+  .card { background: var(--surface); border-radius: var(--r-card); padding: 24px; transition: box-shadow var(--dur-hover) var(--ease-standard); }
+  .card:hover { box-shadow: var(--shadow-hover); }
+  .grid { display: grid; gap: 16px; }
+  .g4 { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); }
+  .g2 { grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); }
+  .topbar { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
+  code, .mono { font-family: var(--font-mono); font-size: 12px; }
+
+  /* swatches */
+  .sw { background: var(--surface); border-radius: var(--r-panel); overflow: hidden; }
+  .sw .chip { height: 64px; box-shadow: var(--swatch-ring); }
+  .sw .meta { padding: 10px 12px; }
+  .sw .meta b { display: block; font: 500 13px/1.3 var(--font-label); color: var(--ink); }
+  .sw .meta span { font: 400 12px/1.4 var(--font-mono); color: var(--ink-60); }
+
+  /* type */
+  .type-row { display: grid; grid-template-columns: 160px 1fr; gap: 16px; padding: 16px 0; border-top: 1px solid var(--border); align-items: baseline; }
+  .type-row:first-child { border-top: 0; }
+
+  /* ---- buttons ---- */
+  .btn { --h: 40px; display: inline-flex; align-items: center; gap: 8px; height: var(--h); padding: 0 18px; border: 0; border-radius: var(--r-pill); font: 500 var(--fs-ui)/1 var(--font-ui); cursor: pointer; white-space: nowrap;
+    transition: background-color var(--dur-fast) var(--ease-standard), color var(--dur-fast) var(--ease-standard), box-shadow var(--dur-hover) var(--ease-standard), transform var(--dur-fast) var(--ease-standard); }
+  .btn:focus-visible, .btn.is-focus { outline: none; box-shadow: var(--focus); }
+  .btn:active, .btn.is-press { transform: scale(.97); }
+  .btn[disabled] { opacity: .4; cursor: not-allowed; transform: none; }
+  .btn-primary { --h: 44px; background: var(--primary); color: var(--on-primary); border-radius: var(--r-card); padding: 0 20px; font-size: 16px; font-weight: 400; }
+  .btn-primary:hover, .btn-primary.is-hover { background: var(--primary-hover); box-shadow: var(--shadow-hover); }
+  .btn-primary:active, .btn-primary.is-press { background: var(--primary-press); }
+  .btn-secondary { background: var(--surface); color: var(--ink); box-shadow: inset 0 0 0 1px var(--border); }
+  .btn-secondary:hover, .btn-secondary.is-hover { background: var(--surface-sunken); }
+  .btn-pill { background: var(--pill); color: var(--ink); padding: 0 16px; height: 36px; }
+  .btn-pill:hover, .btn-pill.is-hover { background: var(--pill-hover); }
+  .btn-ghost { background: transparent; color: var(--ink-60); padding: 0 10px; }
+  .btn-ghost:hover, .btn-ghost.is-hover { color: var(--ink); background: var(--ink-06); }
+  .btn-danger { background: transparent; color: var(--destructive); box-shadow: inset 0 0 0 1px rgba(223,34,36,.35); }
+  .btn-danger:hover, .btn-danger.is-hover { background: rgba(223,34,36,.08); }
+  .btn-icon { width: 40px; padding: 0; justify-content: center; border-radius: var(--r-control); background: var(--pill); color: var(--ink); }
+  .btn .spin { width: 14px; height: 14px; border-radius: 50%; border: 2px solid rgba(255,255,255,.35); border-top-color: #fff; animation: a-spin 1.4s linear infinite; }
+  .btn-row { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
+  .state-grid { display: grid; grid-template-columns: 120px repeat(5, auto); gap: 12px 16px; align-items: center; overflow-x: auto; }
+  .state-grid .label { font-size: 12px; }
+
+  .seg { display: inline-flex; background: var(--ink-06); border-radius: var(--r-pill); padding: 3px; }
+  .seg button { border: 0; background: transparent; border-radius: var(--r-pill); padding: 6px 14px; font: 500 13px/1 var(--font-ui); color: var(--ink-60); cursor: pointer; transition: all var(--dur-fast) var(--ease-standard); }
+  .seg button[aria-pressed="true"] { background: var(--ink); color: var(--surface); }
+
+  /* decision bar */
+  .decision { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 10px; }
+  .dcard { text-align: left; border: 0; border-radius: var(--r-card); padding: 16px; background: var(--surface); box-shadow: inset 0 0 0 1px var(--border); cursor: pointer; font-family: var(--font-ui); color: var(--ink); transition: box-shadow var(--dur-hover) var(--ease-standard), transform var(--dur-fast) var(--ease-standard); }
+  .dcard:hover { box-shadow: inset 0 0 0 1px var(--border), var(--shadow-hover); transform: translateY(-1px); }
+  .dcard[aria-pressed="true"] { box-shadow: inset 0 0 0 2px var(--primary), var(--shadow-hover); }
+  .dcard b { display: flex; align-items: center; gap: 8px; font-weight: 600; font-size: 15px; }
+  .dcard span { display: block; color: var(--ink-60); font-size: 13px; margin-top: 4px; }
+  .dot { width: 10px; height: 10px; border-radius: 50%; box-shadow: var(--swatch-ring); flex: none; display: inline-block; }
+
+  /* chips */
+  .chip-row { display: flex; flex-wrap: wrap; gap: 8px; }
+  .tag { display: inline-flex; align-items: center; gap: 6px; height: 26px; padding: 0 10px; border-radius: var(--r-pill); font: 500 12.5px/1 var(--font-ui); background: var(--ink-06); color: var(--ink); }
+  .tag.for { background: var(--heat-pos-bg); }
+  .tag.against { background: var(--heat-neg-bg); }
+  .tag.zebra { background: rgba(167,139,250,.22); }
+  .tag.mnm { background: rgba(251,146,60,.22); }
+  .tag.ruled { background: transparent; color: var(--ink-50); box-shadow: inset 0 0 0 1px var(--border); text-decoration: line-through; }
+  .tag.trusted { background: transparent; color: var(--trusted); font: 500 11px/1 var(--font-mono); padding: 0; }
+  .tag.untrusted { background: transparent; color: var(--untrusted); font: 500 11px/1 var(--font-mono); padding: 0; }
+
+  /* motion demos */
+  .demo { position: relative; min-height: 150px; }
+  .demo .head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
+  .demo .head b { font: 600 15px/1.3 var(--font-ui); color: var(--ink); }
+  .demo p.spec { font: 400 12px/1.5 var(--font-mono); color: var(--ink-60); margin: 12px 0 0; }
+  .stream span { animation: a-fade-in-token var(--dur-fast) var(--ease-standard) both; display: inline; }
+  .bar { height: 8px; background: var(--ink-06); border-radius: 99px; overflow: hidden; margin: 6px 0 10px; }
+  .bar i { display: block; height: 100%; background: var(--primary); border-radius: 99px; transition: width var(--dur-reveal) var(--ease-reveal); }
+  .hl { background: linear-gradient(var(--heat-pos-bg), var(--heat-pos-bg)) no-repeat 0 90% / 0% 50%; animation: a-highlight-sweep 600ms var(--ease-reveal) 200ms forwards; }
+  @keyframes a-highlight-sweep { to { background-size: 100% 50%; } }
+  .plop { position: absolute; inset: 0; border-radius: inherit; background: var(--heat-pos); opacity: 0; pointer-events: none; }
+  .plop.go { animation: a-plop var(--dur-plop) var(--ease-standard) forwards; }
+  .hint { animation: a-hint 2s var(--ease-standard) infinite; }
+  .node-dim { transition: opacity 400ms var(--ease-standard), filter 400ms var(--ease-standard); }
+  .node-dim.out { opacity: .4; filter: grayscale(1); }
+  .branch path { stroke-dasharray: 160; stroke-dashoffset: 160; }
+  .branch.go path { transition: stroke-dashoffset 700ms var(--ease-reveal); stroke-dashoffset: 0; }
+  .branch.go g.n { animation: a-fade-in-token 300ms var(--ease-standard) 450ms both; }
+
+  /* interactive tree */
+  .ix { display: grid; grid-template-columns: 1.3fr 1fr; gap: 16px; }
+  @media (max-width: 760px) { .ix { grid-template-columns: 1fr; } }
+  .tree svg { width: 100%; height: auto; display: block; }
+  .tree .edge { stroke: var(--border); stroke-width: 1.5; fill: none; }
+  .tree .edge.flow { stroke: var(--primary); stroke-dasharray: 4 6; animation: a-trace-flow 1s linear infinite; }
+  .tree .nd rect { fill: var(--surface); stroke: var(--border); transition: fill var(--dur-fast) var(--ease-standard), stroke var(--dur-fast); }
+  .tree .nd text { font: 500 12.5px var(--font-ui); fill: var(--ink); }
+  .tree .nd .pct { font: 500 11px var(--font-mono); fill: var(--ink-60); }
+  .tree .nd.for rect { fill: var(--heat-pos-bg); stroke: var(--heat-pos); }
+  .tree .nd.against rect { fill: var(--heat-neg-bg); stroke: var(--heat-neg); }
+  .tree .nd.sel rect { stroke: var(--primary); stroke-width: 2; }
+  .tree .nd { cursor: pointer; }
+  .tree .nd:focus { outline: none; }
+  .tree .nd:focus rect { stroke: var(--ring); stroke-width: 2; }
+  .flist { list-style: none; margin: 0; padding: 0; }
+  .flist li { padding: 10px 12px; border-radius: var(--r-panel); cursor: default; transition: background-color var(--dur-fast) var(--ease-standard); font-size: 14px; display: flex; gap: 10px; align-items: center; }
+  .flist li:hover, .flist li.on { background: var(--surface-sunken); }
+  .flist li.for { background: var(--heat-pos-bg); }
+  .flist li.against { background: var(--heat-neg-bg); }
+  .flist .src { margin-left: auto; font: 500 10.5px var(--font-mono); color: var(--ink-50); text-transform: uppercase; }
+  .legend { display: flex; gap: 14px; flex-wrap: wrap; font-size: 12px; color: var(--ink-60); margin-top: 10px; }
+  footer { margin-top: 80px; color: var(--ink-50); font-size: 13px; }
+  a { color: var(--primary); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="topbar">
+    <div class="micro">Arbor · Visual language A</div>
+    <div class="seg" role="group" aria-label="Theme">
+      <button aria-pressed="true" data-theme-set="light">Light</button>
+      <button aria-pressed="false" data-theme-set="dark">Dark</button>
+    </div>
+  </div>
+  <h1 class="display">Attribution</h1>
+  <p class="dek">Warm, editorial calm with a relevance heatmap. Derived from Layerwise's AttnLRP demo and research pages: every finding can be traced to the hypotheses it pushes up (blue) or down (red).</p>
+
+  <!-- COLOUR -->
+  <section>
+    <div class="micro">01 · Colour</div>
+    <h2>Palette</h2>
+    <div class="label" style="margin-bottom:10px">Neutrals (warm)</div>
+    <div class="grid g4" id="sw-neutral"></div>
+    <div class="label" style="margin:24px 0 10px">Action</div>
+    <div class="grid g4" id="sw-action"></div>
+    <div class="label" style="margin:24px 0 10px">Relevance heat → evidence</div>
+    <div class="grid g4" id="sw-heat"></div>
+    <div class="label" style="margin:24px 0 10px">Arbor semantics (from the role swatches)</div>
+    <div class="grid g4" id="sw-sem"></div>
+  </section>
+
+  <!-- TYPE -->
+  <section>
+    <div class="micro">02 · Typography</div>
+    <h2>Noto Serif · Open Sans · Space Grotesk · Roboto Mono</h2>
+    <div class="card">
+      <div class="type-row"><div class="label">Display · Noto Serif 400 · 60/63 · −3%</div><div style="font:400 60px/1.05 var(--font-display);letter-spacing:-.03em;color:var(--ink)">Working diagnosis</div></div>
+      <div class="type-row"><div class="label">H1 · Noto Serif 400 · 36</div><div style="font:400 36px/1.1 var(--font-display);letter-spacing:-.02em;color:var(--ink)">Acute otitis media</div></div>
+      <div class="type-row"><div class="label">H2 · Noto Serif 400 · 30/36</div><div style="font:400 30px/1.2 var(--font-display);color:var(--ink)">Compare the evidence</div></div>
+      <div class="type-row"><div class="label">Label · Space Grotesk 500 · 14</div><div style="font:500 14px/1.4 var(--font-label)">Round 2 · differential re-ranked</div></div>
+      <div class="type-row"><div class="label">Body · Open Sans 400 · 16/24</div><div>14-month-old with fever of 39.4 °C for two days, irritable, feeding less. Mother is the historian; vaccinations up to date; attends nursery.</div></div>
+      <div class="type-row"><div class="label">UI · Open Sans 500 · 14/20</div><div style="font:500 14px/20px var(--font-ui)">Add finding &amp; run next round</div></div>
+      <div class="type-row"><div class="label">Micro · Open Sans 600 · 9.5 · +5% · CAPS</div><div class="micro">Sections · Reasoning trail</div></div>
+      <div class="type-row"><div class="label">Data · Roboto Mono 400 · 12</div><div class="mono">CRP 38 mg/L · HR 160 · ICD-10 H66.90 · p = 0.78</div></div>
+    </div>
+  </section>
+
+  <!-- BUTTONS -->
+  <section>
+    <div class="micro">03 · Buttons</div>
+    <h2>Pill-soft, one blue action per view</h2>
+    <div class="card">
+      <div class="btn-row" style="margin-bottom:24px">
+        <button class="btn btn-primary"><svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M4 2.5v11l9-5.5z"/></svg>Run next round</button>
+        <button class="btn btn-secondary">Order test &amp; park</button>
+        <button class="btn btn-pill">Go to decision</button>
+        <button class="btn btn-ghost">Ask the engine</button>
+        <button class="btn btn-danger">Rule out…</button>
+        <button class="btn btn-icon" aria-label="Pin as must-not-miss"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M6 2h4l-.5 4 2.5 2.5H4L6.5 6z"/><path d="M8 8.5V14"/></svg></button>
+      </div>
+      <div class="state-grid">
+        <div></div><div class="label">Rest</div><div class="label">Hover</div><div class="label">Press</div><div class="label">Focus</div><div class="label">Loading / disabled</div>
+        <div class="label">Primary</div>
+        <button class="btn btn-primary">Confirm</button>
+        <button class="btn btn-primary is-hover">Confirm</button>
+        <button class="btn btn-primary is-press">Confirm</button>
+        <button class="btn btn-primary is-focus">Confirm</button>
+        <button class="btn btn-primary" aria-busy="true"><span class="spin"></span>Reasoning…</button>
+        <div class="label">Secondary</div>
+        <button class="btn btn-secondary">Refer</button>
+        <button class="btn btn-secondary is-hover">Refer</button>
+        <button class="btn btn-secondary is-press">Refer</button>
+        <button class="btn btn-secondary is-focus">Refer</button>
+        <button class="btn btn-secondary" disabled>Refer</button>
+        <div class="label">Pill</div>
+        <button class="btn btn-pill">Tree</button>
+        <button class="btn btn-pill is-hover">Tree</button>
+        <button class="btn btn-pill is-press">Tree</button>
+        <button class="btn btn-pill is-focus">Tree</button>
+        <button class="btn btn-pill" disabled>Tree</button>
+      </div>
+      <p class="spec" style="font:400 12px/1.5 var(--font-mono);color:var(--ink-60);margin-top:20px">primary: 44h · r16 · #0068CF → hover #005BB5 + shadow 0 8 32 /5% · press scale .97 #004E9C · 150ms cubic-bezier(.4,0,.2,1)</p>
+    </div>
+
+    <div class="label" style="margin:28px 0 10px">Segmented control (from the manipulation figure)</div>
+    <div class="seg" role="group" aria-label="View" id="seg-view">
+      <button aria-pressed="true">Tree</button><button aria-pressed="false">Ranked list</button><button aria-pressed="false">Trail</button>
+    </div>
+
+    <div class="label" style="margin:28px 0 10px">Diagnostic decision (Step 4): the doctor picks one</div>
+    <div class="decision" id="decision">
+      <button class="dcard" aria-pressed="false"><b><span class="dot" style="background:var(--primary)"></span>Confirm</b><span>Set the working diagnosis and build the plan</span></button>
+      <button class="dcard" aria-pressed="false"><b><span class="dot" style="background:var(--hyp-zebra)"></span>Refer</b><span>Send the tree summary to a specialist</span></button>
+      <button class="dcard" aria-pressed="false"><b><span class="dot" style="background:var(--heat-pos)"></span>Investigate further</b><span>Order tests and park the case</span></button>
+      <button class="dcard" aria-pressed="false"><b><span class="dot" style="background:var(--hyp-must-not-miss)"></span>Remain unresolved</b><span>Safety-net advice and a review date</span></button>
+    </div>
+  </section>
+
+  <!-- CHIPS -->
+  <section>
+    <div class="micro">04 · Tags &amp; badges</div>
+    <h2>Evidence and hypothesis states</h2>
+    <div class="card">
+      <div class="chip-row">
+        <span class="tag for">▲ supports</span>
+        <span class="tag against">▼ against</span>
+        <span class="tag">● neutral</span>
+        <span class="tag zebra"><span class="dot" style="background:var(--hyp-zebra)"></span>zebra · rare</span>
+        <span class="tag mnm">◆ must-not-miss</span>
+        <span class="tag ruled">Pneumonia</span>
+        <span class="tag"><span class="dot" style="background:var(--author-agent)"></span>agent proposed</span>
+        <span class="tag"><span class="dot" style="background:var(--author-clinician)"></span>clinician decided</span>
+        <span class="tag trusted">LAB · verified</span>
+        <span class="tag untrusted">PARENT REPORT · unverified</span>
+      </div>
+      <p class="spec" style="font:400 12px/1.5 var(--font-mono);color:var(--ink-60);margin-top:16px">Colour is never the only signal: every heat tag carries ▲ / ▼, and every swatch has a 1px inset ring.</p>
+    </div>
+  </section>
+
+  <!-- MOTION -->
+  <section>
+    <div class="micro">05 · Micro-animations</div>
+    <h2>Quiet, meaningful, under 700 ms</h2>
+    <div class="grid g2">
+      <div class="card demo">
+        <div class="head"><b>Token stream: agent message</b><button class="btn btn-ghost" data-replay="stream">Replay</button></div>
+        <div id="stream" class="stream" style="min-height:48px"></div>
+        <p class="spec">a-fade-in-token · 150ms · opacity 0→1 · y .1em→0 · 18ms stagger per word</p>
+      </div>
+      <div class="card demo">
+        <div class="head"><b>Probability re-rank</b><button class="btn btn-ghost" data-replay="bars">Replay</button></div>
+        <div id="bars"></div>
+        <p class="spec">width · 700ms · cubic-bezier(0,0,.2,1) · the rank order swaps after the bars settle</p>
+      </div>
+      <div class="card demo">
+        <div class="head"><b>Finding lands on node (plop)</b><button class="btn btn-ghost" data-replay="plop">Replay</button></div>
+        <div style="display:flex;gap:12px;align-items:center">
+          <span class="tag for" id="plop-chip" style="transition:transform 500ms var(--ease-reveal),opacity 500ms">▲ Bulging TM</span>
+          <div id="plop-node" style="position:relative;border-radius:12px;padding:12px 16px;background:var(--surface-sunken);font-weight:600;color:var(--ink)">Acute otitis media<div class="plop" id="plop"></div></div>
+        </div>
+        <p class="spec">chip translate 500ms → node overlay a-plop 600ms: 0 → .7 → .2 opacity</p>
+      </div>
+      <div class="card demo">
+        <div class="head"><b>Branch grows</b><button class="btn btn-ghost" data-replay="branch">Replay</button></div>
+        <svg id="branch" class="branch" viewBox="0 0 320 110" width="100%" aria-hidden="true">
+          <rect x="4" y="40" width="96" height="30" rx="10" fill="var(--surface-sunken)"/><text x="52" y="59" text-anchor="middle" font-size="12" font-family="Open Sans" font-weight="600" fill="var(--ink)">Otitis media</text>
+          <path d="M100 55 C150 55 150 22 196 22" fill="none" stroke="var(--primary)" stroke-width="1.5"/>
+          <path d="M100 55 C150 55 150 88 196 88" fill="none" stroke="var(--primary)" stroke-width="1.5"/>
+          <g class="n"><rect x="196" y="8" width="110" height="28" rx="10" fill="var(--heat-pos-bg)"/><text x="251" y="26" text-anchor="middle" font-size="12" font-family="Open Sans" fill="var(--ink)">Acute (AOM) 78%</text></g>
+          <g class="n"><rect x="196" y="74" width="110" height="28" rx="10" fill="var(--ink-06)"/><text x="251" y="92" text-anchor="middle" font-size="12" font-family="Open Sans" fill="var(--ink)">Effusion (OME) 9%</text></g>
+        </svg>
+        <p class="spec">stroke-dashoffset 160→0 · 700ms reveal ease · children fade in at +450ms</p>
+      </div>
+      <div class="card demo">
+        <div class="head"><b>Ruled out: dims, stays</b><button class="btn btn-ghost" data-replay="dim">Replay</button></div>
+        <div id="dim" class="node-dim" style="display:inline-flex;gap:8px;align-items:center;padding:12px 16px;border-radius:12px;background:var(--heat-neg-bg);font-weight:600;color:var(--ink)">Urinary tract infection <span class="mono">12%</span></div>
+        <p class="spec">opacity 1→.4 + grayscale · 400ms · never removed from the tree</p>
+      </div>
+      <div class="card demo">
+        <div class="head"><b>Citation highlight + HITL hint</b><button class="btn btn-ghost" data-replay="hl">Replay</button></div>
+        <p id="hlp" style="margin:0">Urine dip negative makes <span class="hl">UTI unlikely in a well-appearing child</span> [2].</p>
+        <div style="margin-top:14px"><span class="hint" style="display:inline-block;border-radius:9999px"><button class="btn btn-secondary">Enter urine dip result</button></span></div>
+        <p class="spec">highlight sweep: background-size 0→100% 600ms (wraps across lines) · a-hint inset ring pulse 2s (waiting for the doctor)</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- INTERACTION -->
+  <section>
+    <div class="micro">06 · Interaction</div>
+    <h2>Hover to attribute: the AttnLRP pattern on the tree</h2>
+    <div class="ix">
+      <div class="card tree">
+        <div class="label" style="margin-bottom:8px">Hover or focus a hypothesis → the findings light up</div>
+        <svg viewBox="0 0 520 300" role="group" aria-label="Hypothesis tree">
+          <path class="edge" d="M120 150 C170 150 170 40 220 40"/>
+          <path class="edge" d="M120 150 C170 150 170 110 220 110"/>
+          <path class="edge" d="M120 150 C170 150 170 180 220 180"/>
+          <path class="edge" d="M120 150 C170 150 170 250 220 250"/>
+          <g class="nd" tabindex="0" data-h="root"><rect x="8" y="128" width="112" height="44" rx="14"/><text x="64" y="147" text-anchor="middle">Fever 39.4 °C</text><text class="pct" x="64" y="163" text-anchor="middle">14 mo · F</text></g>
+          <g class="nd" tabindex="0" data-h="aom"><rect x="220" y="20" width="200" height="40" rx="14"/><text x="236" y="45">Acute otitis media</text><text class="pct" x="404" y="45" text-anchor="end">55%</text></g>
+          <g class="nd" tabindex="0" data-h="urti"><rect x="220" y="90" width="200" height="40" rx="14"/><text x="236" y="115">Viral URTI</text><text class="pct" x="404" y="115" text-anchor="end">25%</text></g>
+          <g class="nd" tabindex="0" data-h="uti"><rect x="220" y="160" width="200" height="40" rx="14"/><text x="236" y="185">UTI</text><text class="pct" x="404" y="185" text-anchor="end">12%</text></g>
+          <g class="nd" tabindex="0" data-h="men"><rect x="220" y="230" width="200" height="40" rx="14"/><circle cx="241" cy="250" r="4.5" fill="var(--hyp-zebra)"/><text x="252" y="255">Bacterial meningitis</text><text class="pct" x="404" y="255" text-anchor="end">3%</text></g>
+          <g transform="translate(428 250)"><rect x="-2" y="-12" width="70" height="22" rx="11" fill="rgba(251,146,60,.22)"/><text x="33" y="3" text-anchor="middle" font-size="10.5" font-family="Open Sans" font-weight="600" fill="var(--ink)">◆ pinned</text></g>
+        </svg>
+        <div class="legend"><span><span class="dot" style="background:var(--heat-pos)"></span> supports</span><span><span class="dot" style="background:var(--heat-neg)"></span> argues against</span></div>
+      </div>
+      <div class="card">
+        <div class="label" style="margin-bottom:8px">…or hover a finding → the tree lights up</div>
+        <ul class="flist" id="flist">
+          <li data-f="tm">▲▼ Red, bulging right tympanic membrane<span class="src">exam</span></li>
+          <li data-f="rhin">▲▼ Clear rhinorrhoea, cough<span class="src">history</span></li>
+          <li data-f="dip">▼ Urine dip: nitrite −, leukocytes −<span class="src">lab</span></li>
+          <li data-f="neck">▼ No neck stiffness, fontanelle flat<span class="src">exam</span></li>
+          <li data-f="cap">▼ Cap refill &lt; 2 s, alert between fevers<span class="src">exam</span></li>
+          <li data-f="fever">▲ Fever 39.4 °C, 2 days<span class="src">parent</span></li>
+        </ul>
+        <p class="spec" style="font:400 12px/1.5 var(--font-mono);color:var(--ink-60);margin-top:12px">150ms fill transition · keyboard: Tab to a node, the same highlight shows on focus · click pins the highlight</p>
+      </div>
+    </div>
+  </section>
+
+  <footer>Sources: attnlrp-demo.layerwise.ai, layerwise.ai/manipulation (extracted 2026-10-17). Tokens: <code>tokens.css</code>. Spec: <code>README.md</code>.</footer>
+</div>
+
+<script>
+(function () {
+  // ---- swatches ----
+  const groups = {
+    "sw-neutral": [["bg", "#F5F5F5"], ["surface", "#FFFFFF"], ["surface-sunken", "#F2EEE7"], ["surface-tint", "#ECE3D6"], ["border", "#DAD7D0"], ["muted-ink", "#655753"], ["ink", "#1E130F"]],
+    "sw-action": [["primary", "#0068CF"], ["primary-hover", "#005BB5"], ["primary-press", "#004E9C"], ["ring", "#096DD2"], ["link (cta)", "#007AFF"], ["accent", "#B6DFCD"], ["destructive", "#DF2224"], ["ok", "#00C950"]],
+    "sw-heat": [["heat-pos · for", "#60A5FA"], ["heat-pos-strong", "#2563EB"], ["heat-neg · against", "#F87171"], ["heat-neg-strong", "#DC2626"], ["highlight-amber", "#FFA100"]],
+    "sw-sem": [["zebra", "#A78BFA"], ["must-not-miss", "#FB923C"], ["agent author", "#38BDF8"], ["clinician author", "#2DD4BF"], ["trusted", "#009966"], ["untrusted", "#E17100"]],
+  };
+  for (const [id, list] of Object.entries(groups)) {
+    const el = document.getElementById(id);
+    el.innerHTML = list.map(([n, h]) => `<div class="sw"><div class="chip" style="background:${h}"></div><div class="meta"><b>${n}</b><span>${h}</span></div></div>`).join("");
+  }
+
+  // ---- theme + segmented controls ----
+  document.querySelectorAll("[data-theme-set]").forEach((b) => b.addEventListener("click", () => {
+    document.documentElement.dataset.theme = b.dataset.themeSet;
+    b.parentElement.querySelectorAll("button").forEach((x) => x.setAttribute("aria-pressed", String(x === b)));
+  }));
+  document.querySelectorAll("#seg-view button, #decision .dcard").forEach((b) => b.addEventListener("click", () => {
+    b.parentElement.querySelectorAll("button").forEach((x) => x.setAttribute("aria-pressed", String(x === b)));
+  }));
+
+  // ---- motion demos ----
+  const msg = "Round 2: the urine dip is negative, so UTI drops to 3% and is proposed for rule-out. Acute otitis media rises to 78%. Meningitis stays pinned.";
+  function stream() {
+    const el = document.getElementById("stream");
+    el.innerHTML = msg.split(" ").map((w, i) => `<span style="animation-delay:${i * 18}ms">${w} </span>`).join("");
+  }
+  function bars() {
+    const el = document.getElementById("bars");
+    const before = [["Acute otitis media", 55], ["Viral URTI", 25], ["UTI", 12]];
+    const after = [["Acute otitis media", 78], ["Viral URTI", 17], ["UTI", 3]];
+    el.innerHTML = before.map(([n, p]) => `<div style="display:flex;justify-content:space-between;font-size:13px"><span>${n}</span><span class="mono" data-p>${p}%</span></div><div class="bar"><i style="width:${p}%"></i></div>`).join("");
+    setTimeout(() => {
+      el.querySelectorAll(".bar i").forEach((b, i) => (b.style.width = after[i][1] + "%"));
+      el.querySelectorAll("[data-p]").forEach((s, i) => (s.textContent = after[i][1] + "%"));
+    }, 60);
+  }
+  function plop() {
+    const chip = document.getElementById("plop-chip"), p = document.getElementById("plop");
+    chip.style.transition = "none"; chip.style.transform = "none"; chip.style.opacity = 1; p.classList.remove("go");
+    setTimeout(() => {
+      chip.style.transition = ""; chip.style.transform = "translateX(80px) scale(.6)"; chip.style.opacity = 0;
+      setTimeout(() => { void p.offsetWidth; p.classList.add("go"); }, 420);
+    }, 60);
+  }
+  function branch() { const b = document.getElementById("branch"); b.classList.remove("go"); void b.getBoundingClientRect(); setTimeout(() => b.classList.add("go"), 60); }
+  function dim() { const d = document.getElementById("dim"); d.classList.remove("out"); setTimeout(() => d.classList.add("out"), 300); }
+  function hl() { const h = document.querySelector("#hlp .hl"); h.classList.remove("hl"); void h.offsetWidth; h.classList.add("hl"); }
+  const demos = { stream, bars, plop, branch, dim, hl };
+  document.querySelectorAll("[data-replay]").forEach((b) => b.addEventListener("click", () => demos[b.dataset.replay]()));
+  Object.values(demos).forEach((f) => f());
+
+  // ---- attribution interaction ----
+  // finding → { hypothesis: +1 supports / -1 against }
+  const W = {
+    tm: { aom: 1, urti: -1 }, rhin: { urti: 1, aom: -1 }, dip: { uti: -1 },
+    neck: { men: -1 }, cap: { men: -1 }, fever: { aom: 1, uti: 1, men: 1, urti: 1 },
+  };
+  const nodes = document.querySelectorAll(".tree .nd");
+  const items = document.querySelectorAll("#flist li");
+  let pinned = null;
+  function clear() { nodes.forEach((n) => n.classList.remove("for", "against", "sel")); items.forEach((i) => i.classList.remove("for", "against", "on")); }
+  function fromFinding(f) {
+    clear(); document.querySelector(`#flist li[data-f="${f}"]`).classList.add("on");
+    for (const [h, w] of Object.entries(W[f])) document.querySelector(`.nd[data-h="${h}"]`).classList.add(w > 0 ? "for" : "against");
+  }
+  function fromNode(h) {
+    clear(); document.querySelector(`.nd[data-h="${h}"]`).classList.add("sel");
+    for (const [f, m] of Object.entries(W)) if (m[h]) document.querySelector(`#flist li[data-f="${f}"]`).classList.add(m[h] > 0 ? "for" : "against");
+  }
+  const restore = () => (pinned ? pinned() : clear());
+  items.forEach((i) => { i.addEventListener("mouseenter", () => fromFinding(i.dataset.f)); i.addEventListener("mouseleave", restore); i.addEventListener("click", () => { pinned = () => fromFinding(i.dataset.f); pinned(); }); });
+  nodes.forEach((n) => {
+    const h = n.dataset.h; if (h === "root") return;
+    n.addEventListener("mouseenter", () => fromNode(h)); n.addEventListener("mouseleave", restore);
+    n.addEventListener("focus", () => fromNode(h)); n.addEventListener("blur", restore);
+    n.addEventListener("click", () => { pinned = () => fromNode(h); pinned(); });
+  });
+})();
+</script>
+</body>
+</html>
