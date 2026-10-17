@@ -4,11 +4,12 @@
   "private": true,
   "description": "Person 2: source-checked ICD-10-GM 2026 code suggestions from clinical excerpts",
   "type": "module",
-  "main": "src/index.ts",
+  "main": "dist/index.js",
   "engines": {
     "node": ">=22"
   },
   "scripts": {
+    "build": "tsc -p tsconfig.build.json",
     "code": "tsx src/cli.ts",
     "smoke": "tsx src/smoke.ts",
     "test": "vitest run",
@@ -24,5 +25,12 @@
     "tsx": "^4.23.15",
     "typescript": "^7.0.2",
     "vitest": "^5.0.5"
+  },
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
   }
 }

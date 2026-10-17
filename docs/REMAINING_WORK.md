@@ -42,10 +42,11 @@ provenance, not clinical truth.
 - **Drug information:** the original configured DrugBank expert has no
   dedicated replacement. General web retrieval must not be described as a
   verified drug-dose, interaction, contraindication, or allergy-check service.
-- **Coding:** the current adapter covers a constrained ICD-10-GM 2026 slice,
-  not the original registry expert's broader coding systems and guideline
-  workflow. Person 2 owns the production of the agreed German coding module.
-  A positive live terminal-code assignment remains unverified.
+- **Coding:** the app now uses the Person 2 module (`medical-coding-expert/`,
+  via `server/experts/coding.ts`). Live terminal-code assignment is verified
+  (15/15 eval cases, plus J46 through the compiled server adapter). Still open:
+  assembling modifier codes (E11.90, J44.11), history Z-codes, and German
+  Kodierrichtlinien checks; OPS/SNOMED remain out of scope.
 - **Treatment and procedure case-finding:** treatment generation and its view
   remain, but the new planner only uses the existing source pool. It does not
   retrieve fresh management evidence, trial sites, procedure locations, or

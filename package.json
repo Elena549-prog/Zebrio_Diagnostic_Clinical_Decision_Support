@@ -5,6 +5,7 @@
   "description": "Retraceable differential-diagnosis demo using Claude and source-grounded web tools.",
   "type": "module",
   "workspaces": [
+    "medical-coding-expert",
     "server",
     "web"
   ],
@@ -15,9 +16,15 @@
     "build": "npm --workspace web run build && npm --workspace server run build",
     "start": "npm --workspace server start",
     "typecheck": "npm --workspace server run typecheck && npm --workspace web run typecheck",
-    "test": "npm --workspace server run test",
+    "test": "npm --workspace server run test && npm --workspace medical-coding-expert run test",
     "test:live": "tsx scripts/smoke-live.ts --live",
-    "data:sync": "python scripts/sync-reference-data.py"
+    "data:sync": "python scripts/sync-reference-data.py",
+    "build:coding": "npm --workspace medical-coding-expert run build",
+    "predev": "npm run build:coding",
+    "prebuild": "npm run build:coding",
+    "pretypecheck": "npm run build:coding",
+    "pretest": "npm run build:coding",
+    "predev:server": "npm run build:coding"
   },
   "devDependencies": {
     "concurrently": "^9.1.0",
