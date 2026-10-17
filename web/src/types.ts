@@ -47,7 +47,7 @@ export interface Hypothesis {
   isZebra?: boolean;
   modelSuggestedZebra?: boolean;
   rarity?: RarityAssessment;
-  populationContextUsed?: { round: number; pass: number; recordIds: string[] }; 
+  populationContextUsed?: { round: number; pass: number; recordIds: string[] };
   baseRateNote?: string;
   createdAt: string;
   updatedAt: string;
@@ -75,6 +75,7 @@ export interface RarityAssessment {
   entity?: { orphaCode: string; name: string; url: string };
   geography?: string;
   release?: string;
+  exportDate?: string;
   dataHash?: string;
   records?: RarityRecord[];
   allEligibleRecords?: RarityRecord[];

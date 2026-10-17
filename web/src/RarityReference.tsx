@@ -23,8 +23,10 @@ export function RarityReference({ h }: { h: Hypothesis }) {
     <p className="muted small">{h.populationContextUsed ? `Population context supplied to agent in round ${h.populationContextUsed.round}, pass ${h.populationContextUsed.pass} (${h.populationContextUsed.recordIds.length} records).` : 'Reference attached for review; no numeric population context supplied for this hypothesis in the displayed round.'}</p>
     {!!rarity.records?.length && <details>
       <summary>Frequency details: conversion, bounds and sources</summary>
+      <p className="muted small">Dataset export: {rarity.exportDate ?? 'unknown'}. SHA-256: <code>{rarity.dataHash ?? 'unavailable'}</code></p>
       <ul>{(rarity.allEligibleRecords ?? rarity.records).map((record) => <li key={`${record.geography}-${record.id}`}>
         <strong>{record.frequency?.percentDisplay ?? "No numeric frequency"} - {record.geography}</strong>
+        <div className="muted small">Record {record.id} / ORPHA:{rarity.entity?.orphaCode}. {h.populationContextUsed?.recordIds.includes(record.id) ? 'Supplied to agent in the displayed round.' : 'Additional reference; not supplied to agent in the displayed round.'}</div>
         <span>{record.metric}: {record.valuePer100000 === null ? `class ${record.prevalenceClass}; no exact value supplied` : `${record.valuePer100000} per 100,000 people`}</span>
         <div className="muted small">{record.frequency?.formula} {record.frequency?.rounding} {record.frequency?.boundsInclusivity} Formula version: {record.frequency?.formulaVersion}</div>
         <div className="muted small">Underlying study date: {record.studyDate ?? "unknown"}. Dataset release: {rarity.release ?? "unknown"}.</div>

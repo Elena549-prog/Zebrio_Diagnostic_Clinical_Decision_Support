@@ -36,6 +36,10 @@ interface Props {
 
 export function DetailPanel({ c, selectedId, onUpdated, busy, setBusy, interactive = true }: Props) {
   const h: Hypothesis | undefined = selectedId ? c.hypotheses[selectedId] : undefined;
+  const ordinalIndex = Object.values(c.hypotheses)
+    .filter((candidate) => candidate.status === 'live' || candidate.status === 'branched')
+    .sort((a, b) => b.probability - a.probability)
+    .findIndex((candidate) => candidate.id === h?.id);
   const findingsById: Record<string, Finding> = {};
   for (const f of c.findings) findingsById[f.id] = f;
   const [descOpen, setDescOpen] = useState(false);
@@ -177,6 +181,7 @@ export function DetailPanel({ c, selectedId, onUpdated, busy, setBusy, interacti
             {probabilityMode(c, h) === "unavailable" ? "Clinical probability" : "Probability"} <b>{probabilityLabel(c, h)}</b>
             {rarityLabel(h, probabilityMode(c) === 'illustrative') && <span className="zebra-tag">{rarityLabel(h, probabilityMode(c) === 'illustrative')}</span>}
           </div>
+          {probabilityMode(c) !== 'illustrative' && ordinalIndex >= 0 && <p className="small">Agent rank #{ordinalIndex + 1} (model judgment)</p>}
           <RarityReference h={h} />
           {h.baseRateNote && (
             <div className="baserate">

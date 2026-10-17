@@ -82,7 +82,7 @@ export interface Hypothesis {
   modelSuggestedZebra?: boolean;
   /** Local reference-population evidence; never a patient probability. */
   rarity?: RarityAssessment;
-  populationContextUsed?: { round: number; pass: number; recordIds: string[] }; 
+  populationContextUsed?: { round: number; pass: number; recordIds: string[] };
   /** Base-rate prior used by the engine (prevalence in this demographic). */
   baseRateNote?: string;
   createdAt: string;
@@ -111,6 +111,7 @@ export interface RarityAssessment {
   entity?: { orphaCode: string; name: string; url: string };
   geography?: string;
   release?: string;
+  exportDate?: string;
   dataHash?: string;
   records?: RarityRecord[];
   allEligibleRecords?: RarityRecord[];

@@ -1037,6 +1037,7 @@ a.source-title:hover { color: var(--accent); text-decoration: underline; }
 .rarity-reference summary { cursor: pointer; font-size: 12px; margin-top: 10px; }
 .rarity-reference ul { padding-left: 18px; font-size: 12px; }
 .rarity-reference li { margin-bottom: 8px; }
+.rarity-reference code { overflow-wrap: anywhere; }
 @media (max-width: 1100px) {
   .appbar { flex-wrap: wrap; height: auto; min-height: 72px; }
   .appbar-actions { flex-wrap: wrap; justify-content: flex-end; }

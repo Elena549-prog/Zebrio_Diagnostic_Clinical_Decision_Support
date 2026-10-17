@@ -65,7 +65,7 @@ function classify(record: EpidemiologyRecord): RarityAssessment['classification'
   return 'uncertain';
 }
 
-export function createRarityLookup(entities: RarityEntity[], metadata: { release: string; dataHash: string }) {
+export function createRarityLookup(entities: RarityEntity[], metadata: { release: string; dataHash: string; exportDate?: string }) {
   const names = new Map<string, RarityEntity[]>();
   const codes = new Map(entities.map((entity) => [entity.orphaCode, entity]));
   for (const entity of entities) for (const name of new Set(Object.values(entity.names).filter(Boolean).map(normalize))) {
@@ -120,7 +120,7 @@ function loadReferences() {
   if (manifest.schemaVersion !== 1 || hash !== manifest.processedFiles.find((item) => item.name === 'orphadata-index.json')?.sha256) throw new Error('Reference-data integrity check failed');
   const index = JSON.parse(buffer.toString('utf8'));
   if (index.schemaVersion !== 1 || !Array.isArray(index.entities)) throw new Error('Invalid reference index');
-  cache = { stamp, directory, manifest, lookup: createRarityLookup(index.entities, { release: manifest.orphadataRelease, dataHash: hash }) };
+  cache = { stamp, directory, manifest, lookup: createRarityLookup(index.entities, { release: manifest.orphadataRelease, exportDate: manifest.orphadataExportDate, dataHash: hash }) };
   return cache;
 }
 export function lookupRarity(query: string): RarityAssessment {

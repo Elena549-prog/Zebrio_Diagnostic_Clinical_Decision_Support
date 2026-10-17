@@ -74,7 +74,7 @@ Neither dataset calculates clinical probabilities or changes clinician gates.
 
 Downloaded 6,728 Orphadata clinical entities (including groups and subtypes)
 and 64,142 RKI rows. A repeat sync verified all five raw-file hashes and rebuilt
-the indexes. Type checks, production build and all 72 automated tests passed.
+the indexes. Type checks, production build and all 77 automated tests passed.
 Synthetic tests cover bilingual identity, ambiguity, incompatible metrics,
 geography, validation status, bounds, missing values and history provenance.
 The running app's API returned ORPHA:586's German point-prevalence record
