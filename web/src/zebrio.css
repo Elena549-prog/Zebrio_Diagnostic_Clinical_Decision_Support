@@ -1,0 +1,108 @@
+/* Live-app adaptation of demo/index.html, visual language A: Attribution.
+ * Keep API-driven case state and clinical controls; share the prototype's
+ * typography, palette, floating panes, canvas and inspection treatments. */
+:root {
+  --font-display: "Noto Serif", ui-serif, Georgia, serif;
+  --font-ui: "Open Sans", system-ui, sans-serif;
+  --font-label: "Space Grotesk", system-ui, sans-serif;
+  --font-sans: var(--font-ui);
+  --font-mono: "Roboto Mono", ui-monospace, Menlo, monospace;
+  --bg: #f5f5f5; --soft: #f8f6f2; --ink: #1e130f;
+  --surface: #f5f5f5; --surface-bright: #f8f6f2;
+  --surface-container-lowest: #fff; --surface-container-low: #f8f6f2;
+  --surface-container: #f2eee7; --surface-container-high: #ece3d6;
+  --surface-container-highest: #dad7d0; --surface-dim: #dad7d0;
+  --on-surface: #1e130f; --on-surface-variant: #655753;
+  --inverse-surface: #1e130f; --inverse-on-surface: #fff;
+  --primary: #0068cf; --primary-container: #005bb5; --surface-tint: #0068cf;
+  --primary-fixed: #e6f0fc; --primary-fixed-dim: #bdd9f7;
+  --on-primary: #fff; --on-primary-container: #e6f0fc; --on-primary-fixed: #004e9c;
+  --secondary: #655753; --secondary-container: #f2eee7; --on-secondary-container: #1e130f;
+  --outline: #817772; --outline-variant: #dad7d0; --outline-soft: #eeeae4;
+  --border: #dad7d0; --live: #0068cf; --branched: #655753;
+  --confirmed: #007a52; --confirmed-container: #ddf2e9;
+  --for: #2563eb; --against: #dc2626; --error: #b3261e;
+  --hitl: #a85400; --hitl-container: #fff1dc; --hitl-border: #e9c795;
+  --evidence-for-wash: rgba(96,165,250,.28); --evidence-for-line: #2563eb;
+  --evidence-against-wash: rgba(248,113,113,.28); --evidence-against-line: #dc2626;
+  --r-sm: 11.2px; --r-md: 11.2px; --r-lg: 16px; --r-xl: 20px;
+  --shadow: none; --shadow-card: none;
+  --shadow-lift: 0 8px 32px rgba(0,0,0,.05);
+  font-family: var(--font-ui);
+}
+body { font-family: var(--font-ui); }
+.appbar { background: #fff; padding: 0 24px; gap: 16px; }
+.appbar-brand { gap: 10px; min-width: 0; }
+.zebrio-logo { flex-shrink: 0; color: var(--ink); }
+.appbar-brand h1 { font: 400 24px/1 var(--font-display); color: var(--ink); letter-spacing: -.02em; }
+.appbar-tag { font-size: 11px; margin-top: 4px; }
+.appbar-nav { align-items: center; gap: 4px; margin-left: 16px; height: auto; }
+.appbar-nav a { padding: 6px 12px; border: 0; border-radius: 9999px; font-size: 13.5px; }
+.appbar-nav a.active { background: #efefef; color: var(--ink); font-weight: 500; }
+.appbar-nav a:hover { background: #f2eee7; }
+.appbar-actions { gap: 8px; min-width: 0; }
+.patient-header { flex-wrap: wrap; gap: 8px; justify-content: flex-end; }
+.patient-header .ph-name { font-size: 13px; max-width: 260px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.patient-header .ph-meta { font-size: 11px; }
+.workspace { grid-template-columns: 320px minmax(0,1fr) 360px; gap: 16px; padding: 16px; background: var(--bg); }
+.workspace > .pane { border: 0; border-radius: 16px; background: #fff; min-width: 0; min-height: 0; }
+.workspace > .pane.left, .workspace > .pane.right { padding-top: 4px; }
+.panel-head h3, .label-caps, .hypothesis-kicker, .hypothesis-widget h4, .na-finding-head, .home-split-head, .home-q {
+  font-family: var(--font-label); font-size: 11px; letter-spacing: .06em;
+}
+.center-head { padding: 14px 18px; background: #fff; }
+.center-head h3 { font: 400 20px/1.2 var(--font-display); letter-spacing: -.01em; text-transform: none; color: var(--ink); }
+button { font-weight: 500; box-shadow: none; border-radius: 9999px; }
+button.ghost { background: #fff; }
+.na-actions button:not(.ghost), .na-finding-actions button:not(.ghost) { border-radius: 16px; min-height: 40px; height: auto; }
+.view-toggle { background: rgba(30,19,15,.06); padding: 3px; border-radius: 9999px; gap: 0; }
+.view-toggle button { border: 0; height: 28px; padding: 0 13px; background: transparent; color: #655753; }
+.view-toggle button.on { background: var(--ink); color: #fff; }
+.na-trail { gap: 5px; }
+.na-step { background: var(--soft); padding: 5px 8px; border-radius: 11px; }
+.na-step.now { background: var(--ink); color: #fff; }
+.na-card { background: var(--soft); border: 0; color: var(--ink); padding: 16px; border-radius: 16px; }
+.na-card-label { font: 400 20px/1.25 var(--font-display); }
+.na-card-reason { color: var(--on-surface-variant); }
+.na-card.hitl, .na-card.gate { background: var(--hitl-container); color: var(--hitl); }
+.na-finding, .presentation-card, .hypothesis-widget { background: var(--soft); border: 0; border-radius: 11px; box-shadow: none; }
+.finding { border-color: transparent; background: #fff; border-radius: 11px; }
+.finding:hover { background: var(--soft); }
+.tree-canvas { background-color: #fff; background-image: radial-gradient(rgba(30,19,15,.12) 1px,transparent 1.2px); background-size: 18px 18px; }
+.node-card { border-radius: 14px; box-shadow: none; }
+.node-card.focus { box-shadow: 0 4px 14px rgba(0,104,207,.16); }
+.canvas-toolbar, .timeline { background: #fff; }
+.timeline-label, .timeline-readout, .canvas-zoom { font-family: var(--font-mono); }
+.timeline-node.current .timeline-dot { box-shadow: 0 0 0 4px rgba(0,104,207,.14); }
+.probability-notice { background: var(--soft); color: var(--muted, #655753); border-color: var(--outline-variant); font-size: 11px; }
+.hypothesis-title-row h3 { font: 400 26px/1.2 var(--font-display); letter-spacing: -.02em; }
+.hypothesis-nav { background: #fff; }
+.hypothesis-nav button { border-radius: 9999px; }
+.hypothesis-confirm-footer, .chat-dock { background: #fff; }
+.status-chip, .zebra-tag, .count, .scenario-mode { border-radius: 9999px; }
+.zebra-tag { background: #eee8fe; color: #604193; }
+.home-title { font: 400 38px/1.2 var(--font-display); }
+.home-scenarios h2 { font: 400 26px/1.2 var(--font-display); }
+.scenario-card { border-radius: 16px; background: #fff; padding: 20px; }
+.scenario-card:hover:not(:disabled) { transform: translateY(-2px); }
+.home-split-col, .home-answer { background: #fff; border: 0; border-radius: 16px; }
+.ranked-item { background: var(--soft); border-radius: 11px; }
+@media (max-width: 1180px) {
+  .workspace { grid-template-columns: 290px minmax(0,1fr); overflow-y: auto; align-content: start; }
+  .workspace > .pane.left, .workspace > .pane.center { min-height: 620px; max-height: calc(100dvh - 100px); }
+  .workspace > .pane.right { grid-column: 1 / -1; max-height: none; overflow: visible; }
+  .appbar-search { width: 160px; }
+  .patient-header .ph-meta { display: none; }
+}
+@media (max-width: 760px) {
+  .appbar { padding: 0 12px; flex-wrap: wrap; height: auto; min-height: 60px; }
+  .appbar-brand { flex: 1; }
+  .appbar-actions { flex-wrap: wrap; }
+  .appbar-actions > .icon-btn, .appbar-search, .appbar-tag { display: none; }
+  .appbar-nav { margin-left: 4px; }
+  .workspace { grid-template-columns: minmax(0,1fr); padding: 12px; gap: 12px; }
+  .workspace > .pane.left, .workspace > .pane.center { min-height: 0; max-height: none; overflow: visible; }
+  .workspace > .pane.center { min-height: 560px; overflow: hidden; }
+  .workspace > .pane.right { grid-column: auto; }
+  .home-split, .home-answers { grid-template-columns: 1fr; }
+}

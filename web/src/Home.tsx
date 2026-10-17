@@ -38,7 +38,7 @@ export function Home({ onStartScenario, onStartBlank, busy, onOpenDocs, savedCas
   return (
     <div className="home">
       <div className="home-hero">
-        <h1 className="home-title">Arbor 🌳</h1>
+        <h1 className="home-title">Zebrio</h1>
         <p className="home-lead">
           A retraceable differential diagnosis. A clinician and an agent work a
           case from <strong>presentation</strong> to <strong>working diagnosis</strong>{" "}

@@ -1,5 +1,18 @@
 # Zebrio — clickable demo
 
+## Live application
+
+The React app at `http://localhost:5175/` now uses this prototype's Zebrio
+branding, typography, Attribution palette, floating three-pane layout,
+dotted reasoning canvas, rounded controls and evidence inspection colours.
+The adaptation lives in `web/src/zebrio.css`; the live tree uses the same
+theme tokens. Run the app with `npm run dev` from the repository root.
+
+The live app retains its API-driven workflow, clinician gates, coding links,
+timeline and what-if forks. This HTML remains a separate static prototype:
+its illustrative percentages, proposed rule-out controls, visit outcomes
+and follow-up simulation are not live clinical capabilities.
+
 A single-file, no-build prototype of the Zebrio clinician workspace (a
 retraceable differential-diagnosis tool for GPs and pediatricians). It uses
 visual language A, "Attribution".

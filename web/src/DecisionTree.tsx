@@ -163,18 +163,18 @@ function buildLayout(c: Case, freshIds: Set<string>): Layout {
 }
 
 function statusColor(h: Hypothesis): { fill: string; stroke: string; text: string; dim: boolean } {
-  if (h.id === ROOT_ID) return { fill: "#12656b", stroke: "#12656b", text: "#ffffff", dim: false };
+  if (h.id === ROOT_ID) return { fill: "var(--on-surface)", stroke: "var(--on-surface)", text: "#ffffff", dim: false };
   switch (h.status) {
     case "confirmed":
-      return { fill: "#e0f0e5", stroke: "#2c6a45", text: "#1d4a30", dim: false };
+      return { fill: "var(--confirmed-container)", stroke: "var(--confirmed)", text: "var(--confirmed)", dim: false };
     case "live":
-      return { fill: "#dcefec", stroke: "#12656b", text: "#072f33", dim: false };
+      return { fill: "var(--primary-fixed)", stroke: "var(--primary)", text: "var(--on-primary-fixed)", dim: false };
     case "branched":
-      return { fill: "#e3e8ed", stroke: "#4f5e6c", text: "#2f3c48", dim: false };
+      return { fill: "var(--surface-container-low)", stroke: "var(--branched)", text: "var(--on-surface-variant)", dim: false };
     case "ruled_out":
-      return { fill: "#f2f1ec", stroke: "#d9d5cc", text: "#66707b", dim: true };
+      return { fill: "var(--surface-container)", stroke: "var(--outline-variant)", text: "var(--outline)", dim: true };
     default:
-      return { fill: "#ffffff", stroke: "#d9d5cc", text: "#4a5562", dim: false };
+      return { fill: "#ffffff", stroke: "var(--outline-variant)", text: "var(--on-surface-variant)", dim: false };
   }
 }
 
@@ -492,8 +492,8 @@ export function DecisionTree({ c, selectedId, onSelect }: Props) {
                     <div
                       className={`node-card ${focus ? "focus" : ""} ${selected ? "sel" : ""} ${isRoot ? "root" : ""} ${dim ? "dim" : ""}`}
                       style={{
-                        borderColor: selected ? "#1b2530" : isTop ? "#12656b" : col.stroke,
-                        background: focus ? "#12656b" : col.fill,
+                        borderColor: selected ? "var(--on-surface)" : isTop ? "var(--primary)" : col.stroke,
+                        background: focus ? "var(--primary)" : col.fill,
                         color: focus ? "#fff" : col.text,
                       }}
                     >
@@ -524,10 +524,10 @@ export function DecisionTree({ c, selectedId, onSelect }: Props) {
 
       {/* Legend — a footer strip that sits directly above the timeline */}
       <div className="legend">
-        <span><i style={{ background: "#dcefec", border: "1.5px solid #12656b" }} /> live</span>
-        <span><i style={{ background: "#e3e8ed", border: "1.5px solid #4f5e6c" }} /> branched</span>
-        <span><i style={{ background: "#e0f0e5", border: "1.5px solid #2c6a45" }} /> working dx</span>
-        <span><i style={{ background: "#f2f1ec", border: "1.5px solid #d9d5cc" }} /> ruled out (kept for trail)</span>
+        <span><i style={{ background: "var(--primary-fixed)", border: "1.5px solid var(--primary)" }} /> live</span>
+        <span><i style={{ background: "var(--surface-container-low)", border: "1.5px solid var(--branched)" }} /> branched</span>
+        <span><i style={{ background: "var(--confirmed-container)", border: "1.5px solid var(--confirmed)" }} /> working dx</span>
+        <span><i style={{ background: "var(--surface-container)", border: "1.5px solid var(--outline-variant)" }} /> ruled out (kept for trail)</span>
         <span>🦓 zebra</span>
       </div>
     </>
