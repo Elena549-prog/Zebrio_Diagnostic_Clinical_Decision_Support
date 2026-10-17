@@ -99,6 +99,16 @@ describe("verifyFindings + decideItem", () => {
     expect(item.missing).toContain("population");
   });
 
+  it("a denominator without a count is not a denominator", () => {
+    const text = "The prevalence was 7.5% (24/322) among children with sore throats.";
+    const sources = store(source("pmcid:PMC9", text));
+    const base = finding({ sourceId: "pmcid:PMC9", quote: "The prevalence was 7.5% (24/322) among children with sore throats", numbers: { value: 0.075 } });
+    const phrase = decideItem(priorQuestion, verifyFindings(priorQuestion, [{ ...base, denominator: "children with sore throats" }], sources).accepted, [...sources.values()]);
+    expect(phrase.denominator).toBeNull();
+    const count = decideItem(priorQuestion, verifyFindings(priorQuestion, [{ ...base, denominator: "24/322" }], sources).accepted, [...sources.values()]);
+    expect(count.denominator).toBe("24/322");
+  });
+
   it("case 4: a real quote attributed to the wrong source is rejected", () => {
     const sources = store(
       source("pmcid:PMC1", LR_TEXT),

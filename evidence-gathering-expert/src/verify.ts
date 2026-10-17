@@ -98,7 +98,8 @@ export function verifyFindings(question: Question, findings: CheckerFinding[], s
       numbers,
       population: stated(f.population),
       setting: stated(f.setting),
-      denominator: stated(f.denominator),
+      // A denominator is a count ("24/322", "n = 3105"), not a description.
+      denominator: f.denominator && /\d/.test(f.denominator) ? stated(f.denominator) : null,
       notes,
       doubleCheck: "skipped",
     });
