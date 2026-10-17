@@ -46,11 +46,23 @@ weights are not patient probabilities. A tested illustrative Bayes kernel is
 included internally, but a published clinical model must be selected and
 reviewed before numerical probabilities are connected.
 
+Published Orphadata population frequencies now inform ordinal reasoning where
+eligible exact matches exist. New candidates can receive one additional bounded
+ranking pass; subsequent rounds receive existing references up front. The
+right-hand diagnosis panel separates model rank from published frequency and
+exposes deterministic conversion math, source links and provenance. The audit
+records which references actually reached the agent; attachment alone does not
+mean a reference was considered. See the [confirmed scope](docs/specs/population-frequency-context.md).
+
 ## Reference data and source attribution
 
 We use **Orphadata Science** for source-backed population-rarity context and
 keep **RKI German health-reporting data** available locally for population
 frequency research. These are separate from patient-specific probabilities.
+
+The pinned Orphadata release is **July 2026**, exported **23 June 2026**.
+RKI is pinned to a **23 September 2026** update; its observations extend through
+2025. Dataset update dates do not establish the age of individual source studies.
 
 - [Orphadata epidemiology](https://sciences.orphadata.com/epidemiology/): English
   and German bulk files, ORPHA identifiers, prevalence/incidence estimates,
