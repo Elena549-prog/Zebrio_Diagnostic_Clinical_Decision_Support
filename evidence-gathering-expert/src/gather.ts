@@ -157,7 +157,8 @@ export async function gatherEvidence(request: EvidenceRequest, deps: Deps): Prom
     }
     const { accepted } = verifyFindings(q, proposed, store);
     for (const f of accepted) {
-      if (f.stance !== "supports" || !NUMBER_FIELDS[q.kind].some((k) => f.numbers[k] != null)) continue;
+      // Supports without numbers can't become a value; everything else needs a second opinion.
+      if (f.stance === "supports" && !NUMBER_FIELDS[q.kind].some((k) => f.numbers[k] != null)) continue;
       try {
         const verdict = await doubleCheck(llm, q, f, store.get(f.sourceId)!);
         f.doubleCheck = verdict.agree ? "agreed" : "disagreed";
@@ -241,7 +242,7 @@ export async function gatherEvidence(request: EvidenceRequest, deps: Deps): Prom
 
   const items = diagnoses.flatMap((d) => [d.prior, ...d.likelihoodRatios]);
   const answered = items.every((i) => ["supported", "contradicted", "conflicting"].includes(i.status));
-  const status = store.all().length === 0 ? "failed" : answered && !errors.length ? "complete" : "partial";
+  const status = store.all().length === 0 ? "failed" : answered ? "complete" : "partial";
 
   return respond({
     status,

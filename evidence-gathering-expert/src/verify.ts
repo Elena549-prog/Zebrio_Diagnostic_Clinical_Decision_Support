@@ -69,7 +69,8 @@ export function verifyFindings(question: Question, findings: CheckerFinding[], s
     if (quote.length < MIN_QUOTE_CHARS) { reject("quote too short"); continue; }
     if (INSTRUCTION_LIKE.test(quote)) { reject("quote contains instructions, not evidence"); continue; }
     if (!normalise(src.text).includes(quote)) { reject(`quote not found in ${f.sourceId}`); continue; }
-    if (accepted.some((a) => a.sourceId === src.id && a.stance === f.stance)) {
+    // One study speaks once per question: it can neither corroborate nor contradict itself.
+    if (accepted.some((a) => a.sourceId === src.id)) {
       reject("same study already counted");
       continue;
     }

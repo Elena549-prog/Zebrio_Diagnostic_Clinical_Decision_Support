@@ -171,6 +171,13 @@ describe("verifyFindings + decideItem", () => {
     expect(v.accepted).toHaveLength(1);
   });
 
+  it("case 8b: one study cannot both support and contradict, so it never conflicts with itself", () => {
+    const sources = store(source("pmcid:PMC1", LR_TEXT));
+    const v = verifyFindings(lrQuestion, [finding(), finding({ stance: "contradicts" })], sources);
+    expect(v.accepted).toHaveLength(1);
+    expect(decideItem(lrQuestion, v.accepted, [...sources.values()]).status).toBe("supported");
+  });
+
   it("case 9: placeholder hosts are never trusted", () => {
     const sources = store(source("url:https://example.org/strep", LR_TEXT, { url: "https://example.org/strep", provider: "duckduckgo" }));
     const v = verifyFindings(lrQuestion, [finding({ sourceId: "url:https://example.org/strep" })], sources);

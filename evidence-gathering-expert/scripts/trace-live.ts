@@ -1,5 +1,6 @@
 // Diagnostic: runs the live demo while logging every outgoing request, its status and size,
-// and every model call's task and output length. Writes the trace to out/trace.json.
+// and every model call's task and output. Writes the trace to out/trace.json.
+// Never records prompts: the analyse prompt contains the presentation (SPEC.md, Data protection).
 import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { gatherEvidence } from "../src/gather.js";
 import { anthropicClient } from "../src/llm.js";
@@ -20,7 +21,9 @@ const real = anthropicClient({ model: process.env.EVIDENCE_MODEL });
 const tracedLlm: LlmClient = {
   async complete(req) {
     const out = await real.complete(req);
-    trace.push({ kind: "llm", task: req.task, userHead: req.user.slice(0, 400), userChars: req.user.length, output: out.slice(0, 2000) });
+    // Check/double-check prompts start with the generated question line; nothing else is kept.
+    const question = req.task === "analyse" ? undefined : req.user.split("\n")[0];
+    trace.push({ kind: "llm", task: req.task, question, userChars: req.user.length, output: out.slice(0, 2000) });
     return out;
   },
 };

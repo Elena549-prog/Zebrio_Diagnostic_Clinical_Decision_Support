@@ -28,7 +28,7 @@ Europe PMC, PubMed and DuckDuckGo need no key. Tests need no key and no network.
 ## Commands
 
 ```bash
-npm test                                             # 54 tests, no keys, no network
+npm test                                             # 57 tests, no keys, no network
 npm run typecheck
 npm run evidence -- examples/sore-throat.request.json  # live run; JSON on stdout, summary with links on stderr, saved to out/<requestId>.json
 npx tsx --env-file=../.env.local scripts/trace-live.ts # live run with a full request/model trace in out/trace.json
@@ -81,7 +81,9 @@ const response = await gatherEvidence(request, {
 5. Code verifies: the quote is in that source's retrieved text; each number is in the
    quote; the source can support (not paywalled/snippet/placeholder host); no
    instruction-like quotes; one study counts once (PMID/PMCID/DOI aliases).
-6. A second, independent Claude call must agree before a number counts as `supported`.
+6. A second, independent Claude call must agree before a finding counts, whether it
+   supports or contradicts. One study speaks once per question, so it can neither
+   corroborate nor contradict itself.
 
 ## Limits, retries, failure behaviour
 
@@ -91,8 +93,8 @@ const response = await gatherEvidence(request, {
 - 3 consecutive failures of a provider (or of Claude) → stop using it for the request.
   A DuckDuckGo block/challenge stops DuckDuckGo immediately; it is never bypassed.
 - Malformed model output → that item is `insufficient` with a `check` error.
-- `status`: `complete` (every item answered, no errors), `partial`, or `failed`
-  (request rejected, analysis failed, or nothing retrieved).
+- `status`: `complete` (every item answered; `errors` may still list an unavailable
+  provider), `partial`, or `failed` (request rejected, analysis failed, or nothing retrieved).
 
 ## Acceptance cases
 
@@ -141,7 +143,15 @@ DuckDuckGo was retried after a block.
   traceable. Free text is screened for identifiers first, but these spans do leave the
   module. Remove them if the orchestrator must not see any presentation wording.
 - Population/setting phrases must appear in the retrieved source, but not necessarily
-  inside the quote.
+  inside the quote. A denominator must contain a count.
+- `conflicting` means one source supports and another contradicts. Two supporting
+  studies with different values stay `supported` (best-ranked value) and `note` lists
+  the other values; read `note` before using a value.
+- On a model policy refusal, the API's server-side fallback may answer with a different
+  Claude model (`fallbacks: "default"` in `src/llm.ts`). Remove it if every call must
+  use `EVIDENCE_MODEL`.
+- `src/report.ts` (the CLI's linked summary) and the files written to `out/` are not
+  unit-tested; the response object they print is.
 - Identifier screening is pattern-based; unusual formats can slip through. Real patient
   data needs a DPIA, a legal basis and DPAs with Anthropic (zero retention) first.
 - Live behaviour depends on today's search results and model output; tests use fixtures.

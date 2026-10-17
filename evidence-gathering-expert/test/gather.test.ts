@@ -223,6 +223,38 @@ describe("gatherEvidence end to end (no network, no keys)", () => {
     expect(res.diagnoses[0]!.prior.status).toBe("supported");
   });
 
+  it("a contradicting finding also needs the independent second check", async () => {
+    const base = scriptedLlm();
+    const llm: LlmClient & { tasks: string[] } = {
+      tasks: [],
+      async complete(req) {
+        llm.tasks.push(req.task);
+        if (req.task === "check" && req.user.split("\n")[0]!.includes("absence of cough")) {
+          return JSON.stringify({
+            findings: [{ sourceId: "pmcid:PMC100", quote: COUGH, stance: "contradicts", numbers: { ...noNumbers, lrPositive: 1.4 }, population: null, setting: null, denominator: null, reason: "Says otherwise.", limitations: [] }],
+          });
+        }
+        if (req.task === "double-check" && req.user.includes("absence of cough")) return JSON.stringify({ agree: false, reason: "Not a contradiction." });
+        return base.complete(req);
+      },
+    };
+    const res = await gatherEvidence(request, { llm, fetch: world(), now: fixedNow });
+    const cough = res.diagnoses[0]!.likelihoodRatios.find((l) => l.quotedFrom === "no cough")!;
+    expect(cough.status).toBe("insufficient");
+  });
+
+  it("is complete when every question is answered, even if a provider was unavailable", async () => {
+    const llm: LlmClient = {
+      async complete(req) {
+        if (req.task === "analyse") return JSON.stringify({ presentingProblem: "sore throat", diagnoses: [{ name: "Group A streptococcal pharyngitis", searchTerm: "streptococcal pharyngitis", findings: [] }] });
+        return scriptedLlm().complete(req);
+      },
+    };
+    const res = await gatherEvidence(request, { llm, fetch: world({ ddg: () => html("anomaly", 202) }), now: fixedNow });
+    expect(res.errors.length).toBeGreaterThan(0);
+    expect(res.status).toBe("complete");
+  });
+
   it("rejects a request with identifiers before calling anything", async () => {
     const llm = scriptedLlm();
     const fetchFn = world();

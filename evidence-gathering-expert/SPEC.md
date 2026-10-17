@@ -175,7 +175,7 @@ Checked against `docs/person2/` on 2026-10-17. There is no Person 3 doc yet.
   fetch, clock, config), same pattern as Person 2's `assignMedicalCodes`. The
   CLI is a thin wrapper. No framework-specific code in the interface.
 - **Fixture first:** within the first 10 minutes, commit
-  `examples/sore-throat.response.json` (hand-written, marked as a fixture) so
+  `examples/sore-throat.fixture.response.json` (hand-written, marked as a fixture) so
   Person 3 can integrate while the real pipeline is built.
 - **Feeding Person 2:** the orchestrator can pass our output straight into
   `assignMedicalCodes`:
@@ -232,8 +232,9 @@ data processing agreements with every provider.
 - 3 consecutive failures of one provider → stop using it for this request,
   record it in `errors`.
 - Malformed model output → that question is `insufficient`, never `supported`.
-- `status`: `complete` (all questions answered), `partial` (some
-  insufficient/errors), `failed` (nothing retrieved / step 1 failed).
+- `status`: `complete` (all questions answered, even if some provider was
+  unavailable), `partial` (some insufficient), `failed` (nothing retrieved /
+  step 1 failed).
 
 ## Commands
 
