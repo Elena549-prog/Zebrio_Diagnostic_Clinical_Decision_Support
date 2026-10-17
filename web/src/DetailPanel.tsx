@@ -9,15 +9,11 @@
  */
 
 import { useState } from "react";
-import { Cited, SourceChips } from "./Cite.js";
-import type { Case, Finding, Hypothesis } from "./types.js";
+import { Cited } from "./Cite.js";
+import type { Case, Hypothesis } from "./types.js";
 import * as api from "./api.js";
-import { probabilityLabel, probabilityMode } from "./probabilityDisplay.js";
-import { RarityReference, rarityLabel } from './RarityReference.js';
-
-/** Long descriptions are clamped to a few lines with a "show more" toggle so
- *  the panel stays scannable; the full text is one click away. */
-const DESC_CLAMP_LINES = 3;
+import { probabilityMode } from "./probabilityDisplay.js";
+import { HypothesisDetails } from "./HypothesisDetails.js";
 
 interface Props {
   c: Case;
@@ -36,20 +32,7 @@ interface Props {
 
 export function DetailPanel({ c, selectedId, onUpdated, busy, setBusy, interactive = true }: Props) {
   const h: Hypothesis | undefined = selectedId ? c.hypotheses[selectedId] : undefined;
-  const ordinalIndex = Object.values(c.hypotheses)
-    .filter((candidate) => candidate.status === 'live' || candidate.status === 'branched')
-    .sort((a, b) => b.probability - a.probability)
-    .findIndex((candidate) => candidate.id === h?.id);
-  const findingsById: Record<string, Finding> = {};
-  for (const f of c.findings) findingsById[f.id] = f;
-  const [descOpen, setDescOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
-  // Last line of defence for the codes row. The server normalizes what the
-  // model returns, but canned/persisted cases and any future writer reach this
-  // component too — and an entry without a system+code used to render as a
-  // bare ":" row. Drop those here so they can never reach the DOM.
-  const codes = (h?.codes ?? []).filter((x) => x && x.system && x.code);
 
   // Discoverability for "Set working dx": when reasoning and there is a leading
   // live hypothesis, surface the action where the user is looking at it. This
@@ -77,20 +60,6 @@ export function DetailPanel({ c, selectedId, onUpdated, busy, setBusy, interacti
 
   return (
     <div className="detail-panel">
-      {interactive && canConverge && (
-        <div className="converge-hint">
-          <div className="converge-hint-text">
-            <strong>{c.pendingDiagnosis ? "Proposed working diagnosis" : "Review the working diagnosis"}</strong>
-            <p className="muted small">
-              {h?.status === "live" ? "Selected hypothesis" : "Leading hypothesis"}: <em>{selectedCandidate!.name}</em> ({probabilityLabel(c, selectedCandidate!)}). Review the evidence before confirming.
-            </p>
-          </div>
-          <button onClick={setWorkingDx} disabled={busy}>
-            Confirm working dx
-          </button>
-        </div>
-      )}
-      {error && <div className="na-err" role="alert">{error}</div>}
       {c.workingDiagnosis && (
         <div className="verdict-card">
           <h3>Working diagnosis</h3>
@@ -159,108 +128,24 @@ export function DetailPanel({ c, selectedId, onUpdated, busy, setBusy, interacti
       )}
 
       {h ? (
-        <div className="hypo-detail">
-          <div className="panel-head">
-            <h3>{h.name}</h3>
-            <span className={`status-chip ${h.status}`}>{h.status}</span>
-          </div>
-          {h.description && (
-            <>
-              {/* The toggle sits outside the clamped paragraph — inside it, the
-                  line-clamp hid the very control needed to un-clamp. The text
-                  still renders through <Cited> so it keeps its source markers. */}
-              <p className={`hypo-desc ${descOpen ? "open" : "clamp"}`}>
-                <Cited text={h.description} sources={c.sources} />
-              </p>
-              <button className="desc-toggle" onClick={() => setDescOpen((v) => !v)}>
-                {descOpen ? "show less" : "show more"}
-              </button>
-            </>
-          )}
-          <div className="prob-line">
-            {probabilityMode(c, h) === "unavailable" ? "Clinical probability" : "Probability"} <b>{probabilityLabel(c, h)}</b>
-            {rarityLabel(h, probabilityMode(c) === 'illustrative') && <span className="zebra-tag">{rarityLabel(h, probabilityMode(c) === 'illustrative')}</span>}
-          </div>
-          {probabilityMode(c) !== 'illustrative' && ordinalIndex >= 0 && <p className="small">Agent rank #{ordinalIndex + 1} (model judgment)</p>}
-          <RarityReference h={h} />
-          {h.baseRateNote && (
-            <div className="baserate">
-              <strong>Base-rate prior</strong>
-              <p className="muted small">
-                <Cited text={h.baseRateNote} sources={c.sources} />
-              </p>
-            </div>
-          )}
-          {codes.length > 0 && (
-            <div className="codes">
-              <strong>Codes</strong>
-              <ul>
-                {codes.map((c2, i) => (
-                  <li key={i}>
-                    {c2.system}: <code>{c2.code}</code> {c2.display}
-                    {c2.url && <a className="cite" href={c2.url} target="_blank" rel="noreferrer"> Official reference</a>}
-                    {c2.reasoning && <div className="muted small">{c2.reasoning}</div>}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
-          {h.evidenceFor.length > 0 && (
-            <div className="ev-block">
-              <strong>Supporting evidence</strong>
-              <ul>
-                {h.evidenceFor.map((e, i) => (
-                  <li key={i} className="supports">
-                    {findingsById[e.findingId]?.hypothetical && <span className="hypothetical-badge">Hypothetical</span>}
-                    <Cited
-                      text={findingsById[e.findingId]?.summary || e.weight}
-                      sources={c.sources}
-                    />
-                    <SourceChips ids={findingsById[e.findingId]?.sourceIndices} sources={c.sources} />
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
-          {h.evidenceAgainst.length > 0 && (
-            <div className="ev-block">
-              <strong>Contradicting evidence</strong>
-              <ul>
-                {h.evidenceAgainst.map((e, i) => (
-                  <li key={i} className="against">
-                    {findingsById[e.findingId]?.hypothetical && <span className="hypothetical-badge">Hypothetical</span>}
-                    <Cited
-                      text={findingsById[e.findingId]?.summary || e.weight}
-                      sources={c.sources}
-                    />
-                    <SourceChips ids={findingsById[e.findingId]?.sourceIndices} sources={c.sources} />
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
-          {h.discriminatingTests?.length ? (
-            <div className="ev-block">
-              <strong>Discriminating tests</strong>
-              <ul>
-                {h.discriminatingTests.map((t, i) => (
-                  <li key={i}>
-                    {t.name}{" "}
-                    <span className="muted small">
-                      — <Cited text={t.rationale} sources={c.sources} />
-                    </span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          ) : null}
-        </div>
+        <HypothesisDetails key={h.id} c={c} h={h} />
       ) : (
         !c.workingDiagnosis && (
           <p className="muted small detail-empty">
             Select a hypothesis node in the tree to inspect its evidence, codes, and base rate.
           </p>
         )
+      )}
+      {interactive && canConverge && (
+        <div className="hypothesis-confirm-footer">
+          {error && <div className="na-err" role="alert">{error}</div>}
+          <p className="small muted">
+            {h?.status === "live" ? "Selected hypothesis" : pendingCandidate ? "Proposed hypothesis" : "Leading hypothesis"}: <strong>{selectedCandidate!.name}</strong>
+          </p>
+          {h && h.status !== "live" && <p className="small hypothesis-target-note">Viewing {h.name} ({h.status}); confirmation targets {selectedCandidate!.name}.</p>}
+          <button onClick={setWorkingDx} disabled={busy}>Confirm working dx</button>
+          <p className="small muted">Review the evidence before confirming.</p>
+        </div>
       )}
     </div>
   );
