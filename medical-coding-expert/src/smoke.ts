@@ -1,9 +1,11 @@
 // Live smoke check with real credentials. Prints a short summary, never keys.
 //   npm run smoke
 // Run 1: normal chain (Tavily first). Run 2: Tavily forced off to exercise
-// the DuckDuckGo fallback live.
+// the DuckDuckGo fallback live. Run 3: Tavily off and DuckDuckGo treated as
+// blocked (no request sent), to exercise catalogue navigation live.
 import { existsSync, readFileSync } from "node:fs";
 import { assignMedicalCodes, BASE_LIMITATIONS, defaultDeps } from "./assignMedicalCodes.ts";
+import { ProviderError } from "./retrieval/errors.ts";
 import type { CodingRequest, CodingResponse } from "./types.ts";
 
 if (existsSync(".env")) process.loadEnvFile(".env");
@@ -26,4 +28,19 @@ summary("normal chain", await assignMedicalCodes(request));
 summary(
   "Tavily forced off (DuckDuckGo fallback)",
   await assignMedicalCodes(request, { deps: { ...defaultDeps(), state: { tavilyDisabledReason: "forced off for smoke test" } } }),
+);
+summary(
+  "Tavily off, DuckDuckGo blocked (catalogue navigation)",
+  await assignMedicalCodes(request, {
+    deps: {
+      ...defaultDeps(),
+      state: { tavilyDisabledReason: "forced off for smoke test" },
+      duckduckgo: {
+        name: "duckduckgo",
+        search: async () => {
+          throw new ProviderError("duckduckgo", "blocked", "simulated challenge page for smoke test");
+        },
+      },
+    },
+  }),
 );

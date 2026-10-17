@@ -1,6 +1,7 @@
 // Discovery + page retrieval with the agreed fallback chain, per concept:
 //   Tavily Search (one retry on transient errors)
 //     -> DuckDuckGo HTML if Tavily is unusable or finds no usable page for that concept
+//     -> catalogue navigation (index -> block page by code range) if both find nothing
 //   Tavily Extract for pages Tavily discovered
 //     -> direct HTTPS fetch if Extract fails or yields no parsable entries
 // Credits exhausted / bad key / no key disable Tavily for the rest of the process.
@@ -9,6 +10,7 @@ import { parseCatalogueHtml, parseCatalogueText, type CatalogueEntry } from "../
 import type { CodingConfig } from "../config.ts";
 import type { RetrievalProvider, SearchProvider } from "../types.ts";
 import { isAllowedCatalogueUrl, normalizeCatalogueUrl, toCurrentEditionUrl } from "../urlPolicy.ts";
+import { createCatalogueNavigator } from "./catalogueNavigation.ts";
 import { toProviderError } from "./errors.ts";
 import type { CallOptions, DirectFetcher, PageExtractor, SearchAdapter } from "./types.ts";
 
@@ -47,7 +49,7 @@ interface Located {
   url: string;
   /** Found via another edition's file name; must be fetched directly. */
   mapped: boolean;
-  by: SearchProvider;
+  by: SearchProvider | "navigation";
 }
 
 /** Keep official 2026 pages; map other editions of catalogue pages to their 2026 counterpart. */
@@ -99,6 +101,21 @@ export async function retrieveCatalogue(
     return [];
   }
 
+  const navigate = createCatalogueNavigator(deps.directFetch);
+  async function navigateConcept(term: string): Promise<Located[]> {
+    try {
+      const hit = await navigate(term, opts);
+      if (!hit) return [];
+      notes.push(
+        `Web search found no usable page for "${term}"; located ${hit.url} by navigating the official 2026 catalogue from its index (${hit.locator} used only to pick the block; codes and labels come only from that page)`,
+      );
+      return [{ url: hit.url, mapped: false, by: "navigation" }];
+    } catch (err) {
+      notes.push(`Catalogue navigation failed for "${term}": ${toProviderError("direct", err).message}`);
+      return [];
+    }
+  }
+
   // 1. Discovery, per concept, within the per-provider search budget.
   const searchedTerms = terms.slice(0, config.maxSearchesPerProvider);
   const perTerm: Located[][] = [];
@@ -107,6 +124,7 @@ export async function retrieveCatalogue(
     let found: Located[] = [];
     if (!deps.state.tavilyDisabledReason) found = await searchConcept(deps.tavily, term, config.tavilyRetries);
     if (!found.length) found = await searchConcept(deps.duckduckgo, term, 0);
+    if (!found.length) found = await navigateConcept(term);
     perTerm.push(found);
   }
 

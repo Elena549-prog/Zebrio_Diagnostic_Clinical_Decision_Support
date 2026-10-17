@@ -7,6 +7,7 @@ import { CATALOGUE_BASE } from "../src/urlPolicy.ts";
 
 export const BLOCK_J40_J47 = `${CATALOGUE_BASE}block-j40-j47.htm`;
 export const BLOCK_HTML = readFileSync(new URL("./fixtures/pages/block-j40-j47.htm", import.meta.url), "utf8");
+export const INDEX_HTML = readFileSync(new URL("./fixtures/pages/index.htm", import.meta.url), "utf8");
 export const FIXED_NOW = new Date("2026-10-17T12:00:00.000Z");
 export const testConfig = loadConfig({}, { timeoutMs: 1000 });
 

@@ -2,7 +2,8 @@ import { describe, expect, it } from "vitest";
 import { assignMedicalCodes, safeSearchTerms, type AssignDeps } from "../src/assignMedicalCodes.ts";
 import { ModelUnavailableError, type CodingModel, type InterpretedCondition, type Selection } from "../src/llm/model.ts";
 import type { CodingRequest } from "../src/types.ts";
-import { BLOCK_J40_J47, deps, err, fakeSearch, fakeTavily, testConfig } from "./helpers.ts";
+import { CATALOGUE_INDEX_URL } from "../src/retrieval/catalogueNavigation.ts";
+import { BLOCK_HTML, BLOCK_J40_J47, deps, err, fakeSearch, fakeTavily, INDEX_HTML, testConfig } from "./helpers.ts";
 
 const request: CodingRequest = {
   requestId: "req-1",
@@ -125,7 +126,20 @@ describe("assignMedicalCodes", () => {
     expect(out.results[0]).toMatchObject({ status: "assigned", code: "J46" });
   });
 
-  it("returns unavailable without fabricating codes when both providers fail", async () => {
+  it("assigns J46 from the official page found by catalogue navigation when both search providers fail", async () => {
+    const out = await run(fakeModel([cond()], [sel()]), {
+      tavily: fakeTavily([err("tavily", "credits_exhausted")]),
+      duckduckgo: fakeSearch("duckduckgo", [err("duckduckgo", "blocked")]),
+      directFetch: async (url) => (url === CATALOGUE_INDEX_URL ? INDEX_HTML : BLOCK_HTML),
+      state: {},
+    });
+    expect(out.results[0]).toMatchObject({ status: "assigned", code: "J46", officialLabel: "Status asthmaticus" });
+    expect(out.results[0]!.references[0]).toMatchObject({ url: `${BLOCK_J40_J47}#J46`, retrievalProvider: "direct" });
+    expect(out.searchProvidersUsed).toEqual([]);
+    expect(out.limitations.join(" ")).toContain("navigating the official 2026 catalogue");
+  });
+
+  it("returns unavailable without fabricating codes when both providers and catalogue navigation fail", async () => {
     const model = fakeModel([cond()], [sel()]);
     const out = await run(model, {
       tavily: fakeTavily([err("tavily", "auth")]),
