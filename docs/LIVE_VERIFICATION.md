@@ -47,6 +47,7 @@ tree/list switching, scripted test-result progression, history stepping, and
 blank-case intake. The live workspace clearly displayed probability
 unavailability; tutorial percentages were labelled illustrative. No browser
 console errors were observed. The UI-only synthetic case was deleted, and
-generated one-click patient-result shortcuts were removed from live intake.
+generated one-click patient-result shortcuts were removed from live intake. (Later restored as labelled synthetic example chips whose recorded
+summary is prefixed “Synthetic demo result”; see `web/src/NextAction.tsx`.)
 
 Sanitized model metadata and observed check counts are in [live-verification-results.json](live-verification-results.json). The script reports incomplete coding as partial; it never turns safe refusal into proof of coding accuracy.

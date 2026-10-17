@@ -62,9 +62,11 @@ available in this repository and has not been copied or reproduced.
 - Coding sources must be HTTPS pages inside the official BfArM ICD-10-GM 2026
   catalogue. Other hosts, years, preliminary editions, encoded paths, and
   redirector query strings are rejected in code.
-- Coding falls back to DuckDuckGo HTML discovery when Tavily is missing or
-  fails, then fetches discovered official pages directly. Every redirect is
-  checked before following. Bot challenges are unavailable, never bypassed.
+- Evidence and coding fall back to DuckDuckGo HTML discovery when Tavily returns
+  no inspected pages, then fetch discovered pages directly. Evidence retains
+  the configured medical-domain policy; coding retains the official catalogue
+  boundary. Every redirect is checked before following. Bot challenges and
+  unsupported content formats are unavailable, never bypassed.
   DuckDuckGo HTML is an unofficial adapter surface and can stop working.
 - At most two searches per provider and three retrieved pages per call. The
   retrieval budget is 45 seconds with 12-second request timeouts, bounded

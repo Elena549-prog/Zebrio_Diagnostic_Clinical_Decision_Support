@@ -433,6 +433,9 @@ button.ghost:hover:not(:disabled) { background: var(--surface-bright); border-co
 .msg.pending .msg-body { display: flex; align-items: center; gap: 8px; color: var(--on-surface-variant); font-style: italic; }
 .chat-actions { display: flex; gap: 8px; padding: 8px 14px; flex-wrap: wrap; align-items: center; }
 .slow-hint { line-height: 1.35; }
+.round-tools { font-size: 12px; line-height: 1.4; padding: 8px 10px; margin-bottom: 10px; border-radius: var(--r-md); border: 1px solid var(--outline-variant); display: flex; flex-direction: column; gap: 4px; }
+.round-tools.degraded { border-color: #c98a00; background: color-mix(in srgb, #c98a00 8%, transparent); }
+.round-tools ul { margin: 4px 0 0 16px; padding: 0; }
 .chat-input { display: flex; gap: 8px; padding: 0 14px 12px; }
 .chat-input textarea { resize: vertical; }
 .hitl-banner {
@@ -573,6 +576,7 @@ button.ghost:hover:not(:disabled) { background: var(--surface-bright); border-co
 }
 .demo-chip:hover:not(:disabled) { border-color: var(--primary); background: var(--primary-fixed); color: var(--on-surface); }
 .demo-chip:disabled { opacity: 0.55; cursor: default; }
+.tut-scripted-result { padding: 8px 10px; border: 1px dashed var(--primary); border-radius: 6px; font-size: 13px; }
 .demo-chip-badge {
   font-size: 10px; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase;
   padding: 1px 7px; border-radius: var(--r-full); align-self: flex-start;
@@ -589,6 +593,14 @@ button.ghost:hover:not(:disabled) { background: var(--surface-bright); border-co
 }
 .scenario-card.tutorial-card:hover:not(:disabled) { background: linear-gradient(180deg, var(--primary-fixed), var(--surface-container-lowest) 85%); }
 .scenario-card.tutorial-card h3 { color: var(--primary); }
+.scenario-card.live-demo-card { border-color: color-mix(in srgb, var(--primary) 40%, var(--outline-variant)); }
+.scenario-mode {
+  align-self: flex-start; font-size: 10px; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase;
+  padding: 1px 7px; border-radius: var(--r-full); border: 1px solid var(--outline-variant); color: var(--outline);
+}
+.scenario-mode.live { color: var(--primary); border-color: var(--primary); }
+.result-sheet { display: flex; flex-direction: column; gap: 4px; }
+.result-sheet button { text-align: left; height: auto; font-size: 12px; font-weight: 400; padding: 6px 8px; }
 
 /* Guided tour rail — a calm "lesson card": progress first, then the lesson,
    then one clear thing to look at, then the step controls. */

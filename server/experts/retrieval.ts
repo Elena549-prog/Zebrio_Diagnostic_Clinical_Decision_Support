@@ -31,13 +31,14 @@ const decodeHtml = (s: string) => s.replace(/&amp;/g, '&').replace(/&quot;/g, '"
 function plainHtml(s: string): string {
   return decodeHtml(s.replace(/<(script|style)\b[^>]*>[\s\S]*?<\/\1>/gi, '').replace(/<\/(?:p|div|h[1-6]|li|tr)>/gi, '\n').replace(/<br\s*\/?\s*>/gi, '\n').replace(/<[^>]+>/g, ' ')).replace(/[ \t]+/g, ' ').replace(/\n\s*\n/g, '\n').trim();
 }
-export function duckDuckGoTargets(html: string): string[] {
+export function duckDuckGoTargets(html: string, coding = true): string[] {
+  const allowed = coding ? allowedIcdUrl : allowedMedicalUrl;
   const urls: string[] = [];
   for (const m of html.matchAll(/href=["']([^"']+)["']/gi)) {
     try {
       const u = new URL(decodeHtml(m[1]!), 'https://html.duckduckgo.com');
       const target = u.searchParams.get('uddg') || u.href;
-      if (allowedIcdUrl(target)) urls.push(target);
+      if (allowed(target)) urls.push(target);
     } catch { /* Ignore malformed discovery links. */ }
   }
   return [...new Set(urls)];
@@ -92,37 +93,40 @@ export async function retrievePages(queries: string[], coding: boolean, options:
       }
     } catch { signal.throwIfAborted(); limitations.push('Tavily search or extraction failed; upstream details are withheld.'); }
   } else limitations.push('TAVILY_API_KEY is not configured.');
-  // Coding fallback discovers only the official edition; no arbitrary page fetches.
-  if (coding && pages.length === 0) {
+  // Fallback discovery and every fetched redirect remain inside the role's source policy.
+  if (pages.length === 0) {
     providers.add('duckduckgo');
     try {
       for (const term of queries.slice(0, 2)) {
-        const response = await request('https://html.duckduckgo.com/html/?q=' + encodeURIComponent(`site:${ICD_BASE} ${term}`));
+        const query = coding ? `site:${ICD_BASE} ${term}` : `${term} (${MEDICAL_HOSTS.map(host => `site:${host}`).join(' OR ')})`;
+        const response = await request('https://html.duckduckgo.com/html/?q=' + encodeURIComponent(query));
         const html = await boundedText(response);
         if (/anomaly\.js|challenge-form|Unfortunately, bots/i.test(html)) { limitations.push('DuckDuckGo returned a challenge; fallback unavailable.'); break; }
-        for (const url of duckDuckGoTargets(html)) if (discoveries.size < 3) discoveries.set(url, url);
+        for (const url of duckDuckGoTargets(html, coding)) if (discoveries.size < 3) discoveries.set(url, url);
       }
     } catch { signal.throwIfAborted(); limitations.push('DuckDuckGo discovery unavailable.'); }
   }
-  if (coding) {
+  if (coding || pages.length === 0) {
     for (const [initialUrl, title] of discoveries) {
       if (pages.length >= 3 || pages.some(p => p.url === initialUrl)) continue;
       try {
         let url = initialUrl;
         for (let redirects = 0; redirects <= 3; redirects++) {
-          if (!allowedIcdUrl(url)) throw new Error('Disallowed redirect');
+          if (!allowed(url)) throw new Error('Disallowed redirect');
           const r = await fetcher(url, { redirect: 'manual', signal: AbortSignal.any([signal, AbortSignal.timeout(12_000)]) });
           if ([301,302,303,307,308].includes(r.status)) {
             const location = r.headers.get('location'); if (!location) throw new Error('Missing redirect target');
             url = new URL(location, url).href; continue;
           }
-          if (!r.ok) throw new Error('Official page unavailable');
+          if (!r.ok) throw new Error('Source page unavailable');
+          const contentType = r.headers.get('content-type')?.split(';')[0]?.trim().toLowerCase();
+          if (contentType && !['text/html', 'text/plain', 'application/xhtml+xml'].includes(contentType)) throw new Error('Unsupported source content type');
           const text = plainHtml(await boundedText(r));
           if (text.length < 40) throw new Error('Empty official page');
           providers.add('direct');
           pages.push({ id: `N${pages.length + 1}`, url, title, text: text.slice(0,45_000), retrievedAt: new Date().toISOString(), retrievalProvider: 'direct' }); break;
         }
-      } catch { signal.throwIfAborted(); limitations.push('An official catalogue page could not be retrieved safely.'); }
+      } catch { signal.throwIfAborted(); limitations.push(coding ? 'An official catalogue page could not be retrieved safely.' : 'An allowed medical source page could not be retrieved safely.'); }
     }
   }
   if (!pages.length) limitations.push('No inspected source content is available; search snippets were not treated as evidence.');

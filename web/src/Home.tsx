@@ -109,17 +109,26 @@ export function Home({ onStartScenario, onStartBlank, busy, onOpenDocs, savedCas
       <div className="home-scenarios">
         <h2>Run a scenario</h2>
         <p className="muted small">
-          Each scenario is a patient who just walked in. Run rounds, order tests
-          at the gates, and watch the tree narrow — then a treatment plan.
+          All patients here are synthetic. The guided tour is pre-scripted and
+          makes no API calls. Every other card starts a live case: each round
+          calls Claude and web retrieval, and you enter the test results
+          yourself. Live cases need the server keys and use paid credits.
         </p>
         <div className="scenario-grid">
           {SCENARIOS.map((s) => (
             <button
               key={s.id}
-              className={`scenario-card${s.tutorial ? " tutorial-card" : ""}`}
+              className={`scenario-card${s.tutorial ? " tutorial-card" : ""}${s.liveDemo ? " live-demo-card" : ""}`}
               onClick={() => onStartScenario(s)}
               disabled={busy}
             >
+              <span className={`scenario-mode ${s.tutorial ? "canned" : "live"}`}>
+                {s.tutorial
+                  ? "Canned tour · no API calls"
+                  : s.golden
+                    ? "Live · Claude + Tavily · synthetic golden example"
+                    : "Live · Claude + Tavily · synthetic patient"}
+              </span>
               <h3>{s.title}</h3>
               <p className="muted small">{s.blurb}</p>
               <div className="demo small">

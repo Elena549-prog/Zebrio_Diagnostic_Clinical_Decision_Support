@@ -132,7 +132,10 @@ export function createApp(overrides: Partial<typeof defaults> = {}) {
       draft.round += 1;
       applyEvidence(draft, evidence);
       draft.round -= 1;
-      if (evidence?.limitations.length) appendEvent(draft, { round: draft.round + 1, kind: 'engine_message', summary: `Evidence limitations: ${evidence.limitations.join(' ')}` });
+      // Always record what retrieval produced so a failed or empty pass is visible, not silent.
+      const retrieval = { status: evidence?.status ?? 'unavailable', sourceCount: evidence?.sources.length ?? 0,
+        acceptedFindings: evidence?.findings.filter((f) => f.validationStatus === 'supported').length ?? 0, limitations: evidence?.limitations ?? [] };
+      appendEvent(draft, { round: draft.round + 1, kind: 'engine_message', summary: `Evidence retrieval ${retrieval.status}: ${retrieval.sourceCount} source(s), ${retrieval.acceptedFindings} passage-checked finding(s).${retrieval.limitations.length ? ` Limitations: ${retrieval.limitations.join(' ')}` : ''}`, payload: { retrieval } });
       const result = await services.runRound(draft, { signal: request.signal });
       attachEvidenceTargets(draft, evidence);
       const targets = Object.values(draft.hypotheses).filter((h) => h.status === 'live').sort((a, b) => b.probability - a.probability).slice(0, 3);
@@ -144,6 +147,7 @@ export function createApp(overrides: Partial<typeof defaults> = {}) {
             evidence: draft.findings.filter((f) => !f.hypothetical).map((f) => ({ id: f.id, text: [f.summary, f.detail].filter(Boolean).join(' '), kind: (f.source === 'literature' || f.source === 'web' ? 'literature' : 'patient_finding') as 'literature' | 'patient_finding' })),
             hypotheses: targets.map((h) => ({ id: h.id, name: h.name })),
           }, { signal: request.signal });
+          let attached = 0;
           for (const code of codes.results) {
             const h = code.hypothesisId ? draft.hypotheses[code.hypothesisId] : undefined;
             const references = code.references.filter((ref) => {
@@ -151,13 +155,17 @@ export function createApp(overrides: Partial<typeof defaults> = {}) {
               catch { return false; }
             });
             if (!h || code.status !== 'assigned' || !code.code || !code.officialLabel || !references.length) continue;
+            attached += 1;
             h.codes = [{ system: 'ICD-10-GM 2026', code: code.code, display: code.officialLabel, url: references[0]!.url, reasoning: code.rationale }];
             mergeSources(draft.sources, references.map((r, i) => ({ ref: `C${i + 1}`, title: `ICD-10-GM 2026 ${code.code}: ${code.officialLabel}`, url: r.url, type: 'code', excerpt: r.supportingPassage, retrievedAt: r.retrievedAt, validationStatus: 'supported' })), draft.round);
           }
-          appendEvent(draft, { round: draft.round, kind: 'engine_message', summary: 'Medical coding suggestions checked against the official catalogue', payload: codes });
+          const codingStatus = codes.results.length && codes.results.every((r) => r.status === 'unavailable') ? 'unavailable' : 'checked';
+          appendEvent(draft, { round: draft.round, kind: 'engine_message', summary: codingStatus === 'unavailable'
+            ? 'Medical coding unavailable for this round; no unverified codes attached.'
+            : `Medical coding: ${attached} verified ICD-10-GM suggestion(s) attached; others need clarification or had no supported code.`, payload: { ...codes, coding: { status: codingStatus, attached } } });
         } catch (error) {
           request.signal.throwIfAborted();
-          appendEvent(draft, { round: draft.round, kind: 'engine_message', summary: 'Medical coding unavailable for this round; no unverified codes attached.' });
+          appendEvent(draft, { round: draft.round, kind: 'engine_message', summary: 'Medical coding unavailable for this round; no unverified codes attached.', payload: { coding: { status: 'unavailable', attached: 0 } } });
         }
       }
       request.signal.throwIfAborted();

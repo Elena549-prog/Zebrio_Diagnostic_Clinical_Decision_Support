@@ -17,6 +17,8 @@ npm run dev
 
 Open **http://localhost:5175**. The API is **http://localhost:8788/api**.
 The Guided tour works without credentials and labels its values synthetic.
+For a click-through of the tour and the live synthetic preset, see
+[Demo steps](docs/DEMO.md).
 
 If `.env` does not exist, copy `.env.example` to `.env`. Add
 `ANTHROPIC_API_KEY` and `TAVILY_API_KEY` there; keep them server-side and out

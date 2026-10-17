@@ -93,7 +93,22 @@ Live results vary from run to run, so a good run of example 2 is saved for the d
 
 It has 3 verified numbers out of 12 (heart failure base rate 47%, raised JVP specificity
 0.70, pulmonary embolism base rate 18%), each with an exact quote, a link and a
-population warning. Show this file on stage; run live only as an extra.
+population warning. The base rates come from other study populations (all ED
+dyspnoea; acute respiratory failure), so they are not this patient's probability.
+Show this file on stage; run live only as an extra.
+
+## In the Arbor app
+
+All three are live scenario cards (`web/src/goldenScenarios.ts`). The app imports
+each `*.request.json` and sends its `presentation` unchanged; the "expected" items
+above and the saved response are not imported. Example 2 is the prominent golden
+live preset. Its optional result sheet (ECG, chest X-ray, echocardiogram) is
+written by us, marked synthetic and "not in golden source", and only fills the
+result box. `web/src/goldenScenarios.test.ts` (run by `npm test`) checks the
+mapping is exact and that nothing above leaks into the cards.
+
+If you change a request file, the app changes with it. Keep the "expected" items
+here out of the request files.
 
 ## Ground rules
 

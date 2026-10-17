@@ -9,7 +9,7 @@
     "build": "tsc -p tsconfig.build.json",
     "start": "node dist/index.js",
     "typecheck": "tsc -p tsconfig.json --noEmit",
-    "test": "tsx --test domain/*.test.ts experts/*.test.ts"
+    "test": "tsx --test domain/*.test.ts experts/*.test.ts ../web/src/*.test.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.135.0",

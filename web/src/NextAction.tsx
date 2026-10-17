@@ -14,6 +14,7 @@ import { useEffect, useState } from "react";
 import type { Case } from "./types.js";
 import * as api from "./api.js";
 import { demoSuggestions, intentLabel, type DemoSuggestion } from "./demoSuggestions.js";
+import { SCENARIOS } from "./scenarios.js";
 
 interface Props {
   c: Case;
@@ -40,6 +41,54 @@ function completedSteps(c: Case): { label: string; done: boolean }[] {
   // The current frontier step is "in progress", not done.
   if (steps.length > 0) steps[steps.length - 1]!.done = false;
   return steps;
+}
+
+interface RetrievalStatus { status: string; sourceCount: number; acceptedFindings: number; limitations: string[] }
+interface CodingStatus { status: string; attached: number }
+
+/** What the latest round's retrieval and coding steps actually produced. */
+function roundTools(c: Case): { retrieval?: RetrievalStatus; coding?: CodingStatus } {
+  const out: { retrieval?: RetrievalStatus; coding?: CodingStatus } = {};
+  for (const e of c.events) {
+    if (e.round !== c.round || !e.payload || typeof e.payload !== "object") continue;
+    const p = e.payload as { retrieval?: RetrievalStatus; coding?: CodingStatus };
+    if (p.retrieval) out.retrieval = p.retrieval;
+    if (p.coding) out.coding = p.coding;
+  }
+  return out;
+}
+
+function RoundToolStatus({ c }: { c: Case }) {
+  const { retrieval, coding } = roundTools(c);
+  if (c.round === 0 || (!retrieval && !coding)) return null;
+  const degraded = retrieval && retrieval.status !== "ready";
+  return (
+    <div className={`round-tools ${degraded ? "degraded" : ""}`} role="status">
+      {retrieval && (
+        <div>
+          <strong>Round {c.round} evidence:</strong>{" "}
+          {retrieval.status === "unavailable" || retrieval.sourceCount === 0
+            ? "no new web literature was retrieved. Ranking may still use earlier sources, findings and local population references."
+            : `${retrieval.sourceCount} source(s), ${retrieval.acceptedFindings} passage-checked finding(s)${retrieval.status === "partial" ? " — partial; some claims could not be checked" : ""}. Quotation checks show provenance, not clinical validity.`}
+          {retrieval.limitations.length > 0 && (
+            <details className="small"><summary>Limitations ({retrieval.limitations.length})</summary>
+              <ul>{retrieval.limitations.map((l, i) => <li key={i}>{l}</li>)}</ul>
+            </details>
+          )}
+        </div>
+      )}
+      {coding && (
+        <div>
+          <strong>Coding (temporary adapter):</strong>{" "}
+          {coding.status === "unavailable"
+            ? "unavailable this round; no codes attached."
+            : coding.attached > 0
+              ? `${coding.attached} ICD-10-GM suggestion(s) verified against the official catalogue. A coding suggestion is not a confirmed diagnosis.`
+              : "no patient code attached; suggestions may require clarification. Suspected diagnoses are not coded as confirmed."}
+        </div>
+      )}
+    </div>
+  );
 }
 
 export function NextAction({ c, onUpdated, busy, setBusy, onNewCase }: Props) {
@@ -70,8 +119,13 @@ export function NextAction({ c, onUpdated, busy, setBusy, onNewCase }: Props) {
   const steps = completedSteps(c);
   const stage = stageLabel(c);
   const awaitingTest = c.awaitingHitl && !c.pendingDiagnosis;
+  // Clinicians can record findings at any open stage, not only at a test gate.
+  // A proposed diagnosis can only be reconsidered by adding a finding first.
+  const findingOpen = !c.workingDiagnosis && (awaitingTest || !!c.pendingDiagnosis || c.round > 0 || !!c.forkOrigin);
   const selectedTest = pendingTests.find((t) => t.id === testId) ?? pendingTests[0];
   const suggestions = demoSuggestions(c, selectedTest?.id);
+  const preset = SCENARIOS.find((s) => s.liveDemo && c.title.replace(/^What-if: /, "") === s.title);
+  const resultSheet = !c.forkOrigin ? preset?.syntheticResults ?? [] : [];
   const diagnosisCandidate = c.pendingDiagnosis
     ? c.hypotheses[c.pendingDiagnosis.hypothesisId]
     : Object.values(c.hypotheses).filter((h) => h.status === "live").sort((a, b) => b.probability - a.probability)[0];
@@ -192,6 +246,8 @@ export function NextAction({ c, onUpdated, busy, setBusy, onNewCase }: Props) {
         Round {c.round || 0} · <span className="na-stage-label">{stage}</span>
       </div>
 
+      <RoundToolStatus c={c} />
+
       {/* the prominent next-action card */}
       <div className="na-card">
         {awaitingTest ? (
@@ -260,7 +316,7 @@ export function NextAction({ c, onUpdated, busy, setBusy, onNewCase }: Props) {
               <button onClick={diagnose} disabled={busy || !diagnosisCandidate}>
                 {c.pendingDiagnosis ? "Confirm proposed working dx" : "Confirm leading working dx"}
               </button>
-              <button className="ghost" onClick={advance} disabled={busy}>Continue reasoning</button>
+              {c.pendingDiagnosis && <span className="muted small">To reconsider instead, add a finding below and advance.</span>}
             </>
           )
         ) : c.status === "treatment" || c.status === "closed" ? (
@@ -289,9 +345,9 @@ export function NextAction({ c, onUpdated, busy, setBusy, onNewCase }: Props) {
       </div>
 
       {/* inline HITL finding form, co-located with the gate */}
-      {(awaitingTest || (c.forkOrigin && !c.workingDiagnosis)) && (
+      {findingOpen && (
         <div className="na-finding">
-          <div className="na-finding-head">{c.forkOrigin ? 'Enter a hypothetical finding' : 'Enter the test result'}</div>
+          <div className="na-finding-head">{c.forkOrigin ? 'Enter a hypothetical finding' : awaitingTest ? 'Enter the test result' : 'Add a clinician finding'}</div>
           {c.forkOrigin && <p className="small muted">Assumed for this exploration only, not an actual patient result.</p>}
           {pendingTests.length > 0 && (
             <select value={testId} onChange={(e) => setTestId(e.target.value)}>
@@ -304,8 +360,8 @@ export function NextAction({ c, onUpdated, busy, setBusy, onNewCase }: Props) {
           )}
           {awaitingTest && suggestions.length > 0 && (
             <div className="demo-suggestions">
-              <div className="demo-suggestions-label label-caps">Example results for this demo</div>
-              <p className="small muted">Synthetic examples. Clicking records the example and advances the reasoning.</p>
+              <div className="demo-suggestions-label label-caps">Synthetic example results</div>
+              <p className="small muted">Generated from the current tree, not real test output. Clicking records it (prefixed “Synthetic demo result”) and runs a live round. To enter your own synthetic result, type it below.</p>
               <div className="demo-suggestions-row">
                 {suggestions.map((example) => (
                   <button
@@ -320,6 +376,15 @@ export function NextAction({ c, onUpdated, busy, setBusy, onNewCase }: Props) {
                   </button>
                 ))}
               </div>
+            </div>
+          )}
+          {resultSheet.length > 0 && (
+            <div className="result-sheet">
+              <div className="demo-suggestions-label label-caps">Synthetic result sheet (live demo preset)</div>
+              <p className="small muted">Fills the form only. Check it matches the proposed test, set the direction, then submit it yourself.</p>
+              {resultSheet.map((text) => (
+                <button key={text} type="button" className="ghost" disabled={busy} onClick={() => setSummary(text)}>{text}</button>
+              ))}
             </div>
           )}
           <input

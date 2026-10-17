@@ -11,7 +11,6 @@
  */
 
 import { TUTORIAL_STEPS } from "./tutorialCase.js";
-import { demoSuggestions, intentLabel } from "./demoSuggestions.js";
 
 interface Props {
   step: number;
@@ -24,7 +23,10 @@ export function TutorialRail({ step, onStep, onExitToLive }: Props) {
   const total = TUTORIAL_STEPS.length;
   const isLast = step === total - 1;
   const isGate = s.spotlight === "hitl-gate";
-  const suggestions = demoSuggestions(s.case);
+  // The tour has exactly one scripted result: the finding the next canned step adds.
+  const next = TUTORIAL_STEPS[step + 1]?.case;
+  const known = new Set(s.case.findings.map((f) => f.id));
+  const scriptedResult = isGate ? next?.findings.find((f) => !known.has(f.id)) : undefined;
   const proposedTest = s.case.tests.find((t) => t.status === "proposed" || t.status === "ordered");
 
   const cue =
@@ -83,23 +85,11 @@ export function TutorialRail({ step, onStep, onExitToLive }: Props) {
         </div>
       </div>
 
-      {isGate && suggestions.length > 0 && (
+      {isGate && scriptedResult && (
         <div className="demo-suggestions">
-          <div className="demo-suggestions-label label-caps">Example results for this demo</div>
-          <p className="small muted">Illustrative choices. All continue to the same scripted result in this guided tour.</p>
-          <div className="demo-suggestions-row">
-            {suggestions.map((example) => (
-              <button
-                key={example.intent}
-                className={`demo-chip ${example.intent}`}
-                title={intentLabel(example.intent)}
-                onClick={() => onStep(step + 1)}
-              >
-                <span className="demo-chip-badge">{example.badge}</span>
-                <span className="demo-chip-hint">{example.hint}</span>
-              </button>
-            ))}
-          </div>
+          <div className="demo-suggestions-label label-caps">Scripted result in this tour</div>
+          <p className="small muted">Synthetic and pre-written. In a live case the clinician types the actual result; nothing here is generated.</p>
+          <div className="tut-scripted-result"><strong>{scriptedResult.summary}</strong>{scriptedResult.detail && <span className="small muted"> — {scriptedResult.detail}</span>}</div>
         </div>
       )}
 
@@ -110,7 +100,7 @@ export function TutorialRail({ step, onStep, onExitToLive }: Props) {
         </button>
         {isGate ? (
           <button onClick={() => onStep(step + 1)}>
-            Enter result &amp; advance →
+            Enter scripted result &amp; advance →
           </button>
         ) : isLast ? (
           <button className="ghost" onClick={onExitToLive}>

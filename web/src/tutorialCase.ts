@@ -328,7 +328,7 @@ const step3: Case = {
       source: "clinician",
       hypothesisIds: [H.arf, H.psra],
       detail: "Positive strep evidence supports the post-streptococcal track and down-weights viral arthralgia.",
-      citation: { label: "Jones criteria, AHA 2024", url: "https://doi.org/10.1161/CIR.0000000000000512" },
+      citation: { label: "Jones criteria revision, AHA 2015", url: "https://doi.org/10.1161/CIR.0000000000000205" },
     }),
   ],
   tests: [
@@ -399,7 +399,7 @@ const step5: Case = {
       source: "clinician",
       hypothesisIds: [H.arf],
       detail: "Carditis — a major Jones criterion. Together with migratory polyarthritis and raised ASO, confirms ARF.",
-      citation: { label: "Jones criteria — carditis", url: "https://doi.org/10.1161/CIR.0000000000000512" },
+      citation: { label: "Jones criteria revision, AHA 2015 — carditis", url: "https://doi.org/10.1161/CIR.0000000000000205" },
     }),
   ],
   tests: [
@@ -439,7 +439,7 @@ const step6: Case = {
       {
         title: "High-dose aspirin / NSAID for arthritis",
         detail: "Anti-inflammatory dosing until symptoms and inflammatory markers settle.",
-        citation: { label: "AHA ARF management", url: "https://doi.org/10.1161/CIR.0000000000000512" },
+        citation: { label: "AHA 2015 statement (diagnosis, not a treatment guideline)", url: "https://doi.org/10.1161/CIR.0000000000000205" },
       },
       {
         title: "Penicillin — eradication + secondary prophylaxis",
@@ -454,9 +454,9 @@ const step6: Case = {
       summary:
         "Valvular sequelae of ARF may need valve repair. Case-finding of where mitral valve repair for rheumatic disease is performed:",
       sites: [
-        { label: "Rheumatic valve repair — Indian Heart Rhythm Society", url: "https://example.org/rheumatic-valve-repair" },
-        { label: "RHD registry — World Heart Federation", url: "https://example.org/whf-rhd" },
-        { label: "Local cardiac surgery (Minneapolis)", note: "closest to the patient" },
+        { label: "Rheumatic mitral valve repair centres", note: "illustrative placeholder — no source retrieved in the guided tour" },
+        { label: "Rheumatic heart disease registry", note: "illustrative placeholder — no source retrieved in the guided tour" },
+        { label: "Local cardiac surgery (Minneapolis)", note: "illustrative placeholder — closest to the patient" },
       ],
     },
     createdAt: "",
@@ -486,7 +486,7 @@ export const TUTORIAL_STEPS: TutorialStep[] = [
     label: "Test gate",
     stage: "awaiting your test result",
     caption:
-      "The engine proposes the test that best splits the remaining differential — a rapid strep test + ASO titre. This is the human-in-the-loop gate: the agent proposes, the clinician orders it and enters the result. (In this tutorial, the result is scripted — click “Enter result & advance” to continue.)",
+      "The engine proposes the test that best splits the remaining differential — a rapid strep test + ASO titre. This is the human-in-the-loop gate: the agent proposes, the clinician orders it and enters the result. (In this tutorial, the result is scripted — click “Enter scripted result & advance” to continue.)",
     spotlight: "hitl-gate",
   },
   {

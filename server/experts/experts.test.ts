@@ -78,3 +78,35 @@ test('already-cancelled work makes no provider call',async()=>{
 test('DDG targets decode redirects and discard unrelated hosts',()=>{
   assert.deepEqual(duckDuckGoTargets(`<a href="//duckduckgo.com/l/?uddg=${encodeURIComponent(fixturePage.url)}&amp;x=y">a</a><a href="https://evil.test">b</a>`),[fixturePage.url]);
 });
+
+test('medical evidence falls back to inspected allowlisted DDG pages without treating snippets as evidence', async () => {
+  const url = 'https://www.nice.org.uk/guidance/fixture';
+  const calls: string[] = [];
+  const result = await retrievePages(['sore throat'], false, { tavilyKey: '', fetcher: (async (input) => {
+    const target = String(input); calls.push(target);
+    if (target.startsWith('https://html.duckduckgo.com')) return new Response(`<a href="${url}">Discovery snippet only</a><a href="https://evil.test">discard</a>`);
+    assert.equal(target, url);
+    return new Response('<h1>Source fixture</h1><p>This inspected passage is synthetic source content for the retrieval test.</p>');
+  }) as typeof fetch });
+  assert.equal(result.pages[0]?.url, url);
+  assert.match(result.pages[0]!.text, /inspected passage/);
+  assert.equal(result.pages[0]!.text.includes('Discovery snippet'), false);
+  assert.deepEqual(result.providers, ['duckduckgo', 'direct']);
+  assert.equal(calls.some(target => target.startsWith('https://evil.test')), false);
+});
+
+test('medical fallback rejects off-policy redirects, binary content and bot challenges', async () => {
+  const url = 'https://www.nice.org.uk/guidance/fixture';
+  for (const mode of ['redirect', 'binary', 'challenge']) {
+    const calls: string[] = [];
+    const result = await retrievePages(['sore throat'], false, { tavilyKey: '', fetcher: (async (input) => {
+      const target = String(input); calls.push(target);
+      if (target.startsWith('https://html.duckduckgo.com')) return new Response(mode === 'challenge' ? '<form id="challenge-form">Unfortunately, bots</form>' : `<a href="${url}">source</a>`);
+      assert.equal(target, url);
+      return mode === 'redirect' ? new Response(null, { status: 302, headers: { location: 'https://evil.test' } })
+        : new Response('Binary data cannot support an inspected HTML passage.', { headers: { 'Content-Type': 'application/pdf' } });
+    }) as typeof fetch });
+    assert.equal(result.pages.length, 0);
+    assert.equal(calls.some(target => target.startsWith('https://evil.test')), false);
+  }
+});

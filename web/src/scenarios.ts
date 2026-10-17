@@ -7,6 +7,7 @@
  */
 
 import type { Presentation } from "./types.js";
+import { GOLDEN_BREATHLESSNESS, GOLDEN_CHEST_PAIN, GOLDEN_DYSURIA } from "./goldenScenarios.js";
 
 export interface Scenario {
   id: string;
@@ -20,6 +21,19 @@ export interface Scenario {
    */
   tutorial?: boolean;
   liveScenarioId?: string;
+  /** The recommended live demo: real Claude/Tavily calls on a synthetic patient. */
+  liveDemo?: boolean;
+  /**
+   * Synthetic results a presenter may type at the test gate. They are not
+   * canned: the live model chooses the tests, and only the clinician records
+   * a result.
+   */
+  syntheticResults?: string[];
+  /**
+   * Set for the team's golden examples: the presentation is the request file's
+   * `presentation`, unchanged (see goldenScenarios.ts).
+   */
+  golden?: { requestId: string; sourceFile: string };
 }
 
 export const SCENARIOS: Scenario[] = [
@@ -48,11 +62,18 @@ export const SCENARIOS: Scenario[] = [
       },
     },
   },
+  GOLDEN_BREATHLESSNESS,
   {
     id: "scn-walkthrough-strep",
-    title: "Quick walk-through: sore throat + fever (1–2 rounds)",
+    title: "Live demo preset ★ — synthetic sore throat + fever",
     blurb:
-      "A second short, clear-cut case to run end-to-end. The engine proposes a rapid strep test; enter the result and watch it converge in 1–2 rounds.",
+      "Synthetic patient, real API calls. Claude and Tavily run each round live; you type the synthetic test results yourself. Usually converges in 1–3 rounds; the model chooses which test to propose.",
+    liveDemo: true,
+    syntheticResults: [
+      "Rapid antigen test for group A streptococcus: positive (synthetic)",
+      "Throat culture: group A streptococcus grown (synthetic)",
+      "Monospot / EBV serology: negative (synthetic)",
+    ],
     presentation: {
       chiefComplaint: "Sore throat and fever for 2 days",
       history:
@@ -70,6 +91,8 @@ export const SCENARIOS: Scenario[] = [
       },
     },
   },
+  GOLDEN_CHEST_PAIN,
+  GOLDEN_DYSURIA,
   {
     id: "scn-fever-rash",
     title: "Fever + migrating joint pain (a young adult)",
@@ -97,7 +120,7 @@ export const SCENARIOS: Scenario[] = [
     id: "scn-fat-anemia",
     title: "Fatigue + microcytic anemia (a 58-year-old woman)",
     blurb:
-      "Iron deficiency from menorrhagia is the obvious horse — but the geography and ethnicity raise a hemoglobinopathy and a GI-malignancy track to branch.",
+      "Iron deficiency is the obvious horse — but with no menstrual losses after menopause, a GI-blood-loss track and a hemoglobinopathy track are worth branching.",
     presentation: {
       chiefComplaint: "Progressive fatigue and shortness of breath on exertion for 3 months",
       history:

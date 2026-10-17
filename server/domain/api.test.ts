@@ -305,3 +305,19 @@ test('hypothetical findings never authorize a documented patient coding assignme
     assert.ok(!codingInputs.some((value) => value.includes('Assumed diagnosis solely')));
   });
 });
+
+test('a failed evidence pass and unavailable coding are recorded for the round, not silently dropped', async () => {
+  const c = caseOf();
+  const failedCodes = async (request: { requestId: string; hypotheses?: { id: string; name: string }[] }) => ({
+    requestId: request.requestId, system: 'ICD-10-GM' as const, edition: '2026' as const, searchProvidersUsed: [], limitations: [],
+    results: (request.hypotheses ?? []).map((h) => ({ condition: h.name, hypothesisId: h.id, status: 'unavailable' as const, code: null, officialLabel: null, rationale: 'offline', inputRefs: [], references: [], clarificationQuestions: [] })),
+  });
+  await serve({ ...mockServices, assignMedicalCodes: failedCodes, runRound: async (draft) => proposed(draft), annotateRarity: () => {} }, async (url) => {
+    assert.equal((await post(`${url}/api/cases/${c.id}/advance`)).status, 200);
+    const payloads = c.events.filter((e) => e.round === c.round).map((e) => e.payload as Record<string, any> | undefined);
+    const retrieval = payloads.find((p) => p?.retrieval)?.retrieval;
+    assert.deepEqual(retrieval, { status: 'unavailable', sourceCount: 0, acceptedFindings: 0, limitations: ['Mock retrieval unavailable'] });
+    assert.deepEqual(payloads.find((p) => p?.coding)?.coding, { status: 'unavailable', attached: 0 });
+    assert.ok(Object.values(c.hypotheses).every((h) => !h.codes?.length));
+  });
+});
