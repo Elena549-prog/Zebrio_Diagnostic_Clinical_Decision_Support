@@ -47,7 +47,7 @@ export function createClaudeModel(config: CodingConfig, injected?: Anthropic): C
   async function call<S extends z.ZodType>(system: string, user: string, schema: S, signal?: AbortSignal) {
     let response;
     try {
-      client ??= new Anthropic();
+      client ??= new Anthropic({ maxRetries: 2 });
       response = await client.beta.messages.parse(
         {
           model: config.model,
@@ -58,7 +58,7 @@ export function createClaudeModel(config: CodingConfig, injected?: Anthropic): C
           betas: ["server-side-fallback-2026-07-01"],
           fallbacks: "default",
         },
-        { signal, timeout: Math.max(config.timeoutMs, 120_000) },
+        { signal, timeout: config.claudeTimeoutMs },
       );
     } catch (err) {
       if (err instanceof Anthropic.AuthenticationError) throw new ModelUnavailableError("Claude API key rejected");

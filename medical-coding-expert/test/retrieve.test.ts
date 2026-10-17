@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { retrieveCatalogue } from "../src/retrieval/retrieve.ts";
-import { parseDuckDuckGoHtml } from "../src/retrieval/duckduckgo.ts";
+import { createDuckDuckGo, parseDuckDuckGoHtml } from "../src/retrieval/duckduckgo.ts";
 import { BLOCK_J40_J47, deps, err, fakeSearch, fakeTavily, testConfig } from "./helpers.ts";
 
 const Q = ["site:klassifikationen.bfarm.de Status asthmaticus J46"];
@@ -17,7 +17,7 @@ describe("retrieveCatalogue", () => {
 
   it("uses Tavily Extract content when it parses into entries", async () => {
     const tavily = fakeTavily([[BLOCK_J40_J47]], async () => [
-      { url: BLOCK_J40_J47, content: "#### J46\nStatus asthmaticus\nInkl.: Akutes schweres Asthma bronchiale" },
+      { url: BLOCK_J40_J47, content: "#### J46 Status asthmaticus\n\nInkl.:\n:   Akutes schweres Asthma bronchiale" },
     ]);
     const d = deps({ tavily });
     const out = await retrieveCatalogue(Q, d, testConfig);
@@ -92,9 +92,41 @@ describe("retrieveCatalogue", () => {
   });
 });
 
+describe("retrieveCatalogue per concept", () => {
+  it("falls back to DuckDuckGo only for the concept Tavily could not find", async () => {
+    const other = BLOCK_J40_J47.replace("block-j40-j47", "block-e10-e14");
+    const tavily = fakeTavily([[BLOCK_J40_J47], []]);
+    const duckduckgo = fakeSearch("duckduckgo", [[other]]);
+    const out = await retrieveCatalogue(["Status asthmaticus", "Diabetes mellitus Typ 2"], deps({ tavily, duckduckgo }), testConfig);
+    expect(tavily.calls).toEqual(["Status asthmaticus", "Diabetes mellitus Typ 2"]);
+    expect(duckduckgo.calls).toEqual(["Diabetes mellitus Typ 2"]);
+    expect(out.searchProvidersUsed).toEqual(["tavily", "duckduckgo"]);
+  });
+
+  it("searches at most maxSearchesPerProvider concepts and reports which", async () => {
+    const out = await retrieveCatalogue(["a", "b", "c"], deps(), testConfig);
+    expect(out.searchedTerms).toEqual(["a", "b"]);
+  });
+});
+
 describe("parseDuckDuckGoHtml", () => {
   it("decodes result redirects", () => {
     const html = `<a rel="nofollow" class="result__a" href="//duckduckgo.com/l/?uddg=${encodeURIComponent(BLOCK_J40_J47)}&amp;rut=x">J46</a>`;
     expect(parseDuckDuckGoHtml(html)).toEqual([BLOCK_J40_J47]);
+  });
+});
+
+describe("createDuckDuckGo", () => {
+  const respond = (status: number, body: string) => (async () => new Response(body, { status })) as unknown as typeof fetch;
+  const link = `<a class="result__a" href="//duckduckgo.com/l/?uddg=${encodeURIComponent(BLOCK_J40_J47)}">x</a>`;
+
+  it("does not mistake a result snippet mentioning 'challenge' for a block", async () => {
+    const ddg = createDuckDuckGo(respond(200, `${link}<p>a clinical challenge</p>`));
+    expect(await ddg.search("x", { timeoutMs: 1000 })).toEqual([BLOCK_J40_J47]);
+  });
+
+  it("reports a real challenge page as blocked", async () => {
+    const ddg = createDuckDuckGo(respond(202, `<form id="challenge-form"></form>`));
+    await expect(ddg.search("x", { timeoutMs: 1000 })).rejects.toMatchObject({ kind: "blocked" });
   });
 });

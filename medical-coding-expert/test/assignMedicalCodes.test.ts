@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { assignMedicalCodes, type AssignDeps } from "../src/assignMedicalCodes.ts";
+import { assignMedicalCodes, safeSearchTerms, type AssignDeps } from "../src/assignMedicalCodes.ts";
 import { ModelUnavailableError, type CodingModel, type InterpretedCondition, type Selection } from "../src/llm/model.ts";
 import type { CodingRequest } from "../src/types.ts";
 import { BLOCK_J40_J47, deps, err, fakeSearch, fakeTavily, testConfig } from "./helpers.ts";
@@ -162,5 +162,34 @@ describe("assignMedicalCodes", () => {
     };
     const out = await run(model);
     expect(out.limitations.join(" ")).toContain("fallback model claude-opus-4-8");
+  });
+
+  it("drops input and hypothesis ids the model invented", async () => {
+    const out = await run(fakeModel([cond({ inputRefs: ["ex1", "ex99"], hypothesisId: "h42" })], [sel()]));
+    expect(out.results[0]!.inputRefs).toEqual(["ex1"]);
+    expect(out.results[0]!.hypothesisId).toBeUndefined();
+  });
+
+  it("marks conditions beyond the search budget as unavailable instead of guessing", async () => {
+    const conditions = [
+      cond(),
+      cond({ condition: "B", searchTerms: "Bronchitis" }),
+      cond({ condition: "C", searchTerms: "Emphysem" }),
+    ];
+    const out = await run(fakeModel(conditions, [sel()]));
+    expect(out.results.map((r) => r.status)).toEqual(["assigned", "unavailable", "unavailable"]);
+    expect(out.results[1]!.rationale).toContain("No coding decision");
+    expect(out.results[2]!.rationale).toContain("budget");
+  });
+});
+
+describe("safeSearchTerms", () => {
+  it("keeps catalogue wording and drops long digit runs", () => {
+    expect(safeSearchTerms(cond({ searchTerms: "Status asthmaticus J46 20261017" }), request)).toBe("Status asthmaticus J46");
+  });
+
+  it("falls back to the condition name when terms copy the record", () => {
+    const leaky = cond({ searchTerms: "admitted with status asthmaticus, no response to salbutamol" });
+    expect(safeSearchTerms(leaky, request)).toBe("Status asthmaticus");
   });
 });

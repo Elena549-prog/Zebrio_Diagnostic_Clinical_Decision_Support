@@ -11,8 +11,10 @@ export interface CodingConfig {
   maxPages: number;
   /** Claude calls for one request (interpret + select). */
   maxClaudeTurns: number;
-  /** Per HTTP call. */
+  /** Per search/extract/fetch HTTP call. */
   timeoutMs: number;
+  /** Per Claude attempt; typical calls take ~4 s, the SDK retries a hung one twice. */
+  claudeTimeoutMs: number;
   /** Extra Tavily attempts on a transient error before falling back. */
   tavilyRetries: number;
 }
@@ -28,6 +30,7 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env, overrides: Part
     maxPages: 3,
     maxClaudeTurns: 4,
     timeoutMs: 20_000,
+    claudeTimeoutMs: 45_000,
     tavilyRetries: 1,
     ...overrides,
   };

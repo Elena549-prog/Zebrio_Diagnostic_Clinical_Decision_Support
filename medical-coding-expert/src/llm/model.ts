@@ -4,12 +4,12 @@
 
 import { z } from "zod";
 import type { CatalogueEntry } from "../catalogue.ts";
-import type { CodingRequest } from "../types.ts";
+import { ASSERTIONS, type CodingRequest } from "../types.ts";
 
 export const InterpretedConditionSchema = z.object({
   condition: z.string().describe("Short name of the condition as documented"),
   hypothesisId: z.string().nullable().describe("Matching hypothesis id, or null"),
-  assertion: z.enum(["documented", "suspected", "negated", "historical", "family_history", "literature_only"]),
+  assertion: z.enum(ASSERTIONS),
   inputRefs: z.array(z.string()).describe("Excerpt/evidence ids that mention this condition"),
   documentedSpecifics: z
     .string()

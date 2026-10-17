@@ -5,10 +5,13 @@ export interface CallOptions {
   signal?: AbortSignal;
 }
 
-/** Replaceable discovery adapter: returns candidate URLs, unfiltered. */
+/**
+ * Replaceable discovery adapter. Takes generic catalogue terms, builds its own
+ * provider-specific query, and returns candidate URLs, unfiltered.
+ */
 export interface SearchAdapter {
   name: SearchProvider;
-  search(query: string, opts: CallOptions): Promise<string[]>;
+  search(terms: string, opts: CallOptions): Promise<string[]>;
 }
 
 export interface ExtractedPage {

@@ -1,6 +1,6 @@
-// Discovery + page retrieval with the agreed fallback chain:
+// Discovery + page retrieval with the agreed fallback chain, per concept:
 //   Tavily Search (one retry on transient errors)
-//     -> DuckDuckGo HTML if Tavily is unusable or finds no allowed page
+//     -> DuckDuckGo HTML if Tavily is unusable or finds no usable page for that concept
 //   Tavily Extract for pages Tavily discovered
 //     -> direct HTTPS fetch if Extract fails or yields no parsable entries
 // Credits exhausted / bad key / no key disable Tavily for the rest of the process.
@@ -9,8 +9,8 @@ import { parseCatalogueHtml, parseCatalogueText, type CatalogueEntry } from "../
 import type { CodingConfig } from "../config.ts";
 import type { RetrievalProvider, SearchProvider } from "../types.ts";
 import { isAllowedCatalogueUrl, normalizeCatalogueUrl, toCurrentEditionUrl } from "../urlPolicy.ts";
-import { ProviderError, toProviderError } from "./errors.ts";
-import type { DirectFetcher, PageExtractor, SearchAdapter } from "./types.ts";
+import { toProviderError } from "./errors.ts";
+import type { CallOptions, DirectFetcher, PageExtractor, SearchAdapter } from "./types.ts";
 
 export interface ProviderState {
   tavilyDisabledReason?: string;
@@ -37,114 +37,101 @@ export interface RetrievedPage {
 export interface RetrievalOutcome {
   pages: RetrievedPage[];
   searchProvidersUsed: SearchProvider[];
+  /** Concepts that were searched; later ones exceeded the search budget. */
+  searchedTerms: string[];
   /** One line per notable failure, for the response's `limitations`. */
   notes: string[];
 }
 
-interface SearchRun {
-  urls: string[];
-  answered: boolean;
-  errors: ProviderError[];
+interface Located {
+  url: string;
+  /** Found via another edition's file name; must be fetched directly. */
+  mapped: boolean;
+  by: SearchProvider;
 }
 
-async function runSearches(
-  adapter: SearchAdapter,
-  queries: string[],
-  retries: number,
-  config: CodingConfig,
-  signal?: AbortSignal,
-): Promise<SearchRun> {
-  const run: SearchRun = { urls: [], answered: false, errors: [] };
-  for (const query of queries.slice(0, config.maxSearchesPerProvider)) {
-    for (let attempt = 0; attempt <= retries; attempt++) {
-      try {
-        run.urls.push(...(await adapter.search(query, { timeoutMs: config.timeoutMs, signal })));
-        run.answered = true;
-        break;
-      } catch (err) {
-        const pe = toProviderError(adapter.name, err);
-        if (pe.sticky || attempt === retries) {
-          run.errors.push(pe);
-          if (pe.sticky) return run;
-        }
-      }
-    }
-  }
-  return run;
-}
-
-interface Discovered {
-  /** Official 2026 pages found directly. */
-  pages: string[];
-  /** 2026 pages located via another edition's file name; need a direct fetch. */
-  mapped: string[];
-}
-
-function allowedPages(urls: string[]): Discovered {
-  const out: Discovered = { pages: [], mapped: [] };
+/** Keep official 2026 pages; map other editions of catalogue pages to their 2026 counterpart. */
+function locate(urls: string[], by: SearchProvider): Located[] {
+  const out: Located[] = [];
+  const add = (url: string, mapped: boolean) => {
+    if (!out.some((l) => l.url === url)) out.push({ url, mapped, by });
+  };
   for (const u of urls) {
-    if (isAllowedCatalogueUrl(u)) {
-      const page = normalizeCatalogueUrl(u);
-      if (!out.pages.includes(page)) out.pages.push(page);
-      continue;
-    }
-    const mapped = toCurrentEditionUrl(u);
-    if (mapped && !out.mapped.includes(mapped)) out.mapped.push(mapped);
+    if (isAllowedCatalogueUrl(u)) add(normalizeCatalogueUrl(u), false);
   }
-  out.mapped = out.mapped.filter((m) => !out.pages.includes(m));
+  for (const u of urls) {
+    const mapped = isAllowedCatalogueUrl(u) ? null : toCurrentEditionUrl(u);
+    if (mapped) add(mapped, true);
+  }
   return out;
 }
 
 export async function retrieveCatalogue(
-  queries: string[],
+  terms: string[],
   deps: RetrievalDeps,
   config: CodingConfig,
   signal?: AbortSignal,
 ): Promise<RetrievalOutcome> {
   const notes: string[] = [];
-  const used: SearchProvider[] = [];
-  let found: Discovered = { pages: [], mapped: [] };
-  let discoveredBy: SearchProvider | null = null;
-  const take = (provider: SearchProvider, urls: string[], answered: boolean) => {
-    found = allowedPages(urls);
-    if (found.pages.length || found.mapped.length) discoveredBy = provider;
-    else if (answered) notes.push(`${provider} returned no usable BfArM catalogue page`);
+  const used = new Set<SearchProvider>();
+  const opts: CallOptions = { timeoutMs: config.timeoutMs, signal };
+  const disableTavily = (reason: string) => {
+    deps.state.tavilyDisabledReason ??= reason;
   };
 
-  if (deps.state.tavilyDisabledReason) {
-    notes.push(`Tavily skipped: ${deps.state.tavilyDisabledReason}`);
-  } else {
-    const run = await runSearches(deps.tavily, queries, config.tavilyRetries, config, signal);
-    if (run.answered) used.push("tavily");
-    for (const e of run.errors) {
-      notes.push(e.message);
-      if (e.sticky) deps.state.tavilyDisabledReason = e.message;
+  async function searchConcept(adapter: SearchAdapter, term: string, retries: number): Promise<Located[]> {
+    for (let attempt = 0; attempt <= retries; attempt++) {
+      try {
+        const urls = await adapter.search(term, opts);
+        used.add(adapter.name);
+        const found = locate(urls, adapter.name);
+        if (!found.length) notes.push(`${adapter.name} found no usable BfArM catalogue page for "${term}"`);
+        return found;
+      } catch (err) {
+        const pe = toProviderError(adapter.name, err);
+        if (pe.sticky && adapter.name === "tavily") disableTavily(pe.message);
+        if (pe.sticky || attempt === retries) {
+          notes.push(pe.message);
+          return [];
+        }
+      }
     }
-    take("tavily", run.urls, run.answered);
+    return [];
   }
 
-  if (!discoveredBy) {
-    const run = await runSearches(deps.duckduckgo, queries, 0, config, signal);
-    if (run.answered) used.push("duckduckgo");
-    for (const e of run.errors) notes.push(e.message);
-    take("duckduckgo", run.urls, run.answered);
+  // 1. Discovery, per concept, within the per-provider search budget.
+  const searchedTerms = terms.slice(0, config.maxSearchesPerProvider);
+  const perTerm: Located[][] = [];
+  if (deps.state.tavilyDisabledReason) notes.push(`Tavily skipped: ${deps.state.tavilyDisabledReason}`);
+  for (const term of searchedTerms) {
+    let found: Located[] = [];
+    if (!deps.state.tavilyDisabledReason) found = await searchConcept(deps.tavily, term, config.tavilyRetries);
+    if (!found.length) found = await searchConcept(deps.duckduckgo, term, 0);
+    perTerm.push(found);
   }
 
-  const pageUrls = [...found.pages, ...found.mapped].slice(0, config.maxPages);
-  const mappedUsed = pageUrls.filter((u) => found.mapped.includes(u));
-  if (mappedUsed.length) {
+  // 2. Pick pages round-robin so every concept gets one before any gets two.
+  const chosen: Located[] = [];
+  for (let rank = 0; chosen.length < config.maxPages && perTerm.some((f) => f.length > rank); rank++) {
+    for (const found of perTerm) {
+      const l = found[rank];
+      if (l && chosen.length < config.maxPages && !chosen.some((c) => c.url === l.url)) chosen.push(l);
+    }
+  }
+  const mapped = chosen.filter((l) => l.mapped).map((l) => l.url);
+  if (mapped.length) {
     notes.push(
-      `Search only found other editions (e.g. preliminary "-vorab"); located the same page in the final 2026 catalogue and verified it there: ${mappedUsed.join(", ")}`,
+      `Search only found other editions (e.g. preliminary "-vorab"); located the same page in the final 2026 catalogue and verified it there: ${mapped.join(", ")}`,
     );
   }
-  const pages: RetrievedPage[] = [];
-  const pending = new Set(pageUrls);
-  const extractable = pageUrls.filter((u) => found.pages.includes(u));
 
-  if (discoveredBy === "tavily" && extractable.length && !deps.state.tavilyDisabledReason) {
+  // 3. Retrieval: Tavily Extract for Tavily-discovered official pages, else direct.
+  const pages: RetrievedPage[] = [];
+  const pending = new Set(chosen.map((l) => l.url));
+  const extractable = chosen.filter((l) => l.by === "tavily" && !l.mapped).map((l) => l.url);
+  if (extractable.length && !deps.state.tavilyDisabledReason) {
     try {
-      const extracted = await deps.tavily.extract(extractable, { timeoutMs: config.timeoutMs, signal });
-      for (const page of extracted) {
+      for (const page of await deps.tavily.extract(extractable, opts)) {
         if (!isAllowedCatalogueUrl(page.url)) continue;
         const url = normalizeCatalogueUrl(page.url);
         if (!pending.has(url)) continue;
@@ -156,18 +143,17 @@ export async function retrieveCatalogue(
     } catch (err) {
       const pe = toProviderError("tavily", err);
       notes.push(`Tavily Extract failed, using direct fetch: ${pe.message}`);
-      if (pe.sticky) deps.state.tavilyDisabledReason = pe.message;
+      if (pe.sticky) disableTavily(pe.message);
     }
   }
-
   for (const url of pending) {
     try {
-      const html = await deps.directFetch(url, { timeoutMs: config.timeoutMs, signal });
+      const html = await deps.directFetch(url, opts);
       pages.push({ url, retrievedAt: deps.now().toISOString(), provider: "direct", entries: parseCatalogueHtml(html) });
     } catch (err) {
       notes.push(toProviderError("direct", err).message);
     }
   }
 
-  return { pages, searchProvidersUsed: used, notes };
+  return { pages, searchProvidersUsed: [...used], searchedTerms, notes };
 }

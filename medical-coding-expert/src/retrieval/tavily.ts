@@ -1,7 +1,7 @@
 // Tavily Search + Extract, restricted to the BfArM catalogue host.
 // Docs: https://docs.tavily.com/documentation/api-reference/endpoint/search
 
-import { CATALOGUE_HOST } from "../urlPolicy.ts";
+import { CATALOGUE_HOST, CATALOGUE_PATH } from "../urlPolicy.ts";
 import { ProviderError, toProviderError, withTimeout } from "./errors.ts";
 import type { ExtractedPage, PageExtractor, SearchAdapter } from "./types.ts";
 
@@ -38,11 +38,12 @@ export function createTavily(apiKey: string | undefined, fetchImpl: typeof fetch
   return {
     name: "tavily",
 
-    async search(query, { timeoutMs, signal }) {
+    async search(terms, { timeoutMs, signal }) {
       const data = await post<{ results?: { url?: string }[] }>(
         "/search",
         {
-          query,
+          // Exact-path site query plus a hard domain restriction.
+          query: `site:${CATALOGUE_HOST}${CATALOGUE_PATH} ${terms}`,
           search_depth: "basic",
           max_results: 5,
           include_domains: [CATALOGUE_HOST],

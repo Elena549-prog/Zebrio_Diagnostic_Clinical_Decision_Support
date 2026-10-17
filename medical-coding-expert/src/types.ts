@@ -33,13 +33,8 @@ export type ResultStatus =
   | "unavailable";
 
 /** How the condition is mentioned in the supplied material. */
-export type Assertion =
-  | "documented"
-  | "suspected"
-  | "negated"
-  | "historical"
-  | "family_history"
-  | "literature_only";
+export const ASSERTIONS = ["documented", "suspected", "negated", "historical", "family_history", "literature_only"] as const;
+export type Assertion = (typeof ASSERTIONS)[number];
 
 export type RetrievalProvider = "tavily" | "direct";
 export type SearchProvider = "tavily" | "duckduckgo";

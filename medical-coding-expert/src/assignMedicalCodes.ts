@@ -11,7 +11,6 @@ import { createDuckDuckGo } from "./retrieval/duckduckgo.ts";
 import { processProviderState, retrieveCatalogue, type RetrievalDeps, type RetrievedPage } from "./retrieval/retrieve.ts";
 import { createTavily } from "./retrieval/tavily.ts";
 import type { Candidate, CodingRequest, CodingResponse, CodingResult, Reference } from "./types.ts";
-import { CATALOGUE_HOST } from "./urlPolicy.ts";
 
 export interface AssignDeps extends RetrievalDeps {
   model: CodingModel;
@@ -23,7 +22,7 @@ export interface AssignOptions {
   deps?: Partial<AssignDeps>;
 }
 
-const BASE_LIMITATIONS = [
+export const BASE_LIMITATIONS = [
   "Suggestions are source-checked against the BfArM ICD-10-GM 2026 catalogue; they do not confirm a diagnosis or certify billing compliance.",
   "German coding rules (Kodierrichtlinien), sequencing and secondary-diagnosis rules are not checked.",
   "Codes that need a 5th-digit modifier are returned as needs_clarification; combined modifier codes are not assembled.",
@@ -176,14 +175,49 @@ export function verifySelection(
   };
 }
 
-function searchQuery(c: InterpretedCondition): string {
-  const terms = c.searchTerms.replace(/[^\p{L}\p{N}.\-\s]/gu, " ").replace(/\s+/g, " ").trim().slice(0, 100);
-  // DuckDuckGo ignores site: filters with a path; the edition goes in as a term.
-  return `site:${CATALOGUE_HOST} htmlgm2026 ${terms}`;
+/** Entries sent to Claude for selection; a chapter page can hold hundreds. */
+const MAX_ENTRIES_FOR_SELECTION = 150;
+
+/**
+ * Web queries get generic catalogue wording only. Long digit runs (dates, ids)
+ * are dropped, and terms that copy record text fall back to the condition name.
+ */
+export function safeSearchTerms(c: InterpretedCondition, request: CodingRequest): string {
+  const normalize = (t: string) =>
+    t
+      .replace(/[^\p{L}\p{N}.\-\s]/gu, " ")
+      .replace(/\b\d{3,}\b/g, " ")
+      .replace(/\s+/g, " ")
+      .trim();
+  const clean = (t: string) => normalize(t).slice(0, 80);
+  const terms = clean(c.searchTerms);
+  const words = terms.toLowerCase().split(" ");
+  const record = [...request.excerpts, ...request.evidence].map((x) => normalize(x.text).toLowerCase());
+  const copiesRecord = words.some((_, i) => i + 5 <= words.length && record.some((r) => r.includes(words.slice(i, i + 5).join(" "))));
+  return copiesRecord || !terms ? clean(c.condition) : terms;
+}
+
+/** Model output may only point at IDs that exist in the request. */
+function keepKnownIds(conditions: InterpretedCondition[], request: CodingRequest): InterpretedCondition[] {
+  const inputIds = new Set([...request.excerpts, ...request.evidence].map((x) => x.id));
+  const hypothesisIds = new Set((request.hypotheses ?? []).map((h) => h.id));
+  return conditions.map((c) => ({
+    ...c,
+    inputRefs: c.inputRefs.filter((id) => inputIds.has(id)),
+    hypothesisId: c.hypothesisId && hypothesisIds.has(c.hypothesisId) ? c.hypothesisId : null,
+  }));
+}
+
+function resolveDeps(injected: Partial<AssignDeps> = {}): AssignDeps {
+  const base = defaultDeps();
+  const config = injected.config ?? base.config;
+  // An injected config must also reach the default Claude model.
+  const model = injected.model ?? (injected.config ? createClaudeModel(config) : base.model);
+  return { ...base, ...injected, config, model };
 }
 
 export async function assignMedicalCodes(request: CodingRequest, options: AssignOptions = {}): Promise<CodingResponse> {
-  const deps: AssignDeps = { ...defaultDeps(), ...options.deps } as AssignDeps;
+  const deps = resolveDeps(options.deps);
   const { signal } = options;
   const limitations = [...BASE_LIMITATIONS];
   const response: CodingResponse = {
@@ -198,6 +232,7 @@ export async function assignMedicalCodes(request: CodingRequest, options: Assign
   const fallbackNote = (servedBy?: string) => {
     if (servedBy) limitations.push(`A Claude refusal was handled by the server-side fallback model ${servedBy}.`);
   };
+  const unavailable = (c: InterpretedCondition, rationale: string): CodingResult => ({ ...baseResult(c), status: "unavailable", rationale });
 
   // 1. Interpret the documentation.
   let conditions: InterpretedCondition[];
@@ -205,22 +240,16 @@ export async function assignMedicalCodes(request: CodingRequest, options: Assign
     turns++;
     const out = await deps.model.interpret(request, signal);
     fallbackNote(out.servedByFallback);
-    conditions = out.conditions;
+    conditions = keepKnownIds(out.conditions, request);
   } catch (err) {
     if (!(err instanceof ModelUnavailableError)) throw err;
     limitations.push(`Claude unavailable: ${err.message}`);
-    response.results = (request.hypotheses ?? []).map((h) => ({
-      condition: h.name,
-      hypothesisId: h.id,
-      assertion: "suspected",
-      status: "unavailable",
-      code: null,
-      officialLabel: null,
-      rationale: "The documentation could not be interpreted, so nothing was coded.",
-      inputRefs: [],
-      references: [],
-      clarificationQuestions: [],
-    }));
+    response.results = (request.hypotheses ?? []).map((h) =>
+      unavailable(
+        { condition: h.name, hypothesisId: h.id, assertion: "suspected", inputRefs: [], documentedSpecifics: "", searchTerms: "" },
+        "The documentation could not be interpreted, so nothing was coded.",
+      ),
+    );
     return response;
   }
 
@@ -229,35 +258,39 @@ export async function assignMedicalCodes(request: CodingRequest, options: Assign
     const reason = NOT_CODED[c.assertion];
     return reason ? { ...baseResult(c), status: "no_supported_code", rationale: reason } : null;
   });
-  const toCode = conditions.map((c, i) => ({ c, i })).filter(({ i }) => results[i] === null);
+  const pendingConditions = conditions
+    .map((c, i) => ({ c, i, terms: safeSearchTerms(c, request) }))
+    .filter(({ i }) => results[i] === null);
 
-  if (toCode.length) {
+  if (pendingConditions.length) {
     // 3. Retrieve official pages (bounded across the whole request).
-    const queries = [...new Set(toCode.map(({ c }) => searchQuery(c)))];
-    const retrieval = await retrieveCatalogue(queries, deps, deps.config, signal);
+    const retrieval = await retrieveCatalogue([...new Set(pendingConditions.map((p) => p.terms))], deps, deps.config, signal);
     response.searchProvidersUsed = retrieval.searchProvidersUsed;
     limitations.push(...retrieval.notes);
-    if (queries.length > deps.config.maxSearchesPerProvider) {
-      limitations.push(`Only the first ${deps.config.maxSearchesPerProvider} conditions were searched (search budget).`);
-    }
+
+    const toCode = pendingConditions.filter(({ c, i, terms }) => {
+      if (retrieval.searchedTerms.includes(terms)) return true;
+      results[i] = unavailable(c, `Not searched: the per-request budget of ${deps.config.maxSearchesPerProvider} concept searches was used up.`);
+      return false;
+    });
     const index = indexEntries(retrieval.pages);
 
-    if (!index.size) {
+    if (toCode.length && !index.size) {
       for (const { c, i } of toCode) {
-        results[i] = {
-          ...baseResult(c),
-          status: "unavailable",
-          rationale: "No official BfArM ICD-10-GM 2026 entry could be retrieved, so no code is suggested.",
-        };
+        results[i] = unavailable(c, "No official BfArM ICD-10-GM 2026 entry could be retrieved, so no code is suggested.");
       }
-    } else if (turns >= deps.config.maxClaudeTurns) {
+    } else if (toCode.length && turns >= deps.config.maxClaudeTurns) {
       limitations.push("Claude turn budget exhausted before code selection.");
-    } else {
+    } else if (toCode.length) {
       // 4. Claude selects among retrieved entries; code verifies.
+      const entries = [...index.values()].map((v) => v.entry);
+      if (entries.length > MAX_ENTRIES_FOR_SELECTION) {
+        limitations.push(`Only the first ${MAX_ENTRIES_FOR_SELECTION} of ${entries.length} retrieved entries were offered for selection.`);
+      }
       try {
         turns++;
         const out = await deps.model.select(
-          { conditions: toCode.map(({ c }) => c), entries: [...index.values()].map((v) => v.entry) },
+          { conditions: toCode.map(({ c }) => c), entries: entries.slice(0, MAX_ENTRIES_FOR_SELECTION) },
           signal,
         );
         fallbackNote(out.servedByFallback);
@@ -269,9 +302,7 @@ export async function assignMedicalCodes(request: CodingRequest, options: Assign
         limitations.push(`Claude unavailable during code selection: ${err.message}`);
       }
     }
-    for (const { c, i } of toCode) {
-      results[i] ??= { ...baseResult(c), status: "unavailable", rationale: "Code selection did not complete." };
-    }
+    for (const { c, i } of toCode) results[i] ??= unavailable(c, "Code selection did not complete.");
   }
 
   response.results = results as CodingResult[];

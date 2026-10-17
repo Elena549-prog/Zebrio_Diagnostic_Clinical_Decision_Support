@@ -1,6 +1,6 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
-import { normalizeCode, parseCatalogueHtml, parseCatalogueText } from "../src/catalogue.ts";
+import { decodeEntities, normalizeCode, parseCatalogueHtml, parseCatalogueText } from "../src/catalogue.ts";
 
 const html = readFileSync(new URL("./fixtures/pages/block-j40-j47.htm", import.meta.url), "utf8");
 
@@ -34,21 +34,31 @@ describe("parseCatalogueHtml (real BfArM 2026 page J40-J47)", () => {
   });
 });
 
-describe("parseCatalogueText (markdown-ish extract)", () => {
-  it("splits on lines that start with a code", () => {
-    const text = [
-      "#### [J45.9-](https://x#J45.9) Asthma bronchiale, nicht näher bezeichnet",
-      "Inkl.: Late-Onset-Asthma",
-      "#### J46",
-      "Status asthmaticus",
-      "Inkl.: Akutes schweres Asthma bronchiale",
-      "Siehe auch (J45.-) für weitere",
-    ].join("\n");
-    const entries = parseCatalogueText(text);
-    expect(entries.map((e) => [e.displayCode, e.label, e.entryKind])).toEqual([
-      ["J45.9-", "Asthma bronchiale, nicht näher bezeichnet", "category"],
-      ["J46", "Status asthmaticus", "terminal"],
-    ]);
+const tavilyMarkdown = readFileSync(new URL("./fixtures/pages/block-j40-j47.tavily.md", import.meta.url), "utf8");
+
+describe("parseCatalogueText (real Tavily Extract markdown of the same page)", () => {
+  const entries = parseCatalogueText(tavilyMarkdown);
+  const byCode = new Map(entries.map((e) => [e.code, e]));
+
+  it("finds the same entries as the HTML parser", () => {
+    expect(entries.map((e) => e.displayCode)).toEqual(parseCatalogueHtml(html).map((e) => e.displayCode));
+  });
+
+  it("agrees with the HTML parser on labels and kinds", () => {
+    for (const e of parseCatalogueHtml(html)) {
+      expect([byCode.get(e.code)?.label, byCode.get(e.code)?.entryKind]).toEqual([e.label, e.entryKind]);
+    }
+  });
+
+  it("never starts an entry from a cross-reference in a note or bullet", () => {
+    const tricky = ["#### J45.- Asthma bronchiale", "Exkl.:", ":   Status asthmaticus ([J46](#J46))", "J46 Fake label on its own line", "* J46 also fake"].join("\n");
+    expect(parseCatalogueText(tricky).map((e) => e.code)).toEqual(["J45"]);
+  });
+});
+
+describe("decodeEntities", () => {
+  it("does not double-decode and handles hex entities", () => {
+    expect(decodeEntities("&amp;lt; &#x00E4; &#228;")).toBe("&lt; ä ä");
   });
 });
 

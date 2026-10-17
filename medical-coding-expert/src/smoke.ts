@@ -3,7 +3,7 @@
 // Run 1: normal chain (Tavily first). Run 2: Tavily forced off to exercise
 // the DuckDuckGo fallback live.
 import { existsSync, readFileSync } from "node:fs";
-import { assignMedicalCodes, defaultDeps } from "./assignMedicalCodes.ts";
+import { assignMedicalCodes, BASE_LIMITATIONS, defaultDeps } from "./assignMedicalCodes.ts";
 import type { CodingRequest, CodingResponse } from "./types.ts";
 
 if (existsSync(".env")) process.loadEnvFile(".env");
@@ -17,7 +17,7 @@ function summary(label: string, r: CodingResponse) {
     console.log(`- ${x.condition} [${x.assertion}] -> ${x.status} ${x.code ?? ""} ${x.officialLabel ?? ""}`);
     for (const ref of x.references) console.log(`    ${ref.url} via ${ref.retrievalProvider}`);
   }
-  const extra = r.limitations.slice(3);
+  const extra = r.limitations.slice(BASE_LIMITATIONS.length);
   if (extra.length) console.log(`notes:\n  ${extra.join("\n  ")}`);
 }
 

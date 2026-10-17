@@ -21,12 +21,13 @@ const CODE_RE = /^[A-Z]\d{2}(?:\.\d{1,2})?$/;
 export function decodeEntities(text: string): string {
   return text
     .replace(/&nbsp;/g, " ")
-    .replace(/&amp;/g, "&")
     .replace(/&lt;/g, "<")
     .replace(/&gt;/g, ">")
     .replace(/&quot;/g, '"')
     .replace(/&#39;|&apos;/g, "'")
-    .replace(/&#(\d+);/g, (_, n: string) => String.fromCodePoint(Number(n)));
+    .replace(/&#x([0-9a-f]+);/gi, (_, n: string) => String.fromCodePoint(parseInt(n, 16)))
+    .replace(/&#(\d+);/g, (_, n: string) => String.fromCodePoint(Number(n)))
+    .replace(/&amp;/g, "&"); // last, so "&amp;lt;" stays "&lt;"
 }
 
 function htmlToText(html: string): string {
@@ -41,6 +42,17 @@ function htmlToText(html: string): string {
     .map((line) => line.replace(/\s+/g, " ").trim())
     .filter(Boolean)
     .join("\n");
+}
+
+function makeEntry(code: string, displayCode: string, label: string, notes: string): CatalogueEntry {
+  return {
+    code,
+    displayCode,
+    label,
+    entryKind: kindOf(displayCode),
+    notes,
+    passage: [`${displayCode} ${label}`, notes].filter(Boolean).join("\n"),
+  };
 }
 
 function kindOf(displayCode: string): EntryKind {
@@ -64,70 +76,40 @@ export function parseCatalogueHtml(html: string): CatalogueEntry[] {
     if (!labelMatch) return;
     const label = htmlToText(labelMatch[1]!).replace(/\n/g, " ");
     const afterLabel = chunk.slice(labelMatch.index! + labelMatch[0].length);
-    const notes = htmlToText(afterLabel);
-    entries.push({
-      code,
-      displayCode,
-      label,
-      entryKind: kindOf(displayCode),
-      notes,
-      passage: [`${displayCode} ${label}`, notes].filter(Boolean).join("\n"),
-    });
+    entries.push(makeEntry(code, displayCode, label, htmlToText(afterLabel)));
   });
   return entries;
 }
 
 /**
- * Best-effort parse of extracted page text/markdown (Tavily Extract).
- * An entry starts at a line that begins with a code; its label is the rest of
- * that line or the next non-empty line.
+ * Parse Tavily Extract markdown. Entries are markdown headings such as
+ * "#### J46 Status asthmaticus" or "##### J45.0- Vorwiegend allergisches ...".
+ * Only headings start an entry, so cross-references in notes and bullet lists
+ * ("([J46](#J46))") can never be mistaken for one.
  */
-export function parseCatalogueText(text: string): CatalogueEntry[] {
-  const lines = text
-    .split("\n")
-    .map((l) =>
-      l
-        .replace(/\[([^\]]*)\]\([^)]*\)/g, "$1") // markdown links -> text
-        .replace(/^[#>*\-\s|]+/, "") // heading/list/table markers
-        .replace(/[*_|]+/g, " ")
-        .replace(/\s+/g, " ")
-        .trim(),
-    )
-    .filter(Boolean);
-
-  const startRe = /^([A-Z]\d{2}(?:\.\d{1,2})?)(-?)(?:\s+(.*))?$/;
-  const starts: number[] = [];
+export function parseCatalogueText(markdown: string): CatalogueEntry[] {
+  const lines = markdown.split("\n");
+  const heading = /^#{3,6}\s+([A-Z]\d{2}(?:\.\d{1,2})?)(\.?-)?\s+(.+?)\s*$/;
+  const starts: { i: number; m: RegExpMatchArray }[] = [];
   lines.forEach((line, i) => {
-    if (startRe.test(line)) starts.push(i);
+    const m = line.match(heading);
+    if (m) starts.push({ i, m });
   });
-
-  const entries: CatalogueEntry[] = [];
-  starts.forEach((s, k) => {
-    const m = lines[s]!.match(startRe)!;
-    const code = m[1]!;
-    const displayCode = code + m[2];
-    const end = starts[k + 1] ?? lines.length;
-    let label = (m[3] ?? "").trim();
-    let noteStart = s + 1;
-    if (!label && s + 1 < end) {
-      label = lines[s + 1]!;
-      noteStart = s + 2;
-    }
-    if (!label) return;
-    const notes = lines.slice(noteStart, end).join("\n");
-    entries.push({
-      code,
-      displayCode,
-      label,
-      entryKind: kindOf(displayCode),
-      notes,
-      passage: [`${displayCode} ${label}`, notes].filter(Boolean).join("\n"),
-    });
-  });
-  // Cross-references like "(J46)" inside notes never start a line, so they are
-  // not mistaken for entries. Keep the first occurrence of each code.
   const seen = new Set<string>();
-  return entries.filter((e) => (seen.has(e.code) ? false : (seen.add(e.code), true)));
+  const entries: CatalogueEntry[] = [];
+  starts.forEach(({ i, m }, k) => {
+    const code = m[1]!;
+    if (seen.has(code)) return;
+    seen.add(code);
+    const end = starts[k + 1]?.i ?? lines.length;
+    const notes = lines
+      .slice(i + 1, end)
+      .map((l) => l.replace(/\[([^\]]*)\]\([^)]*\)/g, "$1").replace(/^[\s:*>-]+/, "").replace(/\s+/g, " ").trim())
+      .filter(Boolean)
+      .join("\n");
+    entries.push(makeEntry(code, code + (m[2] ?? ""), m[3]!.replace(/\[([^\]]*)\]\([^)]*\)/g, "$1"), notes));
+  });
+  return entries;
 }
 
 /** Normalise "j46", "J46 ", "J45.0-" to catalogue form "J46" / "J45.0". */

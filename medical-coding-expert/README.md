@@ -60,10 +60,10 @@ Each result also carries `assertion`: `documented`, `suspected`, `negated`, `his
 
 1. **Interpret** (Claude call 1). Lists the conditions and how each is mentioned, plus generic German search terms. No patient text goes into web queries.
 2. **Settle non-codable mentions** in code: negated, family history, literature-only and historical never reach retrieval.
-3. **Discover pages**. Tavily Search is restricted to `klassifikationen.bfarm.de`, with generated answers off and one retry on transient errors. On failure, or when no usable page comes back, DuckDuckGo HTML search takes over. Credits exhausted (432/433), a bad key or a missing key switch Tavily off for the rest of the process.
+3. **Discover pages, per condition**. Tavily Search gets the exact-path site query, a hard `include_domains` restriction, generated answers off, and one retry on transient errors. If Tavily fails, or finds no usable page for that condition, DuckDuckGo HTML search runs for that condition. Credits exhausted (432/433), a bad key or a missing key switch Tavily off for the rest of the process. Model-written search terms are cleaned in code: long digit runs are dropped, and terms that copy record text fall back to the condition name.
 4. **Retrieve pages**. Tavily Extract is tried first; if it fails or the text can't be parsed, the page is fetched directly over HTTPS, with every redirect checked.
 5. **Select** (Claude call 2). Claude chooses only among the parsed official entries.
-6. **Verify in code**. The code must exist as an entry on a retrieved page. The label is taken from that entry, never from the model. A heading (`…-`) is never assigned.
+6. **Verify in code**. The code must exist as an entry on a retrieved page; only catalogue entry headings count, never cross-references. The label is taken from that entry, never from the model. A heading (`…-`) is never assigned. Input and hypothesis IDs the model returns are kept only if they exist in the request.
 
 URL policy ([src/urlPolicy.ts](src/urlPolicy.ts)) only accepts
 `https://klassifikationen.bfarm.de/icd-10-gm/kode-suche/htmlgm2026/…`. It rejects other hosts, other years, `-vorab` preliminary pages, ports, credentials and path traversal.
@@ -80,21 +80,25 @@ declined, Anthropic re-runs it on a suitable fallback model in the same call,
 and the response notes it in `limitations`. If it is still refused, the
 affected results are `unavailable`.
 
-Limits per request (in [src/config.ts](src/config.ts), all overridable): 2 searches per provider, 3 pages, 4 Claude calls (2 are used), and a 20 s HTTP timeout.
+Limits per request (in [src/config.ts](src/config.ts), all overridable): 2 concept searches per provider, 3 pages, 4 Claude calls (2 are used), 20 s per search/fetch call, and 45 s per Claude attempt (the SDK retries a hung call twice). Conditions beyond the search budget come back `unavailable`.
 
 ## Verification record (2026-10-17)
 
-**Offline fixture tests** (`npm test`, 49 tests). Cover:
+**Offline fixture tests** (`npm test`, 60 tests). Cover:
 - URL policy: off-domain, wrong year, preliminary, traversal.
-- Parsing of the real BfArM J40–J47 page.
+- Parsing of the real BfArM J40–J47 page, as HTML and as real Tavily Extract markdown; both parsers agree on all 24 entries.
 - J46 assigned with its official label, link and passage.
 - A wrong code (J96.0, not on the retrieved page) rejected.
 - Underspecified asthma returned as `needs_clarification` with the J45.9- category.
 - Negated, family-history and literature-only mentions never assigned.
 - A suspected condition never assigned.
-- Tavily retry, then the DuckDuckGo fallback.
+- Tavily retry, then the DuckDuckGo fallback per condition.
 - Credits exhausted switching Tavily off for the process.
 - Both providers failing, giving `unavailable`.
+- The search budget, giving `unavailable`.
+- Invented IDs dropped.
+- Search-term cleaning.
+- DuckDuckGo challenge detection.
 - Claude unavailable.
 - A refusal-fallback note.
 - The example response staying in sync.
@@ -103,7 +107,8 @@ Limits per request (in [src/config.ts](src/config.ts), all overridable): 2 searc
 - Normal chain: Tavily Search found the page, Tavily Extract read it, and J46 "Status asthmaticus" was verified and assigned. Pneumonia (negated), the mother's diabetes (family history) and pneumothorax (literature only) were correctly not coded.
 - Tavily forced off: DuckDuckGo returned only `htmlgm2026-vorab` and 2021 pages. They were rejected as sources, the final 2026 page was located and fetched directly, and J46 was verified and assigned.
 - Underspecified asthma (`examples/request-underspecified.json`): `needs_clarification` with candidates J45.9-/J45.0-/J45.1-/J45.8- and questions about control status and severity.
-- Two Claude calls failed transiently (one connection error, one timeout) and succeeded on rerun. They returned `unavailable`, as designed.
+- Claude calls normally take about 4 s. A few hung during testing; that is why the per-attempt timeout is 45 s with SDK retries.
+- After many test searches in a row, DuckDuckGo started returning its bot challenge (HTTP 202). This was correctly reported as `blocked`, and the result was `unavailable`.
 
 **Not verified live:**
 - Tavily credits actually running out (432/433), which is covered by fixtures only.
@@ -115,5 +120,5 @@ Limits per request (in [src/config.ts](src/config.ts), all overridable): 2 searc
 - Codes built from a 5th-digit modifier (J45.x, E10–E14 and others) are not assembled; they come back as `needs_clarification` with the heading as a candidate.
 - German coding rules (DKR), sequencing, and secondary-diagnosis or "V/G/A/Z" certainty markers are not applied.
 - Historical conditions (Z86/Z87) and family history (Z80–Z84) are not coded.
-- DuckDuckGo HTML is not an official API. Challenge pages are treated as `blocked`, and the engine's index mostly holds non-final editions.
+- DuckDuckGo HTML is not an official API. It rate-limits with a bot challenge, which is treated as `blocked` and never bypassed, and its index mostly holds non-final editions.
 - Search is per request (at most 2 queries per provider), so a request with many conditions searches only the first two distinct ones.
