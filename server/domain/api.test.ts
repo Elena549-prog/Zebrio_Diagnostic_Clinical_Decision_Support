@@ -27,6 +27,25 @@ async function serve(overrides: Parameters<typeof createApp>[0], fn: (url: strin
 const post = (url: string, body?: unknown) => fetch(url, { method: 'POST', headers: { 'content-type': 'application/json' }, body: body === undefined ? undefined : JSON.stringify(body) });
 const mockServices = { requireInference: () => 'mock-only', fetchEvidence: emptyEvidence, assignMedicalCodes: emptyCodes };
 
+test('population rarity provenance is captured in history without enabling patient probabilities', async () => {
+  const c = caseOf();
+  await serve({ ...mockServices, runRound: async (draft) => proposed(draft), annotateRarity: (draft) => {
+    for (const h of Object.values(draft.hypotheses)) h.rarity = {
+      status: 'matched', classification: 'below_reference_threshold', reason: 'Synthetic population fixture',
+      entity: { orphaCode: '999', name: 'Candidate A', url: 'https://www.orpha.net/en/disease/detail/999' },
+      geography: 'Germany', release: 'fixture', dataHash: 'fixture-hash',
+    };
+  } }, async (url) => {
+    assert.equal((await post(`${url}/api/cases/${c.id}/advance`)).status, 200);
+    const h = Object.values(c.hypotheses)[0]!;
+    assert.equal(h.rarity?.dataHash, 'fixture-hash');
+    assert.equal(c.probabilityMode, 'unavailable');
+    const frame = c.history.at(-1)!;
+    assert.equal(frame.hypotheses[h.id]?.rarity?.dataHash, 'fixture-hash');
+    assert.equal((await fetch(`${url}/api/reference-data/rarity?name=`)).status, 400);
+  });
+});
+
 test('server boots without key and live inference returns structured 503 without mutation', async () => {
   const c = caseOf();
   const before = structuredClone(c);

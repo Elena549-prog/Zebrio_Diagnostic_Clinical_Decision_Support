@@ -10,6 +10,7 @@
 
 import type { Case, Hypothesis } from "./types.js";
 import { probabilityLabel } from "./probabilityDisplay.js";
+import { rarityLabel } from './RarityReference.js';
 
 interface Props {
   c: Case;
@@ -45,7 +46,7 @@ export function RankedDifferential({ c, selectedId, onSelect }: Props) {
               <div className="ranked-bar" title="Relative ranking weight; see the probability notice above" aria-hidden="true">
                 <div className="ranked-bar-fill" style={{ width: `${Math.max(h.probability * 100, 3)}%` }} />
               </div>
-              {h.isZebra && <span className="zebra-tag">🦓 zebra</span>}
+              {rarityLabel(h, c.probabilityMode === 'illustrative') && <span className="zebra-tag">{rarityLabel(h, c.probabilityMode === 'illustrative')}</span>}
               {h.baseRateNote && <div className="ranked-baserate muted small">{h.baseRateNote}</div>}
               {h.status === "branched" && <div className="ranked-flag muted small">branched into children</div>}
             </div>
@@ -60,7 +61,7 @@ export function RankedDifferential({ c, selectedId, onSelect }: Props) {
             {ruledOut.map((h) => (
               <li key={h.id} className={`ruled-item ${selectedId === h.id ? "sel" : ""}`} onClick={() => onSelect(h.id)}>
                 <span className="ruled-name">{h.name}</span>
-                {h.isZebra && <span className="zebra-tag">🦓</span>}
+                {rarityLabel(h, c.probabilityMode === 'illustrative') && <span className="zebra-tag" title={rarityLabel(h, c.probabilityMode === 'illustrative')!}>🦓</span>}
               </li>
             ))}
           </ul>

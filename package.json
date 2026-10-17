@@ -16,7 +16,8 @@
     "start": "npm --workspace server start",
     "typecheck": "npm --workspace server run typecheck && npm --workspace web run typecheck",
     "test": "npm --workspace server run test",
-    "test:live": "tsx scripts/smoke-live.ts --live"
+    "test:live": "tsx scripts/smoke-live.ts --live",
+    "data:sync": "python scripts/sync-reference-data.py"
   },
   "devDependencies": {
     "concurrently": "^9.1.0",

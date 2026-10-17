@@ -79,10 +79,42 @@ export interface Hypothesis {
   discriminatingTests?: TestProposal[];
   /** Is this a rare ("zebra") diagnosis? Surfaced so it isn't dropped early. */
   isZebra?: boolean;
+  modelSuggestedZebra?: boolean;
+  /** Local reference-population evidence; never a patient probability. */
+  rarity?: RarityAssessment;
+  populationContextUsed?: { round: number; pass: number; recordIds: string[] }; 
   /** Base-rate prior used by the engine (prevalence in this demographic). */
   baseRateNote?: string;
   createdAt: string;
   updatedAt: string;
+}
+
+export interface PopulationFrequency {
+  kind: 'exact' | 'range' | 'less_than' | 'greater_than';
+  formulaVersion: 'population-percent-v1';
+  boundsInclusivity: string;
+  lowerPer100000?: number;
+  upperPer100000?: number;
+  percentDisplay: string;
+  formula: string;
+  rounding: string;
+}
+export interface RarityRecord {
+  id: string; metric: string; prevalenceClass: string; valuePer100000: number | null;
+  geography: string; validationStatus: string; source: string; sourceUrls: string[];
+  studyDate: string | null; frequency?: PopulationFrequency;
+}
+export interface RarityAssessment {
+  status: 'matched' | 'unknown' | 'unavailable';
+  classification?: 'below_reference_threshold' | 'above_reference_threshold' | 'uncertain';
+  reason: string;
+  entity?: { orphaCode: string; name: string; url: string };
+  geography?: string;
+  release?: string;
+  dataHash?: string;
+  records?: RarityRecord[];
+  allEligibleRecords?: RarityRecord[];
+  geographyPolicy?: string;
 }
 
 export interface EvidenceRef {

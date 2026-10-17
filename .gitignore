@@ -9,3 +9,5 @@ __pycache__/
 dist/
 build/
 *.tsbuildinfo
+data/reference/raw/
+data/reference/*-index.json

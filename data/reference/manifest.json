@@ -1,0 +1,72 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-10-17T12:28:12.281034+00:00",
+  "orphadataRelease": "July 2026",
+  "orphadataExportDate": "2026-06-23 07:57:58",
+  "rkiCommit": "66c5b8632a9291af82849499d8c85f99fbdd2c25",
+  "entityCount": 6728,
+  "rkiRows": 64142,
+  "artifacts": [
+    {
+      "name": "orphadata-en.xml",
+      "url": "https://www.orphadata.com/data/xml/en_product9_prev.xml",
+      "license": "https://creativecommons.org/licenses/by/4.0/",
+      "sha256": "6b492b3cc61e5a0327de12f59386a07a071760a938d0bbd8f525bc4a5f71b7f0",
+      "bytes": 16178169,
+      "retrievedAt": "2026-10-17T12:20:50.500015+00:00",
+      "lastModified": "Mon, 29 Jun 2026 12:08:03 GMT"
+    },
+    {
+      "name": "orphadata-de.xml",
+      "url": "https://www.orphadata.com/data/xml/de_product9_prev.xml",
+      "license": "https://creativecommons.org/licenses/by/4.0/",
+      "sha256": "ef56544efffef4fb6f5aa3c1aae7a89b5abceb1c5e53a1ae1b47aed61c2a54c8",
+      "bytes": 16211852,
+      "retrievedAt": "2026-10-17T12:20:50.500015+00:00",
+      "lastModified": "Mon, 29 Jun 2026 12:07:49 GMT"
+    },
+    {
+      "name": "rki-ncd.tsv",
+      "url": "https://raw.githubusercontent.com/robert-koch-institut/Gesundheitsberichterstattung_-_Daten_zu_nichtuebertragbaren_Erkrankungen/66c5b8632a9291af82849499d8c85f99fbdd2c25/GBE_Indikatoren_nichtuebertragbarer_Erkrankungen.tsv",
+      "license": "https://creativecommons.org/licenses/by/4.0/",
+      "sha256": "4a610d0e79818f0cc477df708926f63d60e231269a42a8c3d985fd4e913af2d9",
+      "bytes": 19752360,
+      "retrievedAt": "2026-10-17T12:20:50.500015+00:00",
+      "lastModified": null
+    },
+    {
+      "name": "rki-LICENSE.txt",
+      "url": "https://raw.githubusercontent.com/robert-koch-institut/Gesundheitsberichterstattung_-_Daten_zu_nichtuebertragbaren_Erkrankungen/66c5b8632a9291af82849499d8c85f99fbdd2c25/LICENSE",
+      "license": "https://creativecommons.org/licenses/by/4.0/",
+      "sha256": "7e7170e3cebf88a9f60c7b8421418323c09304da1af4d5e90f4da1dc1c8a2661",
+      "bytes": 18650,
+      "retrievedAt": "2026-10-17T12:20:50.500015+00:00",
+      "lastModified": null
+    },
+    {
+      "name": "rki-methods.md",
+      "url": "https://raw.githubusercontent.com/robert-koch-institut/Gesundheitsberichterstattung_-_Daten_zu_nichtuebertragbaren_Erkrankungen/66c5b8632a9291af82849499d8c85f99fbdd2c25/Readme.md",
+      "license": "https://creativecommons.org/licenses/by/4.0/",
+      "sha256": "d98c8f7cae231a8aff2479682d2b9f1165508c552a5800ce863dcb0273b96312",
+      "bytes": 968603,
+      "retrievedAt": "2026-10-17T12:20:50.500015+00:00",
+      "lastModified": null
+    }
+  ],
+  "processedFiles": [
+    {
+      "name": "orphadata-index.json",
+      "sha256": "d41172113639872754154eb16628a6f629ee266cf495df2ed088ed09f514b569",
+      "bytes": 5179855
+    },
+    {
+      "name": "rki-index.json",
+      "sha256": "b52a19ca31837b78f58d53b85ea768d042e9d86e6305fab74491bc6381ac3690",
+      "bytes": 55479552
+    }
+  ],
+  "sources": {
+    "orphadata": "https://sciences.orphadata.com/epidemiology/",
+    "rki": "https://github.com/robert-koch-institut/Gesundheitsberichterstattung_-_Daten_zu_nichtuebertragbaren_Erkrankungen"
+  }
+}

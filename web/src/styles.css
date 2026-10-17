@@ -1032,6 +1032,11 @@ a.source-title:hover { color: var(--accent); text-decoration: underline; }
 .saved-case-picker { display: flex; align-items: center; flex-wrap: wrap; gap: 10px; margin: 16px 0; }
 .saved-case-picker label { font-size: 13px; font-weight: 600; }
 .saved-case-picker select { max-width: 360px; min-width: 0; }
+.rarity-reference { margin: 12px 0; padding: 12px; border: 1px solid var(--outline-variant); border-radius: var(--r-md); background: var(--surface-container-low); }
+.rarity-reference p { margin: 6px 0; }
+.rarity-reference summary { cursor: pointer; font-size: 12px; margin-top: 10px; }
+.rarity-reference ul { padding-left: 18px; font-size: 12px; }
+.rarity-reference li { margin-bottom: 8px; }
 @media (max-width: 1100px) {
   .appbar { flex-wrap: wrap; height: auto; min-height: 72px; }
   .appbar-actions { flex-wrap: wrap; justify-content: flex-end; }

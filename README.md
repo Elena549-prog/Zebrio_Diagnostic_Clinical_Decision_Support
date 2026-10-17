@@ -46,6 +46,47 @@ weights are not patient probabilities. A tested illustrative Bayes kernel is
 included internally, but a published clinical model must be selected and
 reviewed before numerical probabilities are connected.
 
+## Reference data and source attribution
+
+We use **Orphadata Science** for source-backed population-rarity context and
+keep **RKI German health-reporting data** available locally for population
+frequency research. These are separate from patient-specific probabilities.
+
+- [Orphadata epidemiology](https://sciences.orphadata.com/epidemiology/): English
+  and German bulk files, ORPHA identifiers, prevalence/incidence estimates,
+  geography, source references and curation status.
+- [RKI German health-reporting dataset](https://github.com/robert-koch-institut/Gesundheitsberichterstattung_-_Daten_zu_nichtuebertragbaren_Erkrankungen):
+  selected disease-frequency indicators with population, period, methods and
+  uncertainty. RKI values are not automatically used as patient priors.
+- Both downloaded datasets are **CC BY 4.0**. See [Orphadata reuse terms](https://www.orphadata.com/faq/)
+  and [RKI licence](https://github.com/robert-koch-institut/Gesundheitsberichterstattung_-_Daten_zu_nichtuebertragbaren_Erkrankungen/blob/main/LICENSE).
+
+Download/update locally (requires Python 3):
+
+```powershell
+npm run data:sync                 # reproduce the recorded release/checksums
+npm run data:sync -- --refresh     # deliberately adopt current upstream versions
+```
+
+Files live in `data/reference/`. Large downloads/indexes are git-ignored;
+[manifest.json](data/reference/manifest.json) records versions, source URLs and
+SHA-256 hashes. [Reference-data documentation](data/reference/README.md) covers
+attribution, matching rules, limitations and update behavior. Missing downloads
+produce an honest unavailable state. The API exposes `/api/reference-data` and
+`/api/reference-data/rarity?name=Cystic%20fibrosis` without paid model calls.
+
+The [local-data math assessment](docs/research/local-data-math-feasibility.md)
+checks actual downloaded records. Population unit conversions and rarity bounds
+are possible now; patient diagnostic probabilities need applicable test
+likelihoods or a validated clinical prediction model.
+
+Attribution: **Orphadata Science: Free access data from Orphanet. © INSERM 1999**,
+version in the manifest; and **Robert Koch-Institut, Gesundheitsberichterstattung
+– Daten zu nichtübertragbaren Erkrankungen**, Git version in the manifest.
+Arbor converts the sources to local indexes and derives displays. Generated
+outputs may not accurately reflect the source data; Orphanet/Orphadata is not
+responsible for those outputs. Neither institution endorses this application.
+
 ## Team integrations
 
 - [Person 1: evidence and validation](docs/person1/README.md)

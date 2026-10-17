@@ -10,6 +10,7 @@ import { store, appendEvent } from './domain/case-store.js';
 import { capture } from './domain/history.js';
 import { createCase } from './domain/case-factory.js';
 import { forkCase } from './domain/fork.js';
+import { annotateRarity, lookupRarity, referenceDataStatus } from './domain/rarity.js';
 import { recordFinding, resultTest, runRound, setWorkingDiagnosis } from './domain/engine.js';
 import { applyEvidence, attachEvidenceTargets, fetchEvidence } from './domain/evidence.js';
 import { groundLinks } from './domain/parse.js';
@@ -29,7 +30,7 @@ export function loadRootEnv(): void {
   }
 }
 loadRootEnv();
-const defaults = { runRound, fetchEvidence, assignMedicalCodes, buildTreatmentPlan, askText, requireInference: requireAnthropicKey };
+const defaults = { runRound, fetchEvidence, assignMedicalCodes, buildTreatmentPlan, askText, annotateRarity, requireInference: requireAnthropicKey };
 export function createApp(overrides: Partial<typeof defaults> = {}) {
   const services = { ...defaults, ...overrides };
   const app = express();
@@ -80,6 +81,14 @@ export function createApp(overrides: Partial<typeof defaults> = {}) {
     { name: 'evidence-validation', provider: 'anthropic', temporary: true },
     { name: 'medical-coding', provider: 'anthropic', system: 'ICD-10-GM', edition: '2026', temporary: true },
   ] }));
+  app.get('/api/reference-data', (_req, res) => res.json(referenceDataStatus()));
+  app.get('/api/reference-data/rarity', (req, res) => {
+    const query = req.query.name;
+    if (typeof query !== 'string' || !query.trim() || query.length > 200) {
+      res.status(400).json({ error: 'Provide a disease name or ORPHA identifier as name (maximum 200 characters).' }); return;
+    }
+    res.json(lookupRarity(query));
+  });
   app.post('/api/cases', (req, res) => {
     const body = req.body as Partial<Presentation> & { title?: string };
     if (!body || typeof body.chiefComplaint !== 'string' || !body.chiefComplaint.trim() ||
@@ -152,6 +161,7 @@ export function createApp(overrides: Partial<typeof defaults> = {}) {
         }
       }
       request.signal.throwIfAborted();
+      services.annotateRarity(draft);
       if (result.decision.kind === 'converged') {
         const hypothesis = draft.hypotheses[result.decision.hypothesisId];
         if (!hypothesis || hypothesis.status !== 'live') throw new Error('Invalid proposed working diagnosis.');

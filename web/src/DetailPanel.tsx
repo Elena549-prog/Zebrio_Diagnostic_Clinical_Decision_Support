@@ -13,6 +13,7 @@ import { Cited, SourceChips } from "./Cite.js";
 import type { Case, Finding, Hypothesis } from "./types.js";
 import * as api from "./api.js";
 import { probabilityLabel, probabilityMode } from "./probabilityDisplay.js";
+import { RarityReference, rarityLabel } from './RarityReference.js';
 
 /** Long descriptions are clamped to a few lines with a "show more" toggle so
  *  the panel stays scannable; the full text is one click away. */
@@ -174,8 +175,9 @@ export function DetailPanel({ c, selectedId, onUpdated, busy, setBusy, interacti
           )}
           <div className="prob-line">
             {probabilityMode(c, h) === "unavailable" ? "Clinical probability" : "Probability"} <b>{probabilityLabel(c, h)}</b>
-            {h.isZebra && <span className="zebra-tag">🦓 zebra</span>}
+            {rarityLabel(h, probabilityMode(c) === 'illustrative') && <span className="zebra-tag">{rarityLabel(h, probabilityMode(c) === 'illustrative')}</span>}
           </div>
+          <RarityReference h={h} />
           {h.baseRateNote && (
             <div className="baserate">
               <strong>Base-rate prior</strong>
