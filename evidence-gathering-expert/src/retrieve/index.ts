@@ -195,7 +195,7 @@ async function tavilyGuidelines(q: Question, problem: string, ctx: RetrieveConte
   }
   t.searches++;
   try {
-    const pages = await searchGuidelinesTavily(t.http, t.apiKey, [q.diagnosis.searchTerm, problem].filter(Boolean).join(" "), 2);
+    const pages = await searchGuidelinesTavily(t.http, t.apiKey, [q.diagnosis.searchTerm, problem].filter(Boolean).join(" "), 3);
     ctx.health.ok("tavily");
     return pages.map((page) =>
       ctx.store.add({

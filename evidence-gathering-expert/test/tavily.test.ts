@@ -28,7 +28,9 @@ describe("Tavily guideline adapter", () => {
     const body = JSON.parse(sent.body!);
     expect(body).toMatchObject({ search_depth: "basic", include_answer: false, include_raw_content: "text" });
     expect(body.include_domains).toContain("nice.org.uk");
-    expect(body.query).toBe("heart failure guideline");
+    // Evidence reviews hold the numbers; overview pages don't (live check, 2026-10-17).
+    expect(body.query).toBe("heart failure guideline evidence review diagnostic accuracy");
+    expect(body.max_results).toBe(3);
     expect(f.calls.join(" ")).not.toContain(KEY);
     expect(pages).toEqual([{ url: "https://www.nice.org.uk/guidance/ng106", title: "Title of https://www.nice.org.uk/guidance/ng106", text: LONG.trim() }]);
   });
