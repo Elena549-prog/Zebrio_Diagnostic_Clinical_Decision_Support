@@ -1,7 +1,7 @@
 /**
  * Recipe catalog — the metadata for the in-app docs recipes. Mirrors the
  * inspiration demo's `src/lib/recipes.ts` (RecipeMeta). Each recipe is a single
- * building block of Arbor, rendered as its own page under the in-app /docs
+ * building block of Zebrio Diagnostic Clinical Decision Support, rendered as its own page under the in-app /docs
  * route, with a "See live feature →" link that deep-links into the demo.
  *
  * The content of each recipe lives in `recipes/<slug>.tsx`.

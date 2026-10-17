@@ -14,13 +14,24 @@ function readJson(file: string): any {
   return JSON.parse(readFileSync(join(goldenDir, file), "utf8"));
 }
 
-const requestFiles = readdirSync(goldenDir).filter((f) => f.endsWith(".request.json")).sort();
+const requestFiles = [
+  ...readdirSync(goldenDir).filter((f) => f.endsWith(".request.json")),
+  ...readdirSync(join(goldenDir, "extra")).filter((f) => f.endsWith(".request.json")).map((f) => `extra/${f}`),
+].sort();
 const goldenScenarios = SCENARIOS.filter((s) => s.golden);
 
-test("every golden request file has exactly one scenario", () => {
-  assert.equal(requestFiles.length, 3);
-  const mapped = goldenScenarios.map((s) => s.golden!.sourceFile).sort();
-  assert.deepEqual(mapped, requestFiles.map((f) => `examples/golden/${f}`));
+test("the app offers the guided tour plus three golden live scenarios", () => {
+  assert.deepEqual(
+    SCENARIOS.map((s) => s.id),
+    ["scn-tutorial", "scn-golden-breathlessness", "scn-golden-chest-pain", "scn-golden-dysuria"],
+  );
+  assert.equal(SCENARIOS.filter((s) => s.tutorial).length, 1);
+});
+
+test("every golden scenario maps to its own existing request file", () => {
+  const mapped = goldenScenarios.map((s) => s.golden!.sourceFile);
+  assert.equal(new Set(mapped).size, mapped.length);
+  for (const f of mapped) assert.ok(requestFiles.includes(f.replace("examples/golden/", "")), f);
 });
 
 test("golden scenario presentation is the request presentation, unchanged", () => {
@@ -38,11 +49,10 @@ test("breathlessness is the prominent live golden preset", () => {
   assert.equal(s.liveDemo, true);
   assert.notEqual(s.tutorial, true);
   assert.equal(s.golden?.requestId, "golden-2-breathlessness");
-  // Right after the guided tour, before the strep preset.
+  // Right after the guided tour.
   const ids = SCENARIOS.map((x) => x.id);
   assert.equal(ids[0], "scn-tutorial");
   assert.equal(ids[1], "scn-golden-breathlessness");
-  assert.equal(findScenario("scn-walkthrough-strep")?.liveDemo, true);
   assert.equal(findScenario("scn-tutorial")?.tutorial, true);
   assert.match(s.title + s.blurb, /synthetic/i);
   assert.match(s.blurb, /real Claude \+ Tavily/i);

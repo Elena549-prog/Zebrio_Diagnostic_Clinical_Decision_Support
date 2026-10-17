@@ -1,5 +1,5 @@
 /**
- * DocsIndex — the /docs home. The building blocks of Arbor, the minimal flow
+ * DocsIndex — the /docs home. The building blocks of Zebrio Diagnostic Clinical Decision Support, the minimal flow
  * (the full round-trip), the agent-vs-client responsibilities, the recipe card
  * grid, and the "Design decisions" note (the ADR-equivalent). Mirrors the
  * inspiration demo's `docs/page.tsx`.
@@ -10,7 +10,7 @@ import { RECIPES } from "./recipes.js";
 export function DocsIndex() {
   return (
     <div className="docs-index">
-      <h1 className="docs-h1">Arbor Recipes</h1>
+      <h1 className="docs-h1">Zebrio Diagnostic Clinical Decision Support Recipes</h1>
       <p className="docs-lead muted">
         The recipe documentation lives inside this app — not in a separate site.
         The demo app is both the runnable reference and the documentation. Each
@@ -58,7 +58,7 @@ export function DocsIndex() {
 
       <h2 className="docs-h2">The minimal flow</h2>
       <p className="muted small">
-        One full case, start to finish, against the Arbor server:
+        One full case, start to finish, against the Zebrio Diagnostic Clinical Decision Support server:
       </p>
       <pre className="docs-code">{`# 1. create a case from a presentation
 POST /api/cases            { chiefComplaint, history, observations, demographics }
@@ -116,7 +116,7 @@ POST /api/cases/:id/treat`}</pre>
       <h2 className="docs-h2">Design decisions</h2>
       <div className="docs-architecture-note">
         <p>
-          Arbor uses a <strong>tree, not a flat list</strong>, for the
+          Zebrio Diagnostic Clinical Decision Support uses a <strong>tree, not a flat list</strong>, for the
           differential. A finding that splits a hypothesis branches it into
           children; a ruled-out branch is kept (dimmed), not deleted, so the
           reasoning trail is auditable: <em>this is what I thought to arrive at

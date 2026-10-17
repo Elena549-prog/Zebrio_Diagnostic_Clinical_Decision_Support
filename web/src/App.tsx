@@ -1,5 +1,5 @@
 /**
- * Arbor — differential-diagnosis decision-tree UI.
+ * Zebrio Diagnostic Clinical Decision Support — differential-diagnosis decision-tree UI.
  *
  * The app shell (Clinical Precision chrome) wraps every view with a top app
  * bar. Inside it, a light hash-router switches between

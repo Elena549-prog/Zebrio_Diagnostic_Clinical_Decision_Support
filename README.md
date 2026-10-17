@@ -94,7 +94,7 @@ evidence, working diagnosis, treatment and the agent team.
 |---|---|---|
 | Keys needed | None | `ANTHROPIC_API_KEY` (and `TAVILY_API_KEY` for search) |
 | API calls | None; canned, scripted steps | Real Claude and search calls; one to two minutes per round |
-| Patient | Synthetic | Synthetic presets: sore throat with fever, plus three golden cases (chest pressure, breathlessness, dysuria) |
+| Patient | Synthetic | Three synthetic golden cases: breathlessness, chest pressure on exertion, burning on urination |
 | Numbers shown | Percentages labelled *illustrative teaching values* | Ordinal rank and published population frequency only |
 
 The tour ends with **Run this case for real**, which starts a live case.

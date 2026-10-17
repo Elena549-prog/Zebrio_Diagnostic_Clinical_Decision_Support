@@ -1,5 +1,5 @@
 /**
- * Thin API client for the Arbor server. All endpoints return the Case snapshot
+ * Thin API client for the Zebrio Diagnostic Clinical Decision Support server. All endpoints return the Case snapshot
  * unless noted.
  */
 

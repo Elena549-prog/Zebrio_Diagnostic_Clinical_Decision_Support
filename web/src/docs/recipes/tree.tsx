@@ -14,7 +14,7 @@ export default function TreeRecipe() {
 
       <p>
         The differential is a <strong>tree of hypotheses</strong>, not a flat
-        list. This is Arbor's headline property: the reasoning is{" "}
+        list. This is Zebrio Diagnostic Clinical Decision Support's headline property: the reasoning is{" "}
         <strong>retraceable</strong>. You can see which path was taken, and which
         were pruned and why.
       </p>
@@ -61,7 +61,7 @@ export default function TreeRecipe() {
       </p>
 
       <div className="docs-callout">
-        <strong>Retraceability</strong> is the difference between Arbor and a
+        <strong>Retraceability</strong> is the difference between Zebrio Diagnostic Clinical Decision Support and a
         flat-differential tool. The flat list shows <em>what</em> the top
         candidates are. The tree shows <em>how you got there</em>.
       </div>

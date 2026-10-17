@@ -1,4 +1,4 @@
-/* Arbor UI — "Clinical Calm" design system.
+/* Zebrio Diagnostic Clinical Decision Support UI — "Clinical Calm" design system.
  * Warm off-white paper, slate ink, one deep-teal primary, and restrained
  * semantic accents (green = working dx, amber = clinician gate, red = against).
  * Inter typography with tabular numerals for data. Low-contrast outlines +
@@ -55,7 +55,7 @@
   --error-container: #fbe5e2;
   --on-error-container: #7d1a14;
 
-  /* Arbor semantic status — mapped onto the clinical palette.
+  /* Zebrio Diagnostic Clinical Decision Support semantic status — mapped onto the clinical palette.
    * live → teal; branched → slate; confirmed → stable green;
    * ruled_out → outline grey; hitl → investigating amber. */
   --live: #12656b;

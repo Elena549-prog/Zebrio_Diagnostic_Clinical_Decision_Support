@@ -36,7 +36,7 @@ export function DocsLayout({ activeSlug, children }: Props) {
         </a>
       </aside>
       <main className="docs-main">
-        <div className="docs-callout">Claude edition of Arbor. Live hypothesis weights express relative ranking; clinical probabilities are unavailable until a reviewed quantitative model is connected. Guided-tour percentages are synthetic.</div>
+        <div className="docs-callout">Claude edition of Zebrio Diagnostic Clinical Decision Support. Live hypothesis weights express relative ranking; clinical probabilities are unavailable until a reviewed quantitative model is connected. Guided-tour percentages are synthetic.</div>
         {children}
       </main>
     </div>

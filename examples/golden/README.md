@@ -1,19 +1,22 @@
 # Golden examples
 
-Three **synthetic** patient presentations for testing the whole product and for the
+Three **synthetic** adult patient presentations for testing the whole product and for the
 demo. They are fictional, contain no identifiers, and pass the evidence expert's
 privacy guard. They use the request shape of the Evidence Gathering Expert
 (`presentation` with chief complaint, history, observations, demographics).
 
-All three are common in German primary care or emergency medicine, and each has a
-well-studied differential, so the evidence and probability steps have real
-numbers to work with.
+The set is chosen so that, together, the three cover the whole pipeline (presentation →
+reasoning tree → evidence → ICD-10-GM coding → probability → decision) and three of the
+four decision outcomes in the UI flow (confirm, investigate/park, refer/unresolved).
 
-| # | File | Patient | Most likely diagnosis | Why it is a good demo |
-|---|---|---|---|---|
-| 1 | `golden-1-chest-pain.request.json` | 64-year-old man, Leipzig | Stable coronary heart disease / angina pectoris | Chest pain is a top GP consultation; the Marburg Heart Score was developed and validated in German primary care |
-| 2 | `golden-2-breathlessness.request.json` | 79-year-old woman, Kiel | Acute decompensated heart failure | Heart failure is the most common reason for hospital admission in Germany; overlaps with pneumonia and COPD, so the differential is genuinely contested |
-| 3 | `golden-3-dysuria.request.json` | 27-year-old woman, Munich | Acute uncomplicated cystitis | Very common, clear-cut case; shows the system converging quickly |
+| # | File | Patient | Most likely diagnosis | UI outcome it demos | What it stresses |
+|---|---|---|---|---|---|
+| 1 | `golden-1-chest-pain.request.json` | 64-year-old man, Leipzig | Stable coronary heart disease / angina pectoris | **Investigate / park**: exercise ECG or troponin chosen at the test gate, case waits for results | Must-not-miss acute coronary syndrome pinned on the tree; the family-history trap; Marburg Heart Score, validated in German primary care |
+| 2 | `golden-2-breathlessness.request.json` | 79-year-old woman, Kiel | Acute decompensated heart failure | **Confirm** → working diagnosis and treatment plan | Genuinely contested differential (pneumonia, COPD, PE); multimorbid coding where specificity comes from the documentation; age-dependent NT-proBNP; the saved demo result |
+| 3 | `golden-3-weight-loss.request.json` | 58-year-old man, Hamburg | Open: colorectal cancer is the leading concern, no diagnosis can be confirmed in one visit | **Refer / remain unresolved** → referral summary and safety-net advice | Broad differential with a zebra, a must-not-miss cancer, iron-deficiency anaemia as a pointer, safe "no diagnosis yet" outcome |
+
+An optional extra, `extra/golden-extra-dysuria.request.json` (27-year-old woman, acute
+uncomplicated cystitis), shows the system converging quickly. It is not part of the top 3.
 
 ## What each part of the product should do
 
@@ -56,20 +59,42 @@ sources. Use these lists only to judge whether output looks plausible.
 - **Watch out for:** NT-proBNP thresholds depend on age; numbers from studies of younger
   or non-acute populations must carry a limitation.
 
-### 3. Burning on urination (27, female)
+### 3. Unintentional weight loss and tiredness (58, male)
 
-- **Findings the system should pick up:** dysuria, frequency, urgency, no vaginal
-  discharge or itching, no fever or flank pain, nitrite-positive and leukocyte-positive
-  dipstick, negative pregnancy test.
-- **Expected differential:** acute uncomplicated cystitis (leading); pyelonephritis
-  (unlikely: afebrile, no flank pain); urethritis / sexually transmitted infection;
-  vaginitis (unlikely: no discharge).
-- **Evidence the expert is likely to find:** likelihood ratios of symptoms (dysuria,
-  frequency, absence of discharge) and dipstick results (nitrite, leukocytes) for UTI
-  in women; German S3 guideline on uncomplicated urinary tract infections (AWMF).
-- **Coding (Person 2):** acute cystitis (N30.0). No pathogen code without a culture result.
-- **Watch out for:** "No urinary infection in the past year" is a negated history,
-  not a diagnosis.
+- **Findings the system should pick up:** unintentional 8 kg weight loss over 3 months;
+  reduced appetite; looser stools and one episode of blood on the stool; night sweats
+  without fever; Hb 10.4 g/dl with low MCV (iron-deficiency pattern); mildly raised CRP;
+  smoker (30 years) and daily alcohol; mother with colon cancer at 62; no palpable
+  lymph nodes, no abdominal mass, normal glucose.
+- **Expected differential:** colorectal cancer (leading concern: bleeding, anaemia,
+  family history, weight loss); lung cancer (smoker, but no cough); inflammatory bowel
+  disease; hyperthyroidism and diabetes (unlikely: no goitre, normal glucose);
+  lymphoma (night sweats, but no nodes); tuberculosis (zebra: no exposure, no cough);
+  depression and alcohol-related causes as non-malignant contributors.
+- **Evidence the expert is likely to find:** positive predictive values of unexplained
+  weight loss, rectal bleeding and iron-deficiency anaemia for colorectal cancer in
+  primary care; NICE NG12 (suspected cancer) evidence reviews; faecal immunochemical
+  test (FIT) accuracy.
+- **Coding (Person 2, verify against ICD-10-GM 2026):** symptom codes while nothing is
+  confirmed: abnormal weight loss (R63.4), iron-deficiency anaemia (D50.-), melaena or
+  rectal bleeding (K92.1 / K62.5). Never a cancer code (C18.-, C20) without a histology
+  result.
+- **Watch out for:** "mother had colon cancer" is family history, not the patient's
+  diagnosis; "no cough", "no fever" and "no abdominal pain" are negations; a suspected
+  cancer is not a coded cancer.
+- **Honest gap (live runs 2026-10-17):** two live runs gave 0 and 1 verified numbers out of
+  about 12, all with insufficient evidence for the colorectal cancer base rate, and the
+  model's differential left out hyperthyroidism and diabetes. The case is therefore
+  strong for the UI and coding steps, weaker for the evidence step. Do not present these
+  runs as a fixed result.
+
+### Extra: burning on urination (27, female)
+
+Acute uncomplicated cystitis (N30.0) is the leading diagnosis; pyelonephritis, urethritis
+and vaginitis are unlikely (afebrile, no flank pain, no discharge). Useful evidence: German
+S3 guideline on uncomplicated urinary tract infections (AWMF) and dipstick likelihood
+ratios. No pathogen code without a culture. "No urinary infection in the past year" is a
+negated history, not a diagnosis.
 
 ## How to run
 
@@ -77,7 +102,7 @@ Evidence Gathering Expert (needs `ANTHROPIC_API_KEY` in the repo-root `.env.loca
 
 ```bash
 cd evidence-gathering-expert
-npm run evidence -- ../examples/golden/golden-1-chest-pain.request.json
+npm run evidence -- ../examples/golden/golden-1-chest-pain.request.json   # also golden-2-…, golden-3-weight-loss
 ```
 
 The orchestrator (Person 3) should send the same `presentation` object through the

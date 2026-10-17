@@ -1,5 +1,5 @@
 /**
- * Golden presets — the team's three synthetic golden examples, wired in as
+ * Golden presets — the team's synthetic golden examples (breathlessness, chest pressure, dysuria), wired in as
  * live scenarios.
  *
  * The presentation is imported straight from `examples/golden/*.request.json`
@@ -12,7 +12,7 @@
 
 import chestPain from "../../examples/golden/golden-1-chest-pain.request.json";
 import breathlessness from "../../examples/golden/golden-2-breathlessness.request.json";
-import dysuria from "../../examples/golden/golden-3-dysuria.request.json";
+import dysuria from "../../examples/golden/extra/golden-extra-dysuria.request.json";
 import type { Scenario } from "./scenarios.js";
 import type { Presentation, Sex } from "./types.js";
 
@@ -46,14 +46,14 @@ export function goldenPresentation(request: GoldenRequest): Presentation {
 export const GOLDEN_REQUESTS = {
   "golden-1-chest-pain": chestPain,
   "golden-2-breathlessness": breathlessness,
-  "golden-3-dysuria": dysuria,
+  "extra/golden-extra-dysuria": dysuria,
 } satisfies Record<string, GoldenRequest>;
 
-function golden(requestId: keyof typeof GOLDEN_REQUESTS): Pick<Scenario, "presentation" | "golden"> {
-  const request = GOLDEN_REQUESTS[requestId];
+function golden(file: keyof typeof GOLDEN_REQUESTS): Pick<Scenario, "presentation" | "golden"> {
+  const request = GOLDEN_REQUESTS[file];
   return {
     presentation: goldenPresentation(request),
-    golden: { requestId, sourceFile: `examples/golden/${requestId}.request.json` },
+    golden: { requestId: request.requestId, sourceFile: `examples/golden/${file}.request.json` },
   };
 }
 
@@ -83,6 +83,6 @@ export const GOLDEN_DYSURIA: Scenario = {
   id: "scn-golden-dysuria",
   title: "Golden — burning on urination, 27-year-old woman (Munich)",
   blurb:
-    "Team golden example 3: a synthetic patient, sent verbatim from examples/golden. Live Claude + Tavily calls; you type any test results yourself.",
-  ...golden("golden-3-dysuria"),
+    "Team golden example (extra): a synthetic patient, sent verbatim from examples/golden/extra. Live Claude + Tavily calls; you type any test results yourself.",
+  ...golden("extra/golden-extra-dysuria"),
 };

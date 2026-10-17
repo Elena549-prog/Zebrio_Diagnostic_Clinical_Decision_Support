@@ -32,7 +32,7 @@ export function AppShell({ view, c, onGo, onNewCase, caseActions, busy = false, 
         <div className="appbar-brand">
           <span className="logo">🌳</span>
           <div>
-            <h1>Arbor</h1>
+            <h1>Zebrio Diagnostic Clinical Decision Support</h1>
             <p className="appbar-tag">retraceable differential diagnosis</p>
           </div>
           <nav className="appbar-nav">
