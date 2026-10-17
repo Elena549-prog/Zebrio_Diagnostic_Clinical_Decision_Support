@@ -1,0 +1,77 @@
+{
+  "requestId": "demo-asthma-001",
+  "system": "ICD-10-GM",
+  "edition": "2026",
+  "results": [
+    {
+      "condition": "Status asthmaticus",
+      "hypothesisId": "h1",
+      "assertion": "documented",
+      "code": "J46",
+      "officialLabel": "Status asthmaticus",
+      "inputRefs": [
+        "ex1",
+        "ev1"
+      ],
+      "references": [
+        {
+          "url": "https://klassifikationen.bfarm.de/icd-10-gm/kode-suche/htmlgm2026/block-j40-j47.htm#J46",
+          "supportingPassage": "J46 Status asthmaticus\nInkl.:\nAkutes schweres Asthma bronchiale",
+          "retrievedAt": "2026-10-17T12:00:00.000Z",
+          "retrievalProvider": "direct"
+        }
+      ],
+      "clarificationQuestions": [],
+      "status": "assigned",
+      "rationale": "ex1 documents status asthmaticus and ev1 shows severe hypoxaemia; BfArM J46 'Status asthmaticus' includes 'Akutes schweres Asthma bronchiale'."
+    },
+    {
+      "condition": "Pneumonia",
+      "hypothesisId": "h2",
+      "assertion": "negated",
+      "code": null,
+      "officialLabel": null,
+      "inputRefs": [
+        "ex2"
+      ],
+      "references": [],
+      "clarificationQuestions": [],
+      "status": "no_supported_code",
+      "rationale": "Documented as absent or ruled out, so no code is suggested."
+    },
+    {
+      "condition": "Type 2 diabetes mellitus (mother)",
+      "assertion": "family_history",
+      "code": null,
+      "officialLabel": null,
+      "inputRefs": [
+        "ex3"
+      ],
+      "references": [],
+      "clarificationQuestions": [],
+      "status": "no_supported_code",
+      "rationale": "Mentioned only as family history, not as a condition of this patient."
+    },
+    {
+      "condition": "Pneumothorax",
+      "assertion": "literature_only",
+      "code": null,
+      "officialLabel": null,
+      "inputRefs": [
+        "ev2"
+      ],
+      "references": [],
+      "clarificationQuestions": [],
+      "status": "no_supported_code",
+      "rationale": "Appears only in literature evidence, which is not evidence that this patient has it."
+    }
+  ],
+  "searchProvidersUsed": [
+    "tavily"
+  ],
+  "limitations": [
+    "Suggestions are source-checked against the BfArM ICD-10-GM 2026 catalogue; they do not confirm a diagnosis or certify billing compliance.",
+    "German coding rules (Kodierrichtlinien), sequencing and secondary-diagnosis rules are not checked.",
+    "Codes that need a 5th-digit modifier are returned as needs_clarification; combined modifier codes are not assembled."
+  ]
+}
