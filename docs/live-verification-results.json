@@ -1,0 +1,161 @@
+﻿{
+    "timestamp":  "2026-10-17T11:32:50.284Z",
+    "checks":  [
+                   {
+                       "name":  "api_health",
+                       "status":  "pass",
+                       "detail":  {
+                                      "configured":  true,
+                                      "provider":  "anthropic",
+                                      "models":  {
+                                                     "orchestrator":  "claude-opus-5-5",
+                                                     "researcher":  "claude-haiku-5-5",
+                                                     "validator":  "claude-sonnet-5-5",
+                                                     "coding":  "claude-sonnet-5-5",
+                                                     "treatment":  "claude-sonnet-5-5",
+                                                     "chat":  "claude-sonnet-5-5"
+                                                 },
+                                      "orchestratorEffort":  "medium",
+                                      "probabilityMode":  "unavailable"
+                                  }
+                   },
+                   {
+                       "name":  "model_access:orchestrator",
+                       "status":  "pass",
+                       "detail":  {
+                                      "requestedModel":  "claude-opus-5-5",
+                                      "responseModel":  "claude-opus-5-5",
+                                      "usage":  {
+                                                    "input_tokens":  46,
+                                                    "cache_creation_input_tokens":  0,
+                                                    "cache_read_input_tokens":  0,
+                                                    "cache_creation":  {
+                                                                           "ephemeral_5m_input_tokens":  0,
+                                                                           "ephemeral_1h_input_tokens":  0
+                                                                       },
+                                                    "output_tokens":  9,
+                                                    "output_tokens_details":  {
+                                                                                  "thinking_tokens":  0
+                                                                              },
+                                                    "service_tier":  "standard",
+                                                    "inference_geo":  "global",
+                                                    "speed":  "standard"
+                                                },
+                                      "effort":  "medium"
+                                  }
+                   },
+                   {
+                       "name":  "model_access:researcher",
+                       "status":  "pass",
+                       "detail":  {
+                                      "requestedModel":  "claude-haiku-5-5",
+                                      "responseModel":  "claude-haiku-5-5",
+                                      "usage":  {
+                                                    "input_tokens":  46,
+                                                    "cache_creation_input_tokens":  0,
+                                                    "cache_read_input_tokens":  0,
+                                                    "cache_creation":  {
+                                                                           "ephemeral_5m_input_tokens":  0,
+                                                                           "ephemeral_1h_input_tokens":  0
+                                                                       },
+                                                    "output_tokens":  9,
+                                                    "output_tokens_details":  {
+                                                                                  "thinking_tokens":  0
+                                                                              },
+                                                    "service_tier":  "standard",
+                                                    "inference_geo":  "global",
+                                                    "speed":  "standard"
+                                                }
+                                  }
+                   },
+                   {
+                       "name":  "model_access:validator",
+                       "status":  "pass",
+                       "detail":  {
+                                      "requestedModel":  "claude-sonnet-5-5",
+                                      "responseModel":  "claude-sonnet-5-5",
+                                      "usage":  {
+                                                    "input_tokens":  46,
+                                                    "cache_creation_input_tokens":  0,
+                                                    "cache_read_input_tokens":  0,
+                                                    "cache_creation":  {
+                                                                           "ephemeral_5m_input_tokens":  0,
+                                                                           "ephemeral_1h_input_tokens":  0
+                                                                       },
+                                                    "output_tokens":  9,
+                                                    "output_tokens_details":  {
+                                                                                  "thinking_tokens":  0
+                                                                              },
+                                                    "service_tier":  "standard",
+                                                    "inference_geo":  "global",
+                                                    "speed":  "standard"
+                                                }
+                                  }
+                   },
+                   {
+                       "name":  "synthetic_round",
+                       "status":  "pass",
+                       "detail":  {
+                                      "round":  1,
+                                      "hypothesisCount":  7,
+                                      "sourceCount":  3,
+                                      "findingCount":  5,
+                                      "awaitingHitl":  true,
+                                      "proposedDiagnosis":  true,
+                                      "probabilityMode":  "unavailable"
+                                  }
+                   },
+                   {
+                       "name":  "retrieval_provenance",
+                       "status":  "pass",
+                       "detail":  {
+                                      "sourceCount":  3,
+                                      "supportedLiteratureFindings":  0,
+                                      "limitation":  "Checks source-bound metadata and citation integrity. Does not independently establish clinical truth or causal support."
+                                  }
+                   },
+                   {
+                       "name":  "coding_adapter",
+                       "status":  "partial",
+                       "detail":  {
+                                      "statuses":  [
+                                                       "no_supported_code",
+                                                       "no_supported_code",
+                                                       "no_supported_code"
+                                                   ],
+                                      "providers":  [
+                                                        "tavily"
+                                                    ],
+                                      "attachedCodes":  [
+
+                                                        ]
+                                  }
+                   },
+                   {
+                       "name":  "clinician_gate",
+                       "status":  "pass",
+                       "detail":  {
+                                      "blockedAdvanceStatus":  409,
+                                      "unchangedRound":  1,
+                                      "diagnosisConfirmed":  false
+                                  }
+                   },
+                   {
+                       "name":  "chat_read_only",
+                       "status":  "pass",
+                       "detail":  "Live chat returned text without changing case state."
+                   },
+                   {
+                       "name":  "synthetic_case_cleanup",
+                       "status":  "pass",
+                       "detail":  {
+                                      "httpStatus":  204
+                                  }
+                   },
+                   {
+                       "name":  "treatment",
+                       "status":  "not_run",
+                       "detail":  "Outside bounded live smoke budget; requires clinician diagnosis confirmation."
+                   }
+               ]
+}
