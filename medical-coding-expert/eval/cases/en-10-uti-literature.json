@@ -1,0 +1,117 @@
+{
+  "id": "en-10-uti-literature",
+  "title": "UTI with literature-only urosepsis and unlikely pyelonephritis",
+  "language": "en",
+  "source": "synthetic",
+  "sourceNote": "Primary-care style note plus a literature snippet supplied by the evidence agent.",
+  "tests": [
+    "literature_only",
+    "hypothesis contradicted",
+    "general code"
+  ],
+  "request": {
+    "requestId": "eval-en-10",
+    "excerpts": [
+      {
+        "id": "ex1",
+        "text": "Dysuria and frequency for 3 days. Urine dipstick nitrite and leukocytes positive. Diagnosis: urinary tract infection, site not further localised."
+      },
+      {
+        "id": "ex2",
+        "text": "No flank pain, afebrile, renal ultrasound normal; pyelonephritis unlikely."
+      }
+    ],
+    "evidence": [
+      {
+        "id": "ev1",
+        "kind": "literature",
+        "text": "In elderly patients, untreated urinary tract infection can progress to urosepsis.",
+        "sourceUrl": "https://example.org/uti-review"
+      }
+    ],
+    "hypotheses": [
+      {
+        "id": "h1",
+        "name": "Acute pyelonephritis"
+      }
+    ]
+  },
+  "expected": [
+    {
+      "id": "uti",
+      "match": {
+        "conditionIncludes": [
+          "urinary",
+          "harnweg",
+          "uti"
+        ],
+        "inputRefs": [
+          "ex1"
+        ]
+      },
+      "assertion": [
+        "documented"
+      ],
+      "status": [
+        "assigned"
+      ],
+      "acceptableCodes": [
+        "N39.0"
+      ],
+      "forbiddenCodes": [
+        "N30",
+        "N10",
+        "N12"
+      ],
+      "notes": "BfArM N39.0 'Harnwegsinfektion, Lokalisation nicht näher bezeichnet'."
+    },
+    {
+      "id": "pyelo",
+      "match": {
+        "hypothesisId": "h1",
+        "conditionIncludes": [
+          "pyelo"
+        ],
+        "inputRefs": [
+          "ex2"
+        ]
+      },
+      "assertion": [
+        "negated",
+        "suspected"
+      ],
+      "status": [
+        "no_supported_code",
+        "needs_clarification"
+      ],
+      "notes": "'Unlikely' with negative findings; must not be assigned N10."
+    },
+    {
+      "id": "urosepsis",
+      "required": false,
+      "match": {
+        "conditionIncludes": [
+          "sepsis"
+        ],
+        "inputRefs": [
+          "ev1"
+        ]
+      },
+      "assertion": [
+        "literature_only"
+      ],
+      "status": [
+        "no_supported_code"
+      ],
+      "forbiddenCodes": [
+        "A41",
+        "R65"
+      ],
+      "notes": "Only in literature."
+    }
+  ],
+  "forbiddenAssignedCodes": [
+    "N10",
+    "A41"
+  ]
+}

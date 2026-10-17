@@ -1,0 +1,93 @@
+{
+  "id": "en-09-copd-fev1",
+  "title": "COPD exacerbation with FEV1 class",
+  "language": "en",
+  "source": "teaching-style",
+  "sourceNote": "English documentation that must map to German J44.1- with the FEV1 modifier.",
+  "tests": [
+    "English input -> German code",
+    "modifier 5th digit"
+  ],
+  "request": {
+    "requestId": "eval-en-09",
+    "excerpts": [
+      {
+        "id": "ex1",
+        "text": "Admitted with an acute exacerbation of COPD. Post-bronchodilator FEV1 42% of predicted."
+      },
+      {
+        "id": "ex2",
+        "text": "Chest X-ray: no consolidation, no evidence of pneumonia."
+      }
+    ],
+    "evidence": [
+      {
+        "id": "ev1",
+        "kind": "patient_finding",
+        "text": "pCO2 52 mmHg, SpO2 89% on room air."
+      }
+    ]
+  },
+  "expected": [
+    {
+      "id": "copd",
+      "match": {
+        "conditionIncludes": [
+          "copd",
+          "obstruktiv",
+          "obstructive"
+        ],
+        "inputRefs": [
+          "ex1"
+        ]
+      },
+      "assertion": [
+        "documented"
+      ],
+      "status": [
+        "assigned",
+        "needs_clarification"
+      ],
+      "acceptableCodes": [
+        "J44.11"
+      ],
+      "idealCode": "J44.11",
+      "candidateCodes": [
+        "J44.1-",
+        "J44.-"
+      ],
+      "forbiddenCodes": [
+        "J44.10",
+        "J44.12",
+        "J44.13",
+        "J44.19",
+        "J44.0",
+        "J44.9"
+      ],
+      "notes": "J44.1- with 5th digit 1 'FEV1 >=35 % und <50 % des Sollwertes'. The official label must stay German."
+    },
+    {
+      "id": "pneumonia",
+      "required": false,
+      "match": {
+        "conditionIncludes": [
+          "pneumon"
+        ],
+        "inputRefs": [
+          "ex2"
+        ]
+      },
+      "assertion": [
+        "negated"
+      ],
+      "status": [
+        "no_supported_code"
+      ],
+      "forbiddenCodes": [
+        "J18",
+        "J44.0"
+      ],
+      "notes": "Ruled out."
+    }
+  ]
+}

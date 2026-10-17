@@ -5,12 +5,15 @@
   "description": "Person 2: source-checked ICD-10-GM 2026 code suggestions from clinical excerpts",
   "type": "module",
   "main": "src/index.ts",
-  "engines": { "node": ">=22" },
+  "engines": {
+    "node": ">=22"
+  },
   "scripts": {
     "code": "tsx src/cli.ts",
     "smoke": "tsx src/smoke.ts",
     "test": "vitest run",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "eval": "tsx eval/run.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.135.0",

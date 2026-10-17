@@ -1,0 +1,87 @@
+{
+  "id": "de-02-appendizitis-peritonitis",
+  "title": "Akute Appendizitis mit lokalisierter Peritonitis",
+  "language": "de",
+  "source": "teaching-style",
+  "sourceNote": "Teaching scenario for the 5-character split of K35.3- (peritonitis / perforation).",
+  "tests": [
+    "5th-digit specificity",
+    "negated finding"
+  ],
+  "request": {
+    "requestId": "eval-de-02",
+    "excerpts": [
+      {
+        "id": "ex1",
+        "text": "OP-Bericht: Laparoskopische Appendektomie. Intraoperativ phlegmonöse Appendix mit lokal begrenzter Peritonitis im rechten Unterbauch, keine Perforation."
+      },
+      {
+        "id": "ex2",
+        "text": "Gynäkologisches Konsil: kein Anhalt für Ovarialzyste oder Adnexitis."
+      }
+    ],
+    "evidence": [
+      {
+        "id": "ev1",
+        "kind": "patient_finding",
+        "text": "Histologie: akute ulzero-phlegmonöse Appendizitis."
+      }
+    ]
+  },
+  "expected": [
+    {
+      "id": "appendicitis",
+      "match": {
+        "conditionIncludes": [
+          "append"
+        ],
+        "inputRefs": [
+          "ex1"
+        ]
+      },
+      "assertion": [
+        "documented"
+      ],
+      "status": [
+        "assigned"
+      ],
+      "acceptableCodes": [
+        "K35.30"
+      ],
+      "forbiddenCodes": [
+        "K35.8",
+        "K35.31",
+        "K35.32",
+        "K35.2"
+      ],
+      "requiredInputRefs": [
+        "ex1"
+      ],
+      "notes": "BfArM K35.30 'Akute Appendizitis mit lokalisierter Peritonitis ohne Perforation oder Ruptur'. K35.8 ignores the documented peritonitis; K35.31 invents a perforation."
+    },
+    {
+      "id": "ovarian-cyst",
+      "required": false,
+      "match": {
+        "conditionIncludes": [
+          "ovar",
+          "adnex"
+        ],
+        "inputRefs": [
+          "ex2"
+        ]
+      },
+      "assertion": [
+        "negated"
+      ],
+      "status": [
+        "no_supported_code"
+      ],
+      "forbiddenCodes": [
+        "N83",
+        "N70"
+      ],
+      "notes": "Explicitly excluded by the consult."
+    }
+  ]
+}

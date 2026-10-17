@@ -1,0 +1,130 @@
+{
+  "id": "de-01-stemi-vorderwand",
+  "title": "STEMI Vorderwand mit Z.n. und Familienanamnese",
+  "language": "de",
+  "source": "teaching-style",
+  "sourceNote": "Classic teaching scenario: acute MI with documented localisation, plus history/family-history distractors.",
+  "tests": [
+    "specific terminal code",
+    "historical mention",
+    "family history"
+  ],
+  "request": {
+    "requestId": "eval-de-01",
+    "excerpts": [
+      {
+        "id": "ex1",
+        "text": "Aufnahme über NA mit akutem retrosternalem Druckschmerz seit 2 h. EKG: ST-Hebungen V1–V4. Koronarangiographie: proximaler RIVA-Verschluss, PCI mit DES. Diagnose: Akuter transmuraler Vorderwandinfarkt (STEMI)."
+      },
+      {
+        "id": "ex2",
+        "text": "Z.n. Appendektomie 1998."
+      },
+      {
+        "id": "ex3",
+        "text": "Familienanamnese: Vater mit 61 J. an Myokardinfarkt verstorben."
+      }
+    ],
+    "evidence": [
+      {
+        "id": "ev1",
+        "kind": "patient_finding",
+        "text": "Troponin T hs 2450 ng/l (Ref. < 14 ng/l)."
+      }
+    ],
+    "hypotheses": [
+      {
+        "id": "h1",
+        "name": "Akuter Vorderwandinfarkt"
+      }
+    ]
+  },
+  "expected": [
+    {
+      "id": "stemi",
+      "match": {
+        "hypothesisId": "h1",
+        "conditionIncludes": [
+          "vorderwand",
+          "anterior",
+          "stemi"
+        ],
+        "inputRefs": [
+          "ex1"
+        ]
+      },
+      "assertion": [
+        "documented"
+      ],
+      "status": [
+        "assigned"
+      ],
+      "acceptableCodes": [
+        "I21.0"
+      ],
+      "forbiddenCodes": [
+        "I21.9",
+        "I21.4",
+        "I22",
+        "I25"
+      ],
+      "requiredInputRefs": [
+        "ex1"
+      ],
+      "notes": "BfArM I21.0 'Akuter transmuraler Myokardinfarkt der Vorderwand'. I21.9/I21.4 ignore the documented localisation/transmurality."
+    },
+    {
+      "id": "father-mi",
+      "required": false,
+      "match": {
+        "conditionIncludes": [
+          "vater",
+          "father",
+          "famil"
+        ],
+        "inputRefs": [
+          "ex3"
+        ]
+      },
+      "assertion": [
+        "family_history"
+      ],
+      "status": [
+        "no_supported_code"
+      ],
+      "forbiddenCodes": [
+        "I21",
+        "I25"
+      ],
+      "notes": "Father's MI is family history, not the patient's condition."
+    },
+    {
+      "id": "appendectomy",
+      "required": false,
+      "match": {
+        "conditionIncludes": [
+          "append"
+        ],
+        "inputRefs": [
+          "ex2"
+        ]
+      },
+      "assertion": [
+        "historical"
+      ],
+      "status": [
+        "no_supported_code",
+        "assigned"
+      ],
+      "acceptableCodes": [
+        "Z90.4"
+      ],
+      "forbiddenCodes": [
+        "K35",
+        "K36",
+        "K37"
+      ],
+      "notes": "Past procedure; must never become an acute appendicitis code."
+    }
+  ]
+}

@@ -1,0 +1,233 @@
+{
+  "id": "de-08-arztbrief-herzinsuffizienz",
+  "title": "Entlassbrief mit mehreren Diagnosen",
+  "language": "de",
+  "source": "teaching-style",
+  "sourceNote": "Realistic cardiology discharge diagnosis list; also stresses the 3-page budget (4 catalogue blocks needed).",
+  "tests": [
+    "multi-condition",
+    "page budget",
+    "negated",
+    "historical"
+  ],
+  "request": {
+    "requestId": "eval-de-08",
+    "excerpts": [
+      {
+        "id": "ex1",
+        "text": "Diagnosen: 1. Dekompensierte Linksherzinsuffizienz, NYHA III, bei hypertensiver Herzkrankheit."
+      },
+      {
+        "id": "ex2",
+        "text": "2. Chronische Nierenkrankheit Stadium 3 (eGFR 42 ml/min/1,73 m²)."
+      },
+      {
+        "id": "ex3",
+        "text": "3. Hypokaliämie unter Diuretikatherapie."
+      },
+      {
+        "id": "ex4",
+        "text": "4. Paroxysmales Vorhofflimmern, aktuell Sinusrhythmus."
+      },
+      {
+        "id": "ex5",
+        "text": "Z.n. laparoskopischer Cholezystektomie 2015. Akuter Myokardinfarkt ausgeschlossen (Troponin seriell negativ)."
+      }
+    ],
+    "evidence": [
+      {
+        "id": "ev1",
+        "kind": "patient_finding",
+        "text": "Kalium 3,1 mmol/l. NT-proBNP 4800 pg/ml."
+      }
+    ]
+  },
+  "expected": [
+    {
+      "id": "hf",
+      "match": {
+        "conditionIncludes": [
+          "herzinsuff",
+          "heart failure",
+          "linksherz"
+        ],
+        "inputRefs": [
+          "ex1"
+        ]
+      },
+      "assertion": [
+        "documented"
+      ],
+      "status": [
+        "assigned"
+      ],
+      "acceptableCodes": [
+        "I50.13"
+      ],
+      "forbiddenCodes": [
+        "I50.9",
+        "I50.19",
+        "I50.14",
+        "I50.12",
+        "I50.11"
+      ],
+      "notes": "BfArM I50.13 (Linksherzinsuffizienz, mit Beschwerden bei leichterer Belastung; Inkl. NYHA-Stadium III)."
+    },
+    {
+      "id": "hhd",
+      "required": false,
+      "match": {
+        "conditionIncludes": [
+          "hypertensiv"
+        ]
+      },
+      "assertion": [
+        "documented"
+      ],
+      "status": [
+        "assigned",
+        "needs_clarification"
+      ],
+      "acceptableCodes": [
+        "I11.00"
+      ],
+      "idealCode": "I11.00",
+      "candidateCodes": [
+        "I11.0-",
+        "I11.-"
+      ],
+      "forbiddenCodes": [
+        "I10"
+      ],
+      "notes": "Hypertensive Herzkrankheit mit Herzinsuffizienz: I11.0- with modifier 0."
+    },
+    {
+      "id": "ckd",
+      "match": {
+        "conditionIncludes": [
+          "niere",
+          "kidney",
+          "ckd"
+        ],
+        "inputRefs": [
+          "ex2"
+        ]
+      },
+      "assertion": [
+        "documented"
+      ],
+      "status": [
+        "assigned"
+      ],
+      "acceptableCodes": [
+        "N18.3"
+      ],
+      "forbiddenCodes": [
+        "N18.9",
+        "N18.4",
+        "N18.2",
+        "N19"
+      ],
+      "notes": "BfArM N18.3 'Chronische Nierenkrankheit, Stadium 3'."
+    },
+    {
+      "id": "hypok",
+      "match": {
+        "conditionIncludes": [
+          "kali",
+          "potass"
+        ],
+        "inputRefs": [
+          "ex3"
+        ]
+      },
+      "assertion": [
+        "documented"
+      ],
+      "status": [
+        "assigned"
+      ],
+      "acceptableCodes": [
+        "E87.6"
+      ],
+      "notes": "BfArM E87.6 'Hypokaliämie'."
+    },
+    {
+      "id": "af",
+      "match": {
+        "conditionIncludes": [
+          "vorhof",
+          "atrial"
+        ],
+        "inputRefs": [
+          "ex4"
+        ]
+      },
+      "assertion": [
+        "documented"
+      ],
+      "status": [
+        "assigned"
+      ],
+      "acceptableCodes": [
+        "I48.0"
+      ],
+      "forbiddenCodes": [
+        "I48.1",
+        "I48.2",
+        "I48.9"
+      ],
+      "notes": "BfArM I48.0 'Vorhofflimmern, paroxysmal'."
+    },
+    {
+      "id": "mi",
+      "required": false,
+      "match": {
+        "conditionIncludes": [
+          "infarkt",
+          "infarct"
+        ],
+        "inputRefs": [
+          "ex5"
+        ]
+      },
+      "assertion": [
+        "negated"
+      ],
+      "status": [
+        "no_supported_code"
+      ],
+      "forbiddenCodes": [
+        "I21"
+      ],
+      "notes": "Excluded."
+    },
+    {
+      "id": "chole",
+      "required": false,
+      "match": {
+        "conditionIncludes": [
+          "chole"
+        ],
+        "inputRefs": [
+          "ex5"
+        ]
+      },
+      "assertion": [
+        "historical"
+      ],
+      "status": [
+        "no_supported_code",
+        "assigned"
+      ],
+      "acceptableCodes": [
+        "Z90.4"
+      ],
+      "forbiddenCodes": [
+        "K80",
+        "K81"
+      ],
+      "notes": "Past procedure."
+    }
+  ]
+}
