@@ -29,6 +29,7 @@ export const DEFAULT_CONFIG: Config = {
   httpTimeoutMs: 15_000,
   requestBudgetMs: 180_000,
   maxConsecutiveProviderFailures: 3,
+  maxTavilySearchesPerRequest: 3,
 };
 
 const LIMITATIONS = [
@@ -142,6 +143,8 @@ export async function gatherEvidence(request: EvidenceRequest, deps: Deps): Prom
     fullText: new Map(),
     searches: new Map(),
     guidelines: new Map(),
+    // No automatic retry for Tavily: a failed call must never cost a second credit.
+    tavily: deps.tavily && { ...deps.tavily, http: new Http(deps.fetch, config.httpTimeoutMs, 0), searches: 0 },
   };
 
   async function answer(q: Question): Promise<QuestionOutcome> {

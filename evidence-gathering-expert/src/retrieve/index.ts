@@ -8,6 +8,7 @@ import { fetchGuidelinePage, ProviderBlocked, searchGuidelines } from "./duckduc
 import type { Http, ProviderHealth } from "./http.js";
 import { fetchEuropePmcFullText, searchEuropePmc, searchPubMed, type PaperRecord } from "./papers.js";
 import { selectPassages } from "./text.js";
+import { CREDITS_PER_SEARCH, searchGuidelinesTavily, type CreditBudget } from "./tavily.js";
 
 export interface RetrieveContext {
   http: Http;
@@ -22,6 +23,7 @@ export interface RetrieveContext {
   guidelines: Map<string, Promise<StoredSource[]>>;
   /** DuckDuckGo searches run one at a time, so a block is seen before the next search starts. */
   ddgQueue?: Promise<unknown>;
+  tavily?: { apiKey: string; budget: CreditBudget; http: Http; searches: number };
 }
 
 export interface Retrieved {
@@ -179,12 +181,52 @@ async function papersFor(q: Question, problem: string, ctx: RetrieveContext): Pr
   );
 }
 
+/**
+ * Guideline pages via Tavily, or null to fall back to DuckDuckGo (no key, cap reached,
+ * no credits left this month, or Tavily failing). Credits are reserved before each call.
+ */
+async function tavilyGuidelines(q: Question, problem: string, ctx: RetrieveContext): Promise<StoredSource[] | null> {
+  const t = ctx.tavily;
+  if (!t || ctx.health.disabled("tavily") || t.searches >= ctx.config.maxTavilySearchesPerRequest) return null;
+  if (!(await t.budget.tryConsume(CREDITS_PER_SEARCH))) {
+    ctx.health.block("tavily");
+    ctx.errors.push({ step: "retrieve", message: "Tavily: monthly credit limit reached; using DuckDuckGo" });
+    return null;
+  }
+  t.searches++;
+  try {
+    const pages = await searchGuidelinesTavily(t.http, t.apiKey, [q.diagnosis.searchTerm, problem].filter(Boolean).join(" "), 2);
+    ctx.health.ok("tavily");
+    return pages.map((page) =>
+      ctx.store.add({
+        id: `url:${page.url}`,
+        url: page.url,
+        title: page.title,
+        studyType: "guideline",
+        accessLevel: "full_text",
+        retrievedAt: ctx.now().toISOString(),
+        provider: "tavily",
+        text: page.text,
+      }),
+    );
+  } catch (e) {
+    // Auth, quota or rate-limit answers mean stop for this request; never retry around them.
+    const status = (e as { status?: number }).status;
+    if (status === 401 || status === 403 || status === 429 || status === 432 || status === 433) ctx.health.block("tavily");
+    else ctx.health.fail("tavily");
+    ctx.errors.push({ step: "retrieve", message: `Tavily: ${(e as Error).message}; using DuckDuckGo` });
+    return null;
+  }
+}
+
 function guidelinesFor(q: Question, problem: string, ctx: RetrieveContext): Promise<StoredSource[]> {
   const key = q.diagnosis.id;
   let p = ctx.guidelines.get(key);
   if (!p) {
     const previous = ctx.ddgQueue ?? Promise.resolve();
     p = previous.then(async () => {
+      const viaTavily = await tavilyGuidelines(q, problem, ctx);
+      if (viaTavily) return viaTavily;
       if (ctx.health.disabled("duckduckgo")) return [];
       let urls: string[];
       try {

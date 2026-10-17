@@ -28,7 +28,7 @@ Europe PMC, PubMed and DuckDuckGo need no key. Tests need no key and no network.
 ## Commands
 
 ```bash
-npm test                                             # 66 tests, no keys, no network
+npm test                                             # 74 tests, no keys, no network
 npm run typecheck
 npm run evidence -- examples/sore-throat.request.json  # live run; JSON on stdout, summary with links on stderr, saved to out/<requestId>.json
 npx tsx --env-file=../.env.local scripts/trace-live.ts # live run with a full request/model trace in out/trace.json
@@ -213,3 +213,20 @@ Live golden runs after this change: **7 / 34 supported** (chest pain 2, breathle
 dysuria 0), all with a population warning. Examples: stable angina 6% of ED patients with
 suspected cardiac ischaemia; orthopnoea LR 39.1 for heart failure in primary care;
 community-acquired pneumonia 35% of acute respiratory failure in elderly patients.
+
+## Tavily guideline search (2026-10-17)
+
+Guideline pages now come from Tavily when `TAVILY_API_KEY` is set (repo-root
+`.env.local`); DuckDuckGo Lite remains the fallback. One basic search per diagnosis
+(1 credit, returns the page text directly, `include_domains` = the guideline domains,
+no answer generation), so at most 3 credits per patient (`maxTavilySearchesPerRequest`).
+Credits are reserved before each call against a monthly counter in
+`out/tavily-usage.json` (git-ignored), default cap 900 (`TAVILY_MONTHLY_CREDIT_LIMIT`),
+below the free plan's 1,000. Tavily calls never retry automatically; 401/403/429 or quota
+errors stop Tavily for the request and fall back to DuckDuckGo. The counter is per
+machine: teammates using the same key on other machines are not counted.
+
+Live check (golden 2): 3 credits, six guideline pages retrieved (NICE acute and chronic
+heart failure, NICE pneumonia, others). Overview pages rarely state numbers, so no
+guideline quote was verified in that run. Known gap: every page on an allowed domain is
+labelled `guideline`, including a journal PDF hosted on who.int.

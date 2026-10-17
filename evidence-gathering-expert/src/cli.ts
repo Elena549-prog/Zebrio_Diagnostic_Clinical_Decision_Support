@@ -3,6 +3,7 @@ import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { gatherEvidence } from "./gather.js";
 import { anthropicClient } from "./llm.js";
 import { formatCitations } from "./report.js";
+import { fileBudget } from "./retrieve/tavily.js";
 import type { EvidenceRequest } from "./types.js";
 
 const file = process.argv[2];
@@ -17,9 +18,16 @@ if (!process.env.ANTHROPIC_API_KEY) {
 
 const request = JSON.parse(readFileSync(file, "utf8")) as EvidenceRequest;
 const started = Date.now();
+// Tavily free plan: 1,000 credits a month. Stay below it by default; the counter lives in
+// out/tavily-usage.json (git-ignored) and is shared by every run on this machine.
+const TAVILY_USAGE_FILE = new URL("../out/tavily-usage.json", import.meta.url).pathname;
+const tavilyKey = process.env.TAVILY_API_KEY?.trim();
 const response = await gatherEvidence(request, {
   llm: anthropicClient({ model: process.env.EVIDENCE_MODEL }),
   fetch,
+  tavily: tavilyKey
+    ? { apiKey: tavilyKey, budget: fileBudget(TAVILY_USAGE_FILE, Number(process.env.TAVILY_MONTHLY_CREDIT_LIMIT) || 900) }
+    : undefined,
 });
 
 mkdirSync("out", { recursive: true });

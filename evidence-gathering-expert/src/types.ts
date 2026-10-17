@@ -30,7 +30,7 @@ export type StudyType =
   | "observational"
   | "other";
 
-export type Provider = "europepmc" | "pubmed" | "duckduckgo";
+export type Provider = "europepmc" | "pubmed" | "duckduckgo" | "tavily";
 
 export interface Source {
   id: string;
@@ -149,6 +149,8 @@ export interface Config {
   httpTimeoutMs: number;
   requestBudgetMs: number;
   maxConsecutiveProviderFailures: number;
+  /** Hard cap on Tavily searches (1 credit each) in one request. */
+  maxTavilySearchesPerRequest: number;
 }
 
 export interface Deps {
@@ -156,4 +158,6 @@ export interface Deps {
   fetch: typeof fetch;
   now?: () => Date;
   config?: Partial<Config>;
+  /** Optional Tavily guideline search; without it DuckDuckGo is used. */
+  tavily?: { apiKey: string; budget: import("./retrieve/tavily.js").CreditBudget };
 }

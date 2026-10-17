@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { gatherEvidence } from "../src/gather.js";
+import { memoryBudget } from "../src/retrieve/tavily.js";
 import type { EvidenceRequest, LlmClient, LlmRequest } from "../src/types.js";
 import { fakeFetch, html, json, xml } from "./helpers.js";
 
@@ -38,8 +39,15 @@ const NICE = `<html><head><title>Sore throat (acute): antimicrobial prescribing 
 
 type Route = (url: string) => Response;
 
-function world(over: { epmc?: Route; pubmed?: Route; ddg?: Route; fullText?: Route } = {}) {
+const TAVILY_TEXT = "For people with sore throat, use FeverPAIN or Centor criteria to identify those more likely to benefit from an antibiotic. ".repeat(3);
+
+function world(over: { epmc?: Route; pubmed?: Route; ddg?: Route; fullText?: Route; tavily?: Route } = {}) {
   return fakeFetch([
+    [
+      /api\.tavily\.com\/search/,
+      over.tavily ??
+        (() => json({ results: [{ url: "https://www.nice.org.uk/guidance/ng84", title: "Sore throat (acute) | NICE", content: "s", raw_content: TAVILY_TEXT }] })),
+    ],
     [/europepmc\/webservices\/rest\/search/, over.epmc ?? (() => json({ resultList: { result: epmcResults } }))],
     [/PMC100\/fullTextXML/, over.fullText ?? (() => xml(fullText))],
     [/eutils/, over.pubmed ?? (() => json({ esearchresult: { idlist: [] } }))],
@@ -350,6 +358,43 @@ describe("gatherEvidence end to end (no network, no keys)", () => {
 
     const rejected = await gatherEvidence(request, { llm: verdict(false), fetch: world(), now: fixedNow });
     expect(rejected.diagnoses[0]!.prior.status).toBe("insufficient");
+  });
+
+  it("uses Tavily for guidelines when a key and credits are available, at most one search per diagnosis", async () => {
+    const fetchFn = world();
+    const res = await gatherEvidence(request, {
+      llm: scriptedLlm(),
+      fetch: fetchFn,
+      now: fixedNow,
+      tavily: { apiKey: "tvly-test", budget: memoryBudget(100) },
+    });
+    const tavilyCalls = fetchFn.calls.filter((c) => c.includes("api.tavily.com"));
+    expect(tavilyCalls).toHaveLength(2); // two diagnoses in the scripted analysis
+    expect(fetchFn.calls.some((c) => c.includes("duckduckgo"))).toBe(false);
+    expect(res.sources.find((s) => s.provider === "tavily")).toMatchObject({ url: "https://www.nice.org.uk/guidance/ng84", studyType: "guideline", accessLevel: "full_text" });
+    const outgoing = tavilyCalls.join("\n");
+    for (const s of ["Aarhus", "38.6", "Pain on swallowing", "Sore throat and fever for 2 days"]) expect(outgoing).not.toContain(s);
+  });
+
+  it("never spends more Tavily credits than the budget allows, and falls back to DuckDuckGo", async () => {
+    const fetchFn = world();
+    const budget = memoryBudget(1);
+    await gatherEvidence(request, { llm: scriptedLlm(), fetch: fetchFn, now: fixedNow, tavily: { apiKey: "tvly-test", budget } });
+    expect(fetchFn.calls.filter((c) => c.includes("api.tavily.com"))).toHaveLength(1);
+    expect(fetchFn.calls.some((c) => c.includes("duckduckgo"))).toBe(true);
+    expect(await budget.tryConsume(1)).toBe(false);
+  });
+
+  it("caps Tavily searches per request even when the monthly budget is large", async () => {
+    const fetchFn = world();
+    await gatherEvidence(request, {
+      llm: scriptedLlm(),
+      fetch: fetchFn,
+      now: fixedNow,
+      tavily: { apiKey: "tvly-test", budget: memoryBudget(1000) },
+      config: { maxTavilySearchesPerRequest: 1 },
+    });
+    expect(fetchFn.calls.filter((c) => c.includes("api.tavily.com"))).toHaveLength(1);
   });
 
   it("a contradicting finding also needs the independent second check", async () => {
