@@ -16,7 +16,7 @@
  *   - a branching finding (a positive strep test splits the meaning of
  *     "post-strep" into ARF vs PSRA)
  *   - a HITL test gate
- *   - evidence with citations + the registry experts
+ *   - scripted evidence with citations
  *   - convergence to a working diagnosis with a reasoning trail
  *   - a treatment plan with surgical case-finding
  *
@@ -343,7 +343,7 @@ const step3: Case = {
   ],
 };
 
-// ---- Step 4: Evidence deep-dive — registry experts ground the leading node --
+// ---- Step 4: Evidence deep-dive — scripted sources illustrate grounding --
 const step4: Case = {
   ...step3,
   round: 2,
@@ -352,7 +352,7 @@ const step4: Case = {
     [H.arf]: {
       ...step3.hypotheses[H.arf]!,
       description:
-        "A delayed autoimmune sequel of group A strep pharyngitis. The migratory polyarthritis + raised ASO fit the updated Jones criteria. PubMed and clinical-trials experts surfaced supporting evidence.",
+        "A delayed autoimmune sequel of group A strep pharyngitis. The migratory polyarthritis + raised ASO fit the updated Jones criteria. This scripted example illustrates cited evidence; no live experts were called in the guided tour.",
       evidenceFor: [
         { findingId: F.fever, weight: "moderate" },
         { findingId: F.joints, weight: "strong" },

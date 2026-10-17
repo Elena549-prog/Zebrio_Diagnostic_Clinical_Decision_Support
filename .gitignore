@@ -9,5 +9,6 @@ __pycache__/
 dist/
 build/
 *.tsbuildinfo
+.playwright-cli/
 data/reference/raw/
 data/reference/*-index.json
