@@ -1,0 +1,19 @@
+{
+  "requestId": "golden-1-chest-pain",
+  "presentation": {
+    "chiefComplaint": "Pressure in the chest on exertion for 3 weeks",
+    "history": "Retrosternal pressure when climbing stairs or walking uphill, radiating to the left arm, settles within about 5 minutes of rest. No pain at rest. Patient is worried it is his heart. Smoker for 35 years, about 20 cigarettes a day. Known hypertension and type 2 diabetes on metformin and ramipril. Father had a heart attack at 58. No cough, no fever, no heartburn.",
+    "observations": [
+      "BP 152/88, HR 78 regular, RR 14, SpO2 97%, BMI 31",
+      "Chest wall not tender, pain not reproducible by palpation",
+      "Heart sounds normal, no murmur, lungs clear, no leg oedema",
+      "Resting ECG in the practice: sinus rhythm, no ST changes"
+    ],
+    "demographics": {
+      "ageYears": 64,
+      "sex": "male",
+      "location": "Leipzig, Germany",
+      "comorbidities": ["hypertension", "type 2 diabetes"]
+    }
+  }
+}
