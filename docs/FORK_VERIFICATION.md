@@ -40,3 +40,25 @@ No paid model/search requests were made for fork verification. Source-code and
 HTTP tests verify isolation; clinical accuracy is outside this feature's scope.
 
 Cases and forks remain in memory and are lost on server restart, as before.
+
+## Final checks
+
+All 66 server tests, server/web typechecks, and the production build pass.
+No paid inference was needed. The committed source also passed a credential
+scan against the configured secrets; `.env` remains ignored.
+
+## Standards
+
+Independent review found no material convention violations or consequential
+maintainability smells. The final follow-up confirmed the result selector
+supports both proposed and ordered tests consistently with the server gate.
+
+## Spec
+
+The first independent review found one P2: reopening a confirmed diagnosis
+could lose an unanswered test gate. Commit `947baf1` restores that gate, and
+`ce9b074` handles both proposed and ordered test states in the form. The reviewer
+independently reran the API checks and confirmed the finding is closed. No
+remaining material spec findings were reported.
+
+Final review findings: Standards 0; Spec 0 outstanding (1 fixed).

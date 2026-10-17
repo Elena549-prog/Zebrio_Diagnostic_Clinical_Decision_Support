@@ -17,7 +17,7 @@ by this new app.
   round rollback, and explicit clinician confirmation of working diagnosis.
 - Local ignored `.env` with authorized credentials; blank `.env.example` for
   sharing. Credentials are not returned by health checks or browser bundles.
-- Final typechecks, 64 automated tests, production build, and browser smoke
+- Final typechecks, 66 automated tests, production build, and browser smoke
   checks pass. Dependency audit reported no known vulnerabilities after updates.
 - Independent live probes passed for all three configured Claude models.
   A synthetic case completed one real round and a read-only chat; the clinician

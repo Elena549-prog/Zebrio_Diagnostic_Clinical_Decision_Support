@@ -104,6 +104,6 @@ Current checks and their limits are recorded in [PORT_STATUS.md](PORT_STATUS.md)
 [LIVE_FOLLOWUP_VERIFICATION.md](LIVE_FOLLOWUP_VERIFICATION.md). The follow-up
 exercised two rounds, an explicit synthetic clinician finding, confirmation,
 and treatment generation; this closes execution coverage, not clinical
-evaluation. With timeline forking, the offline suite passes all 64 tests,
+evaluation. With timeline forking, the offline suite passes all 66 tests,
 typecheck, and build.
 The application port is committed locally on `main`; no push was requested.
