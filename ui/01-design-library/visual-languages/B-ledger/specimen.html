@@ -1,0 +1,407 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ledger Specimen</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="tokens.css">
+<style>
+  * { box-sizing: border-box; }
+  html { background: var(--paper); }
+  body { margin: 0; background: var(--paper); color: var(--ink); font: 400 var(--fs-ui)/var(--lh-ui) var(--font-ui); -webkit-font-smoothing: antialiased; }
+  .page { display: grid; grid-template-columns: var(--rail-w) minmax(0, 1fr); gap: 0 64px; max-width: 1240px; margin: 0 auto; padding: 0 24px; }
+  .rail { position: sticky; top: 0; align-self: start; height: 100vh; padding: 64px 0 32px; border-right: 1px solid var(--rule); }
+  .rail .mark { font: 500 15px/1 var(--font-ui); letter-spacing: -.01em; display: flex; gap: 8px; align-items: center; }
+  .rail nav { margin-top: 40px; display: grid; gap: 10px; }
+  .rail nav a { color: var(--ink-60); text-decoration: none; font-size: 15px; transition: color var(--dur-hover) var(--ease-hover); animation: b-rise-in 400ms var(--ease-standard) both; }
+  .rail nav a:hover, .rail nav a.on { color: var(--ink); }
+  main { padding: 64px 0 120px; min-width: 0; }
+  @media (max-width: 860px) { .page { grid-template-columns: 1fr; } .rail { position: static; height: auto; border-right: 0; border-bottom: 1px solid var(--rule); padding: 24px 0; } .rail nav { grid-auto-flow: column; overflow-x: auto; margin-top: 16px; } }
+
+  .lbl { font: 500 var(--fs-label)/1 var(--font-mono); letter-spacing: var(--ls-label); text-transform: uppercase; color: var(--ink-60); }
+  .micro { font: 500 var(--fs-micro)/1.3 var(--font-mono); letter-spacing: var(--ls-micro); text-transform: uppercase; color: var(--ink-45); }
+  .statement { font: 400 var(--fs-statement)/var(--lh-statement) var(--font-ui); letter-spacing: var(--ls-statement); margin: 20px 0 20px; max-width: 680px; }
+  .dek { font-size: var(--fs-body); line-height: var(--lh-body); color: var(--ink-68); max-width: var(--measure); margin: 0; }
+  section { margin-top: var(--sp-section); padding-top: 28px; border-top: 1px solid var(--rule); }
+  section > h2 { font: 400 var(--fs-h2)/var(--lh-h2) var(--font-ui); letter-spacing: var(--ls-h2); margin: 18px 0 24px; }
+  .panel { background: var(--surface); box-shadow: var(--shadow-card); padding: 24px; }
+  .grid { display: grid; gap: 1px; background: var(--rule); border: 1px solid var(--rule); }
+  .g4 { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); }
+  .g2 { display: grid; gap: 16px; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); }
+  .mono { font-family: var(--font-mono); font-size: 12px; }
+  .spec { font: 400 11.5px/1.6 var(--font-mono); color: var(--ink-60); margin: 14px 0 0; }
+
+  /* swatches */
+  .sw { background: var(--surface); }
+  .sw .chip { height: 72px; border-bottom: 1px solid var(--rule); }
+  .sw .meta { padding: 10px 12px; }
+  .sw .meta b { display: block; font: 500 11px/1.3 var(--font-mono); letter-spacing: .06em; text-transform: uppercase; }
+  .sw .meta span { font: 400 12px/1.5 var(--font-mono); color: var(--ink-60); }
+
+  .type-row { display: grid; grid-template-columns: 200px 1fr; gap: 16px; padding: 18px 0; border-top: 1px dashed var(--rule); align-items: baseline; }
+  .type-row:first-child { border-top: 0; }
+  @media (max-width: 600px) { .type-row { grid-template-columns: 1fr; } }
+
+  /* ---- buttons ---- */
+  .btn { display: inline-flex; align-items: center; gap: 10px; height: 44px; border: 0; border-radius: 0; cursor: pointer; white-space: nowrap; font: 500 var(--fs-label)/1 var(--font-mono); letter-spacing: var(--ls-label); text-transform: uppercase;
+    transition: transform var(--dur-press) var(--ease-cta), background-color var(--dur-hover) var(--ease-hover), color var(--dur-hover) var(--ease-hover), box-shadow var(--dur-hover) var(--ease-hover); }
+  .btn:active, .btn.is-press { transform: scale(.985); }
+  .btn:focus-visible, .btn.is-focus { outline: none; box-shadow: var(--focus), inset 0 0 0 1px var(--blue); }
+  .btn[disabled] { opacity: .4; cursor: not-allowed; }
+
+  /* primary: icon tile + rail sweep + tile spin (supermemory .btn-primary) */
+  .btn-primary { position: relative; overflow: hidden; background: var(--blue); color: var(--on-blue); padding: 2px 14px 2px 2px; isolation: isolate; }
+  .btn-primary::before { content: ""; position: absolute; inset: 0; box-shadow: inset 0 0 0 1px #FFFBF566; clip-path: inset(0); transition: clip-path var(--dur-cta) var(--ease-cta); z-index: 1; pointer-events: none; }
+  .btn-primary .rail { position: absolute; inset: 0; background: var(--blue-deep); translate: -100% 0; transition: translate var(--dur-cta) var(--ease-cta); z-index: -1; }
+  .btn-primary .tile { width: 40px; height: 40px; display: grid; place-items: center; background: var(--on-blue); color: var(--blue); transition: rotate 580ms var(--spring-36); }
+  .btn-primary:hover::before, .btn-primary.is-hover::before { clip-path: inset(2px); }
+  .btn-primary:hover .rail, .btn-primary.is-hover .rail { translate: 0 0; }
+  .btn-primary:hover .tile, .btn-primary.is-hover .tile { rotate: 360deg; }
+  .btn-primary:active, .btn-primary.is-press { background: var(--blue-press); }
+
+  .btn-secondary { background: var(--surface); color: var(--ink); padding: 0 14px; box-shadow: inset 0 0 0 1px var(--blue-40); }
+  .btn-secondary:hover, .btn-secondary.is-hover { background: var(--blue-7); color: var(--blue-deep); }
+  .btn-secondary .arr { transition: translate var(--dur-hover) var(--ease-out); }
+  .btn-secondary:hover .arr, .btn-secondary.is-hover .arr { translate: 2px -2px; }
+  .btn-hatch { background: var(--paper) var(--hatch); color: var(--ink); padding: 0 12px; height: 32px; box-shadow: inset 0 0 0 1px var(--rule); }
+  .btn-hatch:hover, .btn-hatch.is-hover { background-color: var(--surface); }
+  .btn-text { background: transparent; color: var(--ink-60); padding: 0 4px; height: 32px; font: 400 15px/1 var(--font-ui); letter-spacing: 0; text-transform: none; }
+  .btn-text:hover, .btn-text.is-hover { color: var(--ink); }
+  .btn-alert { background: var(--surface); color: var(--alert); padding: 0 14px; box-shadow: inset 0 0 0 1px #A02B2559; }
+  .btn-alert:hover, .btn-alert.is-hover { background: #A02B250D; }
+  .btn-icon { width: 36px; height: 36px; padding: 0; justify-content: center; background: var(--surface); color: var(--ink); box-shadow: inset 0 0 0 1px var(--rule); }
+  .btn-icon:hover, .btn-icon.is-hover { box-shadow: inset 0 0 0 1px var(--ink); }
+  .shimmer { color: transparent; background: linear-gradient(90deg, #FFFBF599 35%, #FFFBF5 50%, #FFFBF599 65%) 0 0 / 200% 100%; -webkit-background-clip: text; background-clip: text; animation: b-shimmer 1.8s linear infinite; }
+
+  .btn-row { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
+  .state-grid { display: grid; grid-template-columns: 110px repeat(5, max-content); gap: 14px 16px; align-items: center; overflow-x: auto; padding-bottom: 4px; }
+
+  .toggle { display: inline-flex; background: var(--paper); padding: 2px; box-shadow: inset 0 0 0 1px var(--rule); border-radius: var(--r-toggle); }
+  .toggle button { height: 28px; padding: 0 11px; border: 0; border-radius: var(--r-toggle); background: transparent; color: var(--ink-68); font: 400 11px/1 var(--font-ui); cursor: pointer; transition: color var(--dur-hover) var(--ease-hover), background-color var(--dur-hover) var(--ease-hover); }
+  .toggle button[aria-pressed="true"] { background: var(--surface); color: var(--ink); font-weight: 600; box-shadow: var(--shadow-tab); }
+
+  /* decision ledger */
+  .ledger { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1px; background: var(--rule); border: 1px solid var(--rule); }
+  @media (max-width: 1100px) { .ledger { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 520px) { .ledger { grid-template-columns: 1fr; } }
+  .lrow { position: relative; text-align: left; border: 0; background: var(--surface); padding: 16px; cursor: pointer; font-family: var(--font-ui); color: var(--ink); transition: background-color var(--dur-hover) var(--ease-hover); }
+  .lrow:hover { background: var(--warm); }
+  .lrow .k { font: 500 11px/1 var(--font-mono); letter-spacing: .06em; color: var(--ink-45); }
+  .lrow b { display: block; font-weight: 500; font-size: 16px; margin: 10px 0 4px; letter-spacing: -.01em; }
+  .lrow span { color: var(--ink-60); font-size: 13px; }
+  .lrow::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 2px; background: var(--blue); transform: scaleX(0); transform-origin: left; transition: transform var(--dur-reveal) var(--ease-out); }
+  .lrow[aria-pressed="true"] { background: var(--blue-7); }
+  .lrow[aria-pressed="true"]::after { transform: scaleX(1); }
+
+  /* tags */
+  .tags { display: flex; flex-wrap: wrap; gap: 8px; }
+  .tag { display: inline-flex; align-items: center; gap: 6px; height: 24px; padding: 0 8px; font: 500 11px/1 var(--font-mono); letter-spacing: .05em; text-transform: uppercase; background: var(--surface); box-shadow: inset 0 0 0 1px var(--rule); color: var(--ink-86); }
+  .tag.for { color: var(--blue); background: var(--blue-7); box-shadow: inset 0 0 0 1px var(--blue-40); }
+  .tag.against { color: var(--alert); background: var(--ev-against-bg); box-shadow: inset 0 0 0 1px #A02B2540; }
+  .tag.zebra { background: var(--surface) var(--hatch-strong); }
+  .tag.mnm { box-shadow: inset 0 0 0 1px var(--ink); }
+  .tag.ruled { color: var(--ink-40); text-decoration: line-through; box-shadow: none; background: var(--dash-rule) bottom / 100% 1px no-repeat; }
+  .live { width: 7px; height: 7px; border-radius: 50%; background: var(--live); animation: b-live-pulse 2s var(--ease-standard) infinite; }
+  .sq { width: 7px; height: 7px; background: currentColor; }
+
+  /* motion demos */
+  .demo .head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; gap: 12px; }
+  .demo .head b { font-weight: 500; font-size: 15px; letter-spacing: -.01em; }
+  .rise > * { animation: b-rise-in 400ms var(--ease-standard) both; }
+  .draw { animation: b-draw-across 500ms var(--ease-out) both; }
+  .row-p { display: grid; grid-template-columns: 1fr 52px; gap: 10px; align-items: center; font-size: 13px; margin: 6px 0; }
+  .meter { grid-column: 1 / -1; height: 6px; background: var(--paper) var(--hatch); box-shadow: inset 0 0 0 1px var(--rule); }
+  .meter i { display: block; height: 100%; background: var(--blue); transition: width 580ms var(--spring-36); }
+  .flowline { stroke: var(--blue); stroke-dasharray: 2 4; animation: b-drift 1.2s linear infinite; }
+  .rule-out { transition: color 300ms var(--ease-standard); }
+  .rule-out s { text-decoration: none; background: linear-gradient(var(--ink-40), var(--ink-40)) left 55% / 0 1px no-repeat; transition: background-size 400ms var(--ease-out); }
+  .rule-out.out { color: var(--ink-40); }
+  .rule-out.out s { background-size: 100% 1px; }
+  .logo path { stroke: var(--blue); stroke-width: 1.5; fill: var(--blue); stroke-dasharray: 120; animation: b-logo-draw 1.2s var(--ease-standard) both; }
+
+  /* interactive tree */
+  .ix { display: grid; grid-template-columns: 1.35fr 1fr; gap: 16px; }
+  @media (max-width: 1000px) { .ix { grid-template-columns: 1fr; } }
+  .canvas { background: var(--surface) var(--dots); background-size: 14px 14px; box-shadow: var(--shadow-card); padding: 20px; }
+  .canvas svg { width: 100%; height: auto; display: block; }
+  .e { fill: none; stroke: var(--ink-14); stroke-width: 1; }
+  .e.on { stroke: var(--blue); stroke-dasharray: 2 4; animation: b-drift 1.2s linear infinite; }
+  .n rect { fill: var(--surface); stroke: var(--rule); transition: fill var(--dur-hover) var(--ease-hover), stroke var(--dur-hover) var(--ease-hover); }
+  .n text { font: 400 12.5px var(--font-ui); fill: var(--ink); }
+  .n .p { font: 500 11px var(--font-mono); fill: var(--ink-60); }
+  .n { cursor: pointer; }
+  .n:focus { outline: none; }
+  .n:focus rect, .n.sel rect { stroke: var(--blue); stroke-width: 1.5; }
+  .n.for rect { fill: #EEF4FE; stroke: var(--blue); }
+  .n.against rect { fill: #F8EDEC; stroke: var(--alert); }
+  .n.zeb rect { fill: url(#hatch); }
+  .fl { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--rule); }
+  .fl li { display: grid; grid-template-columns: 22px 1fr auto; gap: 8px; align-items: center; padding: 11px 4px; border-bottom: 1px solid var(--rule); font-size: 14px; transition: background-color var(--dur-hover) var(--ease-hover); cursor: default; }
+  .fl li:hover, .fl li.on { background: var(--warm); }
+  .fl li.for { background: var(--blue-7); }
+  .fl li.for .ic { color: var(--blue); }
+  .fl li.against { background: var(--ev-against-bg); }
+  .fl li.against .ic { color: var(--alert); }
+  .fl .ic { font: 500 12px var(--font-mono); color: var(--ink-45); }
+  .fl .src { font: 500 10.5px var(--font-mono); letter-spacing: .06em; color: var(--ink-45); text-transform: uppercase; }
+  footer { margin-top: 96px; padding-top: 20px; border-top: 1px solid var(--rule); color: var(--ink-60); font-size: 13px; }
+  a.lnk { color: var(--blue); text-decoration: none; background: var(--link-gradient) 0 100% / 200% 1px no-repeat; transition: background-position var(--dur-link) var(--ease-hover); }
+  a.lnk:hover { background-position: 100% 100%; }
+</style>
+</head>
+<body>
+<div class="page">
+  <aside class="rail">
+    <div class="mark">
+      <svg class="logo" width="18" height="18" viewBox="0 0 18 18" aria-hidden="true"><path d="M9 1v16M9 9 3 4M9 9l6-5M9 13l-5-3M9 13l5-3"/></svg>
+      arbor
+    </div>
+    <nav id="toc">
+      <a href="#colour" style="animation-delay:120ms">Colour</a>
+      <a href="#type" style="animation-delay:200ms">Typography</a>
+      <a href="#buttons" style="animation-delay:280ms">Buttons</a>
+      <a href="#tags" style="animation-delay:360ms">Tags</a>
+      <a href="#motion" style="animation-delay:440ms">Micro-animations</a>
+      <a href="#interaction" style="animation-delay:520ms">Interaction</a>
+    </nav>
+  </aside>
+
+  <main>
+    <div class="tags"><span class="tag"><span class="live"></span>Visual language B</span><span class="tag">from supermemory.ai</span></div>
+    <h1 class="statement">Ledger: a precise, auditable surface for clinical reasoning.</h1>
+    <p class="dek">Square corners, hairline rules, monospace labels and one decisive blue. Every hypothesis reads like an entry in a ledger: dated, attributed, and never erased.</p>
+
+    <section id="colour">
+      <div class="lbl">01 · Colour</div>
+      <h2>Ink on paper, one blue</h2>
+      <div class="micro" style="margin-bottom:10px">Neutrals</div>
+      <div class="grid g4" id="sw-n"></div>
+      <div class="micro" style="margin:24px 0 10px">Blue scale</div>
+      <div class="grid g4" id="sw-b"></div>
+      <div class="micro" style="margin:24px 0 10px">Signals → Arbor semantics</div>
+      <div class="grid g4" id="sw-s"></div>
+    </section>
+
+    <section id="type">
+      <div class="lbl">02 · Typography</div>
+      <h2>Geist + Geist Mono</h2>
+      <div class="panel">
+        <div class="type-row"><div class="micro">Statement · Geist 400 · 40/1.12 · −3%</div><div style="font:400 40px/1.12 var(--font-ui);letter-spacing:-.03em">Acute otitis media, 78%</div></div>
+        <div class="type-row"><div class="micro">H2 · Geist 400 · 24/30 · −2%</div><div style="font:400 24px/1.25 var(--font-ui);letter-spacing:-.02em">Compare the evidence</div></div>
+        <div class="type-row"><div class="micro">H3 · Geist 500 · 16 · −1%</div><div style="font:500 16px/1.3 var(--font-ui);letter-spacing:-.01em">Missing information</div></div>
+        <div class="type-row"><div class="micro">Body · Geist 400 · 17/1.65</div><div style="font-size:17px;line-height:1.65;color:var(--ink-86)">14-month-old with fever of 39.4 °C for two days, irritable, feeding less. Mother is the historian; vaccinations up to date; attends nursery.</div></div>
+        <div class="type-row"><div class="micro">UI · Geist 400 · 13/1.5</div><div style="font-size:13px;line-height:1.5;color:var(--ink-68)">Proposed by the hypothesis engine · Round 2 · 14:32</div></div>
+        <div class="type-row"><div class="micro">Label · Geist Mono 500 · 12 · +6% · CAPS</div><div class="lbl" style="color:var(--ink)">Run next round</div></div>
+        <div class="type-row"><div class="micro">Data · Geist Mono 400 · 12</div><div class="mono">CRP 38 mg/L · HR 160 · ICD-10 H66.90 · p = 0.78</div></div>
+      </div>
+    </section>
+
+    <section id="buttons">
+      <div class="lbl">03 · Buttons</div>
+      <h2>Square, labelled in mono, with a sweep</h2>
+      <div class="panel">
+        <div class="btn-row" style="margin-bottom:28px">
+          <button class="btn btn-primary"><span class="rail"></span><span class="tile"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M8 1v14M8 8 3 4M8 8l5-4M8 12l-4-3M8 12l4-3"/></svg></span>Run next round</button>
+          <button class="btn btn-secondary">Order test &amp; park <span class="arr">↗</span></button>
+          <button class="btn btn-hatch">Copy referral summary</button>
+          <button class="btn btn-alert">Rule out…</button>
+          <button class="btn btn-icon" aria-label="Pin as must-not-miss"><svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><path d="M6 2h4l-.5 4 2.5 2.5H4L6.5 6z"/><path d="M8 8.5V14"/></svg></button>
+          <button class="btn btn-text">Ask the engine</button>
+        </div>
+        <div class="state-grid">
+          <div></div><div class="micro">Rest</div><div class="micro">Hover</div><div class="micro">Press</div><div class="micro">Focus</div><div class="micro">Loading / disabled</div>
+          <div class="micro">Primary</div>
+          <button class="btn btn-primary"><span class="rail"></span><span class="tile">✓</span>Confirm</button>
+          <button class="btn btn-primary is-hover"><span class="rail"></span><span class="tile">✓</span>Confirm</button>
+          <button class="btn btn-primary is-press"><span class="rail"></span><span class="tile">✓</span>Confirm</button>
+          <button class="btn btn-primary is-focus"><span class="rail"></span><span class="tile">✓</span>Confirm</button>
+          <button class="btn btn-primary" aria-busy="true"><span class="rail"></span><span class="tile">…</span><span class="shimmer">Reasoning</span></button>
+          <div class="micro">Secondary</div>
+          <button class="btn btn-secondary">Refer <span class="arr">↗</span></button>
+          <button class="btn btn-secondary is-hover">Refer <span class="arr">↗</span></button>
+          <button class="btn btn-secondary is-press">Refer <span class="arr">↗</span></button>
+          <button class="btn btn-secondary is-focus">Refer <span class="arr">↗</span></button>
+          <button class="btn btn-secondary" disabled>Refer <span class="arr">↗</span></button>
+        </div>
+        <p class="spec">primary: 44h · r0 · #0562EF · 40px tile flush left · hover: rail #0450C8 sweeps in 360ms cubic-bezier(.23,1,.32,1), frame insets 2px, tile rotates 360° on spring-36 · press scale .985 120ms #033A9A</p>
+      </div>
+
+      <div class="micro" style="margin:28px 0 10px">Toggle (supermemory Human / Agent)</div>
+      <div class="toggle" role="group" aria-label="View" id="tg">
+        <button aria-pressed="true">Tree</button><button aria-pressed="false">Ranked</button><button aria-pressed="false">Trail</button>
+      </div>
+
+      <div class="micro" style="margin:28px 0 10px">Diagnostic decision (Step 4): a ledger of four entries</div>
+      <div class="ledger" id="ledger">
+        <button class="lrow" aria-pressed="false"><span class="k">A · CONFIRM</span><b>Working diagnosis</b><span>Lock the path and build the plan</span></button>
+        <button class="lrow" aria-pressed="false"><span class="k">B · REFER</span><b>To a specialist</b><span>Summary generated from the tree</span></button>
+        <button class="lrow" aria-pressed="false"><span class="k">C · INVESTIGATE</span><b>Order and park</b><span>The case waits for results</span></button>
+        <button class="lrow" aria-pressed="false"><span class="k">D · UNRESOLVED</span><b>Safety-net</b><span>Advice and a review date</span></button>
+      </div>
+    </section>
+
+    <section id="tags">
+      <div class="lbl">04 · Tags</div>
+      <h2>States as stamps</h2>
+      <div class="panel">
+        <div class="tags">
+          <span class="tag for"><span class="sq"></span>Supports</span>
+          <span class="tag against"><span class="sq"></span>Against</span>
+          <span class="tag">Neutral</span>
+          <span class="tag zebra">Zebra · rare</span>
+          <span class="tag mnm">◆ Must-not-miss</span>
+          <span class="tag ruled">Pneumonia</span>
+          <span class="tag"><span class="live"></span>Live</span>
+          <span class="tag">Agent · proposed</span>
+          <span class="tag for">Clinician · decided</span>
+          <span class="tag">Round 02 · 14:32</span>
+        </div>
+        <p class="spec">Zebra = a literal hatch texture. Must-not-miss = a solid ink frame. Ruled out = a dashed underline + strike. No meaning is carried by colour alone.</p>
+      </div>
+    </section>
+
+    <section id="motion">
+      <div class="lbl">05 · Micro-animations</div>
+      <h2>Draw, rise, drift, settle on a spring</h2>
+      <div class="g2">
+        <div class="panel demo">
+          <div class="head"><b>Rise-in: new findings</b><button class="btn btn-text" data-replay="rise">Replay</button></div>
+          <div id="rise" class="rise"></div>
+          <p class="spec">b-rise-in · 400ms · cubic-bezier(.4,0,.2,1) · y 8px→0 · stagger 80ms</p>
+        </div>
+        <div class="panel demo">
+          <div class="head"><b>Re-rank on a spring</b><button class="btn btn-text" data-replay="rank">Replay</button></div>
+          <div id="rank"></div>
+          <p class="spec">width · 580ms · linear() spring-36 (from supermemory) · slight settle, no bounce</p>
+        </div>
+        <div class="panel demo">
+          <div class="head"><b>Draw-across: a branch is born</b><button class="btn btn-text" data-replay="draw">Replay</button></div>
+          <svg id="draw" viewBox="0 0 320 100" width="100%" aria-hidden="true">
+            <rect x="2" y="36" width="100" height="28" fill="#fff" stroke="var(--rule)"/><text x="12" y="54" font-family="Geist" font-size="12" fill="var(--ink)">Otitis media</text>
+            <g class="draw"><path d="M102 50 H140 V20 H190" fill="none" stroke="var(--ink-45)"/><path d="M102 50 H140 V80 H190" fill="none" stroke="var(--ink-45)"/></g>
+            <g class="draw" style="animation-delay:300ms"><rect x="190" y="6" width="124" height="28" fill="#EEF4FE" stroke="var(--blue)"/><text x="200" y="24" font-family="Geist" font-size="12" fill="var(--ink)">AOM</text><text x="304" y="24" text-anchor="end" font-family="Geist Mono" font-size="11" fill="var(--blue)">78%</text></g>
+            <g class="draw" style="animation-delay:380ms"><rect x="190" y="66" width="124" height="28" fill="#fff" stroke="var(--rule)"/><text x="200" y="84" font-family="Geist" font-size="12" fill="var(--ink)">OME</text><text x="304" y="84" text-anchor="end" font-family="Geist Mono" font-size="11" fill="var(--ink-60)">09%</text></g>
+          </svg>
+          <p class="spec">b-draw-across · clip-path inset(0 100% 0 0)→inset(0) · 500ms cubic-bezier(.22,1,.36,1) · children +300ms / +80ms</p>
+        </div>
+        <div class="panel demo">
+          <div class="head"><b>Strike-through rule-out</b><button class="btn btn-text" data-replay="strike">Replay</button></div>
+          <div id="strike" class="rule-out" style="font-size:20px;letter-spacing:-.01em"><s>Urinary tract infection</s> <span class="mono">03%</span></div>
+          <div class="tags" style="margin-top:12px"><span class="tag">Clinician · ruled out</span><span class="tag">“Urine dip negative”</span></div>
+          <p class="spec">1px line sweeps L→R 400ms ease-out · ink → ink-40 · the entry remains in the ledger</p>
+        </div>
+        <div class="panel demo">
+          <div class="head"><b>Drift: reasoning in progress</b><button class="btn btn-text" data-replay="none" style="visibility:hidden">·</button></div>
+          <svg viewBox="0 0 320 70" width="100%" aria-hidden="true">
+            <rect x="2" y="21" width="96" height="28" fill="#fff" stroke="var(--rule)"/><text x="12" y="39" font-family="Geist" font-size="12">Presentation</text>
+            <path class="flowline" d="M98 35 H222" fill="none"/>
+            <rect x="222" y="21" width="96" height="28" fill="#fff" stroke="var(--blue)"/><text x="232" y="39" font-family="Geist Mono" font-size="11" fill="var(--blue)">ROUND 03…</text>
+          </svg>
+          <p class="spec">b-drift · stroke-dasharray 2 4 · dashoffset → −6px · 1.2s linear infinite · shown only while the engine works</p>
+        </div>
+        <div class="panel demo">
+          <div class="head"><b>Live dot + shimmer label</b><button class="btn btn-text" data-replay="none" style="visibility:hidden">·</button></div>
+          <div class="tags"><span class="tag"><span class="live"></span>Awaiting your result</span></div>
+          <div style="margin-top:14px"><button class="btn btn-primary" aria-busy="true"><span class="rail"></span><span class="tile">…</span><span class="shimmer">Engine is reasoning</span></button></div>
+          <p class="spec">b-live-pulse 2s (#00C763 ring 0→4px) · shimmer-text 1.8s linear gradient sweep</p>
+        </div>
+      </div>
+    </section>
+
+    <section id="interaction">
+      <div class="lbl">06 · Interaction</div>
+      <h2>Trace a node to its evidence</h2>
+      <div class="ix">
+        <div class="canvas">
+          <div class="micro" style="margin-bottom:10px">Hover / focus a hypothesis · click to hold</div>
+          <svg viewBox="0 0 520 300" role="group" aria-label="Hypothesis tree">
+            <defs><pattern id="hatch" width="5" height="5" patternUnits="userSpaceOnUse" patternTransform="rotate(-45)"><rect width="5" height="5" fill="#fff"/><line x1="0" y1="0" x2="0" y2="5" stroke="#0B101524" stroke-width="1"/></pattern></defs>
+            <path class="e" data-e="aom" d="M120 150 H160 V40 H220"/>
+            <path class="e" data-e="urti" d="M120 150 H160 V110 H220"/>
+            <path class="e" data-e="uti" d="M120 150 H160 V180 H220"/>
+            <path class="e" data-e="men" d="M120 150 H160 V250 H220"/>
+            <g class="n" data-h="root"><rect x="8" y="130" width="112" height="40"/><text x="18" y="148">Fever 39.4 °C</text><text class="p" x="18" y="162">14 MO · F</text></g>
+            <g class="n" tabindex="0" data-h="aom"><rect x="220" y="22" width="210" height="36"/><text x="232" y="45">Acute otitis media</text><text class="p" x="420" y="45" text-anchor="end">55%</text></g>
+            <g class="n" tabindex="0" data-h="urti"><rect x="220" y="92" width="210" height="36"/><text x="232" y="115">Viral URTI</text><text class="p" x="420" y="115" text-anchor="end">25%</text></g>
+            <g class="n" tabindex="0" data-h="uti"><rect x="220" y="162" width="210" height="36"/><text x="232" y="185">UTI</text><text class="p" x="420" y="185" text-anchor="end">12%</text></g>
+            <g class="n zeb" tabindex="0" data-h="men"><rect x="220" y="232" width="210" height="36" style="stroke:var(--ink)"/><text x="232" y="255">Bacterial meningitis</text><text class="p" x="420" y="255" text-anchor="end">03%</text></g>
+            <text x="438" y="246" font-family="Geist Mono" font-size="9.5" fill="var(--ink-60)">ZEBRA</text>
+            <text x="438" y="259" font-family="Geist Mono" font-size="9.5" fill="var(--ink)">◆ PINNED</text>
+          </svg>
+        </div>
+        <div class="panel" style="padding:20px">
+          <div class="micro" style="margin-bottom:10px">…or hover a finding</div>
+          <ul class="fl" id="fl">
+            <li data-f="tm"><span class="ic">±</span>Red, bulging right TM<span class="src">Exam</span></li>
+            <li data-f="rhin"><span class="ic">±</span>Clear rhinorrhoea, cough<span class="src">History</span></li>
+            <li data-f="dip"><span class="ic">−</span>Urine dip: nitrite −, leuk −<span class="src">Lab</span></li>
+            <li data-f="neck"><span class="ic">−</span>No neck stiffness<span class="src">Exam</span></li>
+            <li data-f="cap"><span class="ic">−</span>Cap refill &lt; 2 s, alert<span class="src">Exam</span></li>
+            <li data-f="fever"><span class="ic">+</span>Fever 39.4 °C, 2 days<span class="src">Parent</span></li>
+          </ul>
+          <p class="spec">edges to the hovered node switch to a drifting blue dash; findings tint blue (for) / red (against) with +/− glyphs</p>
+        </div>
+      </div>
+    </section>
+
+    <footer>Source: supermemory.ai (extracted 2026-10-17). Tokens: <code>tokens.css</code> · Spec: <code>README.md</code> · <a class="lnk" href="#colour">Back to top</a></footer>
+  </main>
+</div>
+
+<script>
+(function () {
+  const groups = {
+    "sw-n": [["paper", "#F4F4F6"], ["surface", "#FFFFFF"], ["warm", "#FAFAFA"], ["rule", "#DFDFDF"], ["ink-45", "#0B101573"], ["ink-68", "#0B1015AD"], ["ink", "#0B1015"], ["logo-ink", "#141B34"]],
+    "sw-b": [["blue-7", "#0562EF12"], ["blue-11", "#0562EF1C"], ["tick", "#9EC6F7"], ["blue", "#0562EF"], ["blue-deep", "#0450C8"], ["link-start", "#0042AF"], ["blue-press", "#033A9A"], ["on-blue", "#FFFBF5"]],
+    "sw-s": [["live · active", "#00C763"], ["success", "#10A86A"], ["ev-for = blue", "#0562EF"], ["ev-against = alert", "#A02B25"], ["ruled-out = ink-40", "#0B101566"]],
+  };
+  for (const [id, list] of Object.entries(groups)) {
+    document.getElementById(id).innerHTML = list.map(([n, h]) => `<div class="sw"><div class="chip" style="background:${h}"></div><div class="meta"><b>${n}</b><span>${h}</span></div></div>`).join("");
+  }
+  document.querySelectorAll("#tg button, #ledger .lrow").forEach((b) => b.addEventListener("click", () => {
+    b.parentElement.querySelectorAll("button").forEach((x) => x.setAttribute("aria-pressed", String(x === b)));
+  }));
+
+  // scroll-spy for the rail
+  const links = [...document.querySelectorAll("#toc a")];
+  const io = new IntersectionObserver((es) => es.forEach((e) => { if (e.isIntersecting) links.forEach((l) => l.classList.toggle("on", l.hash === "#" + e.target.id)); }), { rootMargin: "-40% 0px -55% 0px" });
+  document.querySelectorAll("main section").forEach((s) => io.observe(s));
+
+  const demos = {
+    rise() {
+      const el = document.getElementById("rise");
+      const rows = [["+", "Red, bulging right TM", "EXAM"], ["−", "Urine dip negative", "LAB"], ["−", "No neck stiffness", "EXAM"]];
+      el.innerHTML = rows.map(([g, t, s], i) => `<div style="animation-delay:${i * 80}ms;display:grid;grid-template-columns:18px 1fr auto;gap:8px;padding:9px 0;border-bottom:1px solid var(--rule);font-size:14px"><span class="mono" style="color:${g === "+" ? "var(--blue)" : "var(--alert)"}">${g}</span>${t}<span class="micro">${s}</span></div>`).join("");
+    },
+    rank() {
+      const el = document.getElementById("rank");
+      const a = [["Acute otitis media", 55, 78], ["Viral URTI", 25, 17], ["UTI", 12, 3]];
+      el.innerHTML = a.map(([n, p]) => `<div class="row-p"><span>${n}</span><span class="mono" style="text-align:right" data-p>${String(p).padStart(2, "0")}%</span><div class="meter"><i style="width:${p}%"></i></div></div>`).join("");
+      setTimeout(() => {
+        el.querySelectorAll(".meter i").forEach((m, i) => (m.style.width = a[i][2] + "%"));
+        el.querySelectorAll("[data-p]").forEach((s, i) => (s.textContent = String(a[i][2]).padStart(2, "0") + "%"));
+      }, 60);
+    },
+    draw() { const s = document.getElementById("draw"); const c = s.cloneNode(true); s.replaceWith(c); },
+    strike() { const s = document.getElementById("strike"); s.classList.remove("out"); setTimeout(() => s.classList.add("out"), 300); },
+    none() {},
+  };
+  document.querySelectorAll("[data-replay]").forEach((b) => b.addEventListener("click", () => demos[b.dataset.replay]()));
+  demos.rise(); demos.rank(); demos.strike();
+
+  const W = { tm: { aom: 1, urti: -1 }, rhin: { urti: 1, aom: -1 }, dip: { uti: -1 }, neck: { men: -1 }, cap: { men: -1 }, fever: { aom: 1, uti: 1, men: 1, urti: 1 } };
+  const nodes = document.querySelectorAll(".n[data-h]"), items = document.querySelectorAll("#fl li"), edges = document.querySelectorAll(".e");
+  let held = null;
+  const clear = () => { nodes.forEach((n) => n.classList.remove("for", "against", "sel")); items.forEach((i) => i.classList.remove("for", "against", "on")); edges.forEach((e) => e.classList.remove("on")); };
+  const fromF = (f) => { clear(); document.querySelector(`#fl li[data-f="${f}"]`).classList.add("on"); for (const [h, w] of Object.entries(W[f])) { document.querySelector(`.n[data-h="${h}"]`).classList.add(w > 0 ? "for" : "against"); document.querySelector(`.e[data-e="${h}"]`).classList.add("on"); } };
+  const fromN = (h) => { clear(); document.querySelector(`.n[data-h="${h}"]`).classList.add("sel"); document.querySelector(`.e[data-e="${h}"]`).classList.add("on"); for (const [f, m] of Object.entries(W)) if (m[h]) document.querySelector(`#fl li[data-f="${f}"]`).classList.add(m[h] > 0 ? "for" : "against"); };
+  const restore = () => (held ? held() : clear());
+  items.forEach((i) => { i.addEventListener("mouseenter", () => fromF(i.dataset.f)); i.addEventListener("mouseleave", restore); i.addEventListener("click", () => { held = () => fromF(i.dataset.f); held(); }); });
+  nodes.forEach((n) => { const h = n.dataset.h; if (h === "root") return; n.addEventListener("mouseenter", () => fromN(h)); n.addEventListener("mouseleave", restore); n.addEventListener("focus", () => fromN(h)); n.addEventListener("blur", restore); n.addEventListener("click", () => { held = () => fromN(h); held(); }); });
+})();
+</script>
+</body>
+</html>
