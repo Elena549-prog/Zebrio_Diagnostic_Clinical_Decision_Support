@@ -1,0 +1,20 @@
+{
+  "requestId": "golden-3-weight-loss",
+  "presentation": {
+    "chiefComplaint": "Unintentional weight loss and tiredness for 3 months",
+    "history": "Has lost about 8 kg over 3 months without dieting, appetite reduced, constantly tired. Occasional night sweats, no fever. Bowel habit has become looser over the last 2 months, one episode of blood on the stool, no abdominal pain. No cough, no haemoptysis. Smoker for 30 years, about 15 cigarettes a day, drinks 2 beers most evenings. Mother had colon cancer at 62. No travel abroad, no known contact with tuberculosis. Otherwise no regular medication, no previous operations.",
+    "observations": [
+      "BP 126/78, HR 84 regular, T 37.2°C, BMI 21 (was 25 a year ago)",
+      "Pale conjunctivae, no jaundice, no goitre",
+      "Abdomen soft, non-tender, no mass palpable, liver edge not enlarged",
+      "No palpable lymph nodes in neck, axillae or groins",
+      "Lungs clear, heart sounds normal",
+      "Haemoglobin 10.4 g/dl with low MCV (point-of-care), CRP 14 mg/l, random glucose 5.6 mmol/l"
+    ],
+    "demographics": {
+      "ageYears": 58,
+      "sex": "male",
+      "location": "Hamburg, Germany"
+    }
+  }
+}

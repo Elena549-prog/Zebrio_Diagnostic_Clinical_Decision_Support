@@ -38,7 +38,7 @@ export function RarityReference({ h }: { h: Hypothesis }) {
     <details className="muted small"><summary>Data attribution</summary>
       Orphadata Science: Free access data from Orphanet. © INSERM 1999. Release {rarity.release ?? 'unavailable'}.{' '}
       <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noreferrer">CC BY 4.0</a>.
-      {' '}Arbor derives these displays from Orphadata. Generated results may not reflect the source accurately; Orphanet/Orphadata is not responsible for generated outputs and does not endorse this application.
+      {' '}Zebrio Diagnostic Clinical Decision Support derives these displays from Orphadata. Generated results may not reflect the source accurately; Orphanet/Orphadata is not responsible for generated outputs and does not endorse this application.
     </details>
   </div>;
 }

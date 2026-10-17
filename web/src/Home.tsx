@@ -1,6 +1,6 @@
 /**
  * Home — the simple front door. Emulates the /wait-what skill: speak in plain
- * Simplified Technical English, in Arbor's ubiquitous language (CONTEXT.md),
+ * Simplified Technical English, in Zebrio Diagnostic Clinical Decision Support's ubiquitous language (CONTEXT.md),
  * and make the four questions a new reader asks immediately legible:
  *
  *   - What does the agent do?
@@ -41,7 +41,7 @@ export function Home({ onStartScenario, onStartBlank, busy, onOpenDocs, savedCas
       <div className="home-hero">
         <div className="home-welcome">
         <div className="home-welcome-copy">
-        <p className="home-eyebrow">Zebrio · Clinical reasoning workspace</p>
+        <p className="home-eyebrow">Zebrio · Diagnostic clinical decision support</p>
         <h1 className="home-title">Every possibility.<br /><em>A clearer next step.</em></h1>
         <p className="home-lead">
           Explore the differential, inspect the evidence, and decide what comes

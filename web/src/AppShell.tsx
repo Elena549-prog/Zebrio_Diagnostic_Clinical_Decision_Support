@@ -32,7 +32,7 @@ export function AppShell({ view, c, onGo, onNewCase, caseActions, busy = false, 
         <div className="appbar-brand">
           <svg className="zebrio-logo" width="28" height="28" viewBox="0 0 28 28" aria-hidden="true"><rect width="28" height="28" rx="9" fill="currentColor"/><path d="M8 7l5 14M13 7l5 14M18 7l3 8" stroke="#fff" strokeWidth="2.2" strokeLinecap="round"/></svg>
           <div>
-            <h1>Zebrio</h1>
+            <h1 title="Zebrio Diagnostic Clinical Decision Support">Zebrio</h1>
             <p className="appbar-tag">retraceable differential diagnosis</p>
           </div>
           <nav className="appbar-nav">

@@ -11,14 +11,17 @@ The supplied tour and preset patients are synthetic. Nothing here is clinically 
    tour are labelled illustrative teaching values.
 4. On the last step, **Run this case for real** starts a live case (uses credits).
 
-## 2. Live demo preset (real Claude + Tavily calls)
+## 2. Live presets (real Claude + Tavily calls)
+
+The home page offers one deterministic card (the guided tour) and three live golden
+cards: breathlessness, chest pressure on exertion, and burning on urination.
 
 Needs `ANTHROPIC_API_KEY` and `TAVILY_API_KEY` in the root `.env`. The home
 setup notice must say *Live reasoning is configured*. Each round makes several
 model and search calls and can take one to two minutes.
 
-1. Click **Live demo preset ★ — synthetic sore throat + fever**
-   (badge: *Live · Claude + Tavily · synthetic patient*).
+1. Click **Golden live preset ★ — breathlessness** (section 3), or any other live card
+   (badge: *Live · Claude + Tavily · synthetic golden example*).
 2. **Advance a round.** Read the status strip above the next-action card: it
    reports how many sources were retrieved and passage-checked, or says plainly
    that no literature was retrieved, and whether any ICD-10-GM code was verified.
@@ -55,7 +58,7 @@ synthetic golden example*) sends `examples/golden/golden-2-breathlessness.reques
    set the direction, then submit. For any other test, write your own result.
 3. Continue as in section 2, steps 5–7.
 
-Golden examples 1 (chest pressure, Leipzig) and 3 (dysuria, Munich) are also
+Golden example 1 (chest pressure, Leipzig) and the extra dysuria example (Munich) are also
 live cards with the same verbatim mapping and no result sheet.
 
 **The saved run is separate.** `examples/golden/golden-2-breathlessness.response.json`

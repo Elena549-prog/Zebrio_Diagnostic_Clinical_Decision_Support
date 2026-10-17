@@ -532,7 +532,7 @@ export const TUTORIAL_STEPS: TutorialStep[] = [
  * The tutorial is already a scripted sequence of complete case states, which is
  * exactly what a history entry is — so each step's tape is simply every step up
  * to and including it. That makes the scrubber live in the tour too, where most
- * people meet Arbor first, with no second set of canned data to maintain.
+ * people meet Zebrio Diagnostic Clinical Decision Support first, with no second set of canned data to maintain.
  */
 const HISTORY_KINDS: HistoryEntry["kind"][] = [
   "intake",

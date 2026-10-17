@@ -40,7 +40,7 @@ export default function HorsesZebrasRecipe() {
 
       <h2 className="docs-h2">Why this matters</h2>
       <p>
-        A flat-differential tool will quietly drop a 1% diagnosis. Arbor keeps
+        A flat-differential tool will quietly drop a 1% diagnosis. Zebrio Diagnostic Clinical Decision Support keeps
         it — because some zebras are dangerous (endocarditis, vasculitis), and
         dropping them early is how rare causes get missed. The zebra stays on
         the tree, dimmed once ruled out, so the clinician can see it was
