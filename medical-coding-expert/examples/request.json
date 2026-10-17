@@ -1,0 +1,16 @@
+{
+  "requestId": "demo-asthma-001",
+  "excerpts": [
+    { "id": "ex1", "text": "Admitted via ED with status asthmaticus; no response to repeated salbutamol nebulisation." },
+    { "id": "ex2", "text": "No signs of pneumonia on chest X-ray." },
+    { "id": "ex3", "text": "Mother has type 2 diabetes." }
+  ],
+  "evidence": [
+    { "id": "ev1", "kind": "patient_finding", "text": "SpO2 88% on room air, silent chest on auscultation." },
+    { "id": "ev2", "kind": "literature", "text": "Severe asthma exacerbations can be complicated by pneumothorax.", "sourceUrl": "https://example.org/review" }
+  ],
+  "hypotheses": [
+    { "id": "h1", "name": "Status asthmaticus" },
+    { "id": "h2", "name": "Pneumonia" }
+  ]
+}

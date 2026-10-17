@@ -1,0 +1,22 @@
+{
+  "id": "en-15-no-diagnosis",
+  "title": "Routine review without any diagnosis",
+  "language": "en",
+  "source": "synthetic",
+  "sourceNote": "Negative control.",
+  "tests": [
+    "no invented codes"
+  ],
+  "request": {
+    "requestId": "eval-en-15",
+    "excerpts": [
+      {
+        "id": "ex1",
+        "text": "Seen in clinic for routine review. Feels well, no complaints. Plan: follow-up in 2 weeks."
+      }
+    ],
+    "evidence": []
+  },
+  "expected": [],
+  "maxAssigned": 0
+}

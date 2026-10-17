@@ -99,8 +99,9 @@ identifiers out of those queries. Retrieved text is data, not instructions.
 
 Read `ANTHROPIC_API_KEY`, configurable Claude model, and `TAVILY_API_KEY` from
 the builder's environment. Never include secrets in results, logs, or fixtures.
-Bound work with configurable defaults: two concept searches per provider,
-three source pages, four Claude turns, and timeouts/cancellation. These are
+Bound work with configurable defaults: eight concept searches per provider,
+eight source pages (raised from 2/3 after the eval in `medical-coding-expert/eval/`
+showed multi-diagnosis letters exceeding them), four Claude turns, and timeouts/cancellation. These are
 engineering limits, not clinical thresholds. Failure of both providers returns
 `unavailable` without fabricated assignments.
 

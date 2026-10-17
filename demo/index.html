@@ -1,0 +1,810 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Zebrio</title>
+<meta name="description" content="Zebrio — a retraceable differential-diagnosis workspace for GPs and pediatricians. Static prototype in visual language A (Attribution).">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif:ital,wght@0,400;0,600;1,400&family=Open+Sans:wght@400;500;600;700&family=Roboto+Mono:wght@400;500&family=Space+Grotesk:wght@500;600&display=swap" rel="stylesheet">
+<style>
+/* ---- Visual language A · "Attribution" (inline copy of ../tokens/attribution.css) ---- */
+:root {
+  --font-display: "Noto Serif", ui-serif, Georgia, serif;
+  --font-ui: "Open Sans", system-ui, sans-serif;
+  --font-label: "Space Grotesk", system-ui, sans-serif;
+  --font-mono: "Roboto Mono", ui-monospace, Menlo, monospace;
+  --bg: #F5F5F5; --surface: #FFFFFF; --sunken: #F2EEE7; --tint: #ECE3D6; --soft: #F8F6F2;
+  --ink: #1E130F; --ink-60: rgba(30,19,15,.60); --ink-35: rgba(30,19,15,.35); --ink-12: rgba(30,19,15,.12); --ink-06: rgba(30,19,15,.06);
+  --muted: #655753; --border: #DAD7D0; --pill: #EFEFEF; --pill-hover: #E4E4E4;
+  --primary: #0068CF; --primary-hover: #005BB5; --primary-press: #004E9C; --primary-wash: #E6F0FC; --ring: rgba(9,109,210,.35);
+  --heat-pos: #60A5FA; --heat-pos-bg: rgba(96,165,250,.28); --for: #2563EB;
+  --heat-neg: #F87171; --heat-neg-bg: rgba(248,113,113,.28); --against: #DC2626;
+  --confirmed: #007A52; --confirmed-bg: #DDF2E9;
+  --hitl: #A85400; --hitl-bg: #FFF1DC;
+  --zebra: #A78BFA; --zebra-bg: #EEE8FE; --mnm: #FB923C; --mnm-bg: rgba(251,146,60,.18);
+  --agent: #38BDF8; --clinician: #2DD4BF;
+  --r-pill: 9999px; --r-card: 16px; --r-panel: 11.2px; --r-ctl: 14px;
+  --shadow-hover: 0 8px 32px rgba(0,0,0,.05); --shadow-pop: 0 12px 40px rgba(30,19,15,.10);
+  --ease: cubic-bezier(.4,0,.2,1); --ease-reveal: cubic-bezier(0,0,.2,1);
+}
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: 1ms !important; animation-iteration-count: 1 !important; transition-duration: 1ms !important; } }
+@keyframes fade-token { from { opacity: 0; transform: translateY(.1em); } to { opacity: 1; transform: none; } }
+@keyframes plop { 0% { opacity: 0; } 65% { opacity: .7; } 100% { opacity: 0; } }
+@keyframes hint { 0%,100% { box-shadow: inset 0 0 0 0 rgba(5,150,105,0); } 50% { box-shadow: inset 0 0 0 2px rgba(5,150,105,.5); } }
+@keyframes flow { to { stroke-dashoffset: -20; } }
+@keyframes spin { to { transform: rotate(720deg); } }
+@keyframes rise { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html, body { height: 100%; margin: 0; }
+body { background: var(--bg); color: var(--ink); font: 400 14px/1.45 var(--font-ui); -webkit-font-smoothing: antialiased; font-feature-settings: "tnum" 1; }
+button { font: inherit; color: inherit; }
+.mono { font-family: var(--font-mono); font-size: 12px; }
+.label { font: 600 11px/1.2 var(--font-label); letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
+.muted { color: var(--muted); }
+
+/* ---- buttons ---- */
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; height: 36px; padding: 0 16px; border: 0; border-radius: var(--r-pill); cursor: pointer; font-weight: 500; font-size: 13.5px; white-space: nowrap;
+  transition: background-color 150ms var(--ease), box-shadow 150ms var(--ease), transform 150ms var(--ease), color 150ms var(--ease); }
+.btn:focus-visible { outline: none; box-shadow: 0 0 0 3px var(--ring); }
+.btn:active:not(:disabled) { transform: scale(.97); }
+.btn:disabled { opacity: .4; cursor: not-allowed; }
+.btn-primary { background: var(--primary); color: #fff; height: 44px; border-radius: var(--r-card); padding: 0 18px; font-size: 14.5px; }
+.btn-primary:hover:not(:disabled) { background: var(--primary-hover); box-shadow: var(--shadow-hover); }
+.btn-secondary { background: var(--surface); box-shadow: inset 0 0 0 1px var(--border); }
+.btn-secondary:hover:not(:disabled) { background: var(--soft); }
+.btn-pill { background: var(--pill); }
+.btn-pill:hover:not(:disabled) { background: var(--pill-hover); }
+.btn-ghost { background: transparent; color: var(--ink-60); padding: 0 10px; }
+.btn-ghost:hover:not(:disabled) { background: var(--ink-06); color: var(--ink); }
+.btn-danger { background: transparent; color: var(--against); box-shadow: inset 0 0 0 1px rgba(220,38,38,.35); }
+.btn-danger:hover:not(:disabled) { background: rgba(220,38,38,.06); }
+.btn-sm { height: 30px; padding: 0 12px; font-size: 12.5px; }
+.btn-block { width: 100%; }
+.spinner { width: 14px; height: 14px; border-radius: 50%; border: 2px solid rgba(255,255,255,.35); border-top-color: #fff; animation: spin 1.4s linear infinite; }
+.seg { display: inline-flex; background: var(--ink-06); border-radius: var(--r-pill); padding: 3px; }
+.seg button { border: 0; background: transparent; border-radius: var(--r-pill); padding: 5px 13px; font-size: 12.5px; font-weight: 500; color: var(--ink-60); cursor: pointer; transition: all 150ms var(--ease); }
+.seg button[aria-pressed="true"] { background: var(--ink); color: #fff; }
+
+/* ---- tags ---- */
+.tag { display: inline-flex; align-items: center; gap: 5px; height: 22px; padding: 0 9px; border-radius: var(--r-pill); font-size: 11.5px; font-weight: 500; background: var(--ink-06); white-space: nowrap; }
+.tag.zebra { background: var(--zebra-bg); }
+.tag.mnm { background: var(--mnm-bg); }
+.tag.proposed { background: transparent; box-shadow: inset 0 0 0 1px var(--border); color: var(--muted); }
+.tag.hitl { background: var(--hitl-bg); color: var(--hitl); }
+.tag.ok { background: var(--confirmed-bg); color: var(--confirmed); }
+.dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; flex: none; box-shadow: inset 0 0 0 1px var(--ink-12); }
+
+/* ---- app shell (mirrors Arbor's AppShell) ---- */
+.app { display: grid; grid-template-rows: 60px 1fr; height: 100vh; }
+.appbar { display: flex; align-items: center; gap: 24px; padding: 0 24px; background: var(--surface); border-bottom: 1px solid var(--border); }
+.brand { display: flex; align-items: center; gap: 10px; }
+.brand h1 { margin: 0; font: 400 24px/1 var(--font-display); letter-spacing: -.02em; }
+.brand small { display: block; font-size: 11px; color: var(--muted); margin-top: 3px; }
+.nav { display: flex; gap: 4px; margin-left: 8px; }
+.nav a { padding: 6px 12px; border-radius: var(--r-pill); color: var(--ink-60); text-decoration: none; font-weight: 500; font-size: 13.5px; transition: background-color 150ms var(--ease), color 150ms; }
+.nav a:hover { background: var(--ink-06); color: var(--ink); }
+.nav a.on { background: var(--pill); color: var(--ink); }
+.patient { margin-left: auto; display: flex; align-items: center; gap: 12px; }
+.patient .who { font-weight: 600; }
+.patient .meta { color: var(--muted); }
+
+/* ---- workspace: left rail · tree · detail ---- */
+.ws { display: grid; grid-template-columns: 320px minmax(0, 1fr) 360px; gap: 16px; padding: 16px; min-height: 0; }
+.pane { background: var(--surface); border-radius: var(--r-card); min-height: 0; overflow: auto; }
+.pane.left, .pane.right { padding: 18px; display: flex; flex-direction: column; gap: 18px; }
+.pane.center { display: grid; grid-template-rows: auto 1fr auto; grid-template-columns: minmax(0, 1fr); overflow: hidden; min-width: 0; }
+@media (max-width: 1180px) { .ws { grid-template-columns: 300px minmax(0, 1fr); } .pane.right { grid-column: 1 / -1; } .app { height: auto; } }
+@media (max-width: 760px) { .ws { grid-template-columns: minmax(0, 1fr); padding: 12px; } .appbar { padding: 0 16px; gap: 12px; } .nav, .patient .meta { display: none; } .pane.center { min-height: 520px; } }
+
+/* stepper */
+.steps { display: grid; gap: 2px; margin: 0; padding: 0; list-style: none; }
+.steps li { display: grid; grid-template-columns: 22px 1fr auto; gap: 8px; align-items: center; padding: 6px 8px; border-radius: var(--r-panel); color: var(--ink-60); font-size: 13px; }
+.steps li .n { width: 22px; height: 22px; border-radius: 50%; display: grid; place-items: center; font: 500 11px var(--font-mono); background: var(--ink-06); }
+.steps li { cursor: pointer; transition: background-color 150ms var(--ease); }
+.steps li:hover { background: var(--ink-06); }
+.steps li:focus-visible { outline: none; box-shadow: 0 0 0 3px var(--ring); }
+.steps li.done { color: var(--ink); }
+.steps li.done .n { background: var(--confirmed-bg); color: var(--confirmed); }
+.steps li.now { background: var(--soft); color: var(--ink); font-weight: 600; }
+.steps li.now .n { background: var(--ink); color: #fff; }
+
+/* next-action card */
+.next { border-radius: var(--r-card); background: var(--soft); padding: 16px; display: flex; flex-direction: column; gap: 12px; }
+.next.gate { animation: hint 2.4s var(--ease) infinite; background: var(--hitl-bg); }
+.next h2 { margin: 0; font: 400 20px/1.2 var(--font-display); letter-spacing: -.01em; }
+.next p { margin: 0; color: var(--muted); font-size: 13px; }
+.next .alts { display: flex; flex-wrap: wrap; gap: 6px; }
+.field { display: grid; gap: 6px; }
+.field input, .field textarea, .field select { width: 100%; border: 1px solid var(--border); border-radius: var(--r-panel); padding: 9px 11px; font: inherit; background: var(--surface); color: var(--ink); outline: none; transition: border-color 150ms, box-shadow 150ms; }
+.field input:focus, .field textarea:focus, .field select:focus { border-color: var(--primary); box-shadow: 0 0 0 3px var(--ring); }
+
+/* presentation + findings */
+.card-quiet { border-radius: var(--r-panel); background: var(--soft); padding: 12px 14px; font-size: 13px; }
+.card-quiet b { font-weight: 600; }
+.findings { list-style: none; margin: 0; padding: 0; display: grid; gap: 2px; }
+.findings li { display: grid; grid-template-columns: 18px 1fr auto; gap: 8px; align-items: start; padding: 8px 10px; border-radius: var(--r-panel); font-size: 13px; cursor: default; transition: background-color 150ms var(--ease); }
+.findings li .g { font: 500 11px/1.6 var(--font-mono); color: var(--muted); }
+.findings li .src { font: 500 10px/1.8 var(--font-mono); color: var(--muted); text-transform: uppercase; letter-spacing: .04em; }
+.findings li:hover, .findings li.on { background: var(--soft); }
+.findings li.for { background: var(--heat-pos-bg); }
+.findings li.for .g { color: var(--for); }
+.findings li.against { background: var(--heat-neg-bg); }
+.findings li.against .g { color: var(--against); }
+.findings li.new { animation: rise 400ms var(--ease) both; }
+
+/* centre: tree */
+.center-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 14px 18px; border-bottom: 1px solid var(--border); }
+.center-head h3 { margin: 0 auto 0 0; font: 400 20px/1 var(--font-display); letter-spacing: -.01em; }
+.canvas { position: relative; overflow: auto; background-image: radial-gradient(var(--ink-12) 1px, transparent 1.2px); background-size: 18px 18px; }
+.tree-fit { position: relative; margin: 12px auto; }
+.tree { position: absolute; left: 0; top: 0; width: 780px; height: 540px; transform-origin: 0 0; }
+.tree svg { position: absolute; inset: 0; overflow: visible; }
+.edge { fill: none; stroke: var(--border); stroke-width: 1.5; transition: stroke 200ms var(--ease); }
+.edge.dim { stroke-dasharray: 4 4; }
+.edge.path { stroke: var(--primary); stroke-dasharray: 4 6; animation: flow 1s linear infinite; }
+.node { position: absolute; width: 200px; min-height: 52px; padding: 8px 12px; border-radius: 14px; background: var(--surface); border: 1.5px solid var(--border); cursor: pointer; text-align: left;
+  transition: background-color 150ms var(--ease), border-color 150ms var(--ease), opacity 400ms var(--ease), filter 400ms var(--ease), box-shadow 160ms var(--ease), top 600ms var(--ease-reveal); }
+.node:hover { box-shadow: var(--shadow-hover); }
+.node:focus-visible { outline: none; box-shadow: 0 0 0 3px var(--ring); }
+.node .nm { display: flex; gap: 6px; align-items: center; font-weight: 600; font-size: 13px; line-height: 1.25; }
+.node .sub { display: flex; gap: 6px; align-items: center; margin-top: 4px; font-size: 11px; color: var(--muted); }
+.node .bar { height: 3px; border-radius: 2px; background: var(--ink-06); margin-top: 6px; overflow: hidden; }
+.node .bar i { display: block; height: 100%; background: var(--ink); border-radius: 2px; transition: width 700ms var(--ease-reveal); }
+.node.root { background: var(--ink); color: #fff; border-color: var(--ink); cursor: default; }
+.node.root .sub { color: rgba(255,255,255,.7); }
+.node.group { background: var(--soft); }
+.node.lead { border-color: var(--primary); }
+.node.lead .bar i { background: var(--primary); }
+.node.sel { border-color: var(--ink); box-shadow: 0 0 0 1px var(--ink); }
+.node.proposed { border-style: dashed; }
+.node.ruled { opacity: .55; filter: grayscale(1); }
+.node.ruled .nm span:first-child { text-decoration: line-through; text-decoration-color: var(--ink-35); }
+.node.confirmed { background: var(--confirmed-bg); border-color: var(--confirmed); }
+.node.confirmed .bar i { background: var(--confirmed); }
+.node.for { background: var(--heat-pos-bg); border-color: var(--heat-pos); }
+.node.against { background: var(--heat-neg-bg); border-color: var(--heat-neg); }
+.node .flash { position: absolute; inset: 0; border-radius: inherit; background: var(--heat-pos); opacity: 0; pointer-events: none; }
+.node .flash.go { animation: plop 700ms var(--ease) forwards; }
+.canvas.doc { background-image: none; padding: 20px 24px; }
+.doc-sec { padding: 16px 0; border-top: 1px solid var(--border); }
+.doc-sec:first-child { border-top: 0; padding-top: 4px; }
+.doc-sec h4 { margin: 0 0 8px; font: 600 11px/1.2 var(--font-label); letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
+.doc-sec p { margin: 0; font-size: 14.5px; line-height: 1.6; max-width: 68ch; }
+.doc-cc { font: 400 24px/1.25 var(--font-display); letter-spacing: -.01em; margin: 0; max-width: 32ch; }
+.kv { display: grid; grid-template-columns: 140px 1fr; gap: 8px 16px; font-size: 14px; }
+.kv dt { color: var(--muted); }
+.kv dd { margin: 0; }
+.lanes { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; }
+.lane { border-radius: var(--r-card); background: var(--soft); padding: 14px 16px; display: grid; gap: 8px; align-content: start; }
+.lane h4 { margin: 0; display: flex; justify-content: space-between; align-items: center; font: 600 11px/1.2 var(--font-label); letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
+.lane .obs { background: var(--surface); border-radius: var(--r-panel); padding: 10px 12px; font-size: 13.5px; }
+.lane .none { color: var(--muted); font-size: 13px; }
+.legend { display: flex; flex-wrap: wrap; gap: 14px; padding: 10px 18px; font-size: 11.5px; color: var(--muted); border-top: 1px solid var(--border); align-items: center; }
+.legend i { width: 12px; height: 12px; border-radius: 4px; display: inline-block; vertical-align: -2px; margin-right: 5px; border: 1.5px solid var(--border); background: var(--surface); }
+.ranked { padding: 12px 18px; display: grid; gap: 6px; align-content: start; }
+.ranked .row { display: grid; grid-template-columns: 1fr 52px; gap: 4px 12px; align-items: center; padding: 10px 12px; border-radius: var(--r-panel); cursor: pointer; }
+.ranked .row:hover { background: var(--soft); }
+.ranked .row .track { grid-column: 1 / -1; height: 6px; background: var(--ink-06); border-radius: 3px; overflow: hidden; }
+.ranked .row .track i { display: block; height: 100%; background: var(--primary); border-radius: 3px; transition: width 700ms var(--ease-reveal); }
+.ranked .row.ruled { opacity: .5; }
+
+/* timeline */
+.timeline { display: flex; align-items: center; gap: 14px; padding: 12px 18px; border-top: 1px solid var(--border); overflow-x: auto; }
+.tl { display: flex; align-items: center; gap: 0; flex: 1; min-width: 420px; }
+.tl .st { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; position: relative; font-size: 11px; color: var(--muted); }
+.tl .st::before { content: ""; position: absolute; top: 5px; left: -50%; right: 50%; height: 2px; background: var(--border); }
+.tl .st:first-child::before { display: none; }
+.tl .st { cursor: pointer; }
+.tl .st:hover { color: var(--ink); }
+.tl .st i { width: 12px; height: 12px; border-radius: 50%; background: var(--border); position: relative; z-index: 1; transition: background-color 200ms; }
+.tl .st.done i { background: var(--ink); }
+.tl .st.done::before { background: var(--ink); }
+.tl .st.now i { background: var(--primary); box-shadow: 0 0 0 4px rgba(0,104,207,.2); }
+.tl .st.now { color: var(--primary); font-weight: 600; }
+.tl .st.crit i { box-shadow: 0 0 0 2px var(--hitl-bg), 0 0 0 3px var(--hitl); }
+
+/* right: detail */
+.dx-name { margin: 4px 0 0; font: 400 26px/1.15 var(--font-display); letter-spacing: -.02em; }
+.prob { display: flex; align-items: baseline; gap: 10px; }
+.prob b { font: 500 28px/1 var(--font-mono); }
+.prob-bar { height: 8px; border-radius: 4px; background: var(--ink-06); overflow: hidden; }
+.prob-bar i { display: block; height: 100%; background: var(--primary); border-radius: 4px; transition: width 700ms var(--ease-reveal); }
+.ev { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.ev > div { border-radius: var(--r-panel); padding: 10px 12px; font-size: 12.5px; }
+.ev .f { background: var(--heat-pos-bg); }
+.ev .a { background: var(--heat-neg-bg); }
+.ev ul { margin: 6px 0 0; padding-left: 16px; }
+.ev li + li { margin-top: 4px; }
+.actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.actions .btn { width: 100%; }
+.empty { color: var(--muted); font-size: 13px; padding: 24px 6px; text-align: center; }
+.chat-dock { margin-top: auto; border-top: 1px solid var(--border); padding-top: 12px; }
+.trail { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; font-size: 12.5px; }
+.trail li { display: grid; grid-template-columns: 10px 1fr; gap: 10px; align-items: start; animation: rise 300ms var(--ease) both; }
+.trail li .dot { margin-top: 5px; }
+.trail .t { color: var(--muted); font: 400 11px var(--font-mono); }
+
+/* modal + popover */
+.scrim { position: fixed; inset: 0; background: rgba(30,19,15,.28); display: none; align-items: center; justify-content: center; padding: 16px; z-index: 50; }
+.scrim.open { display: flex; animation: rise 200ms var(--ease) both; }
+.modal { width: min(760px, 100%); max-height: calc(100vh - 32px); overflow: auto; background: var(--surface); border-radius: 20px; box-shadow: var(--shadow-pop); padding: 24px; display: grid; gap: 18px; }
+.modal h2 { margin: 0; font: 400 28px/1.15 var(--font-display); letter-spacing: -.02em; }
+.outcomes { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+@media (max-width: 700px) { .outcomes { grid-template-columns: 1fr 1fr; } .ev, .actions { grid-template-columns: 1fr; } }
+.oc { text-align: left; border: 0; border-radius: var(--r-card); padding: 14px; background: var(--surface); box-shadow: inset 0 0 0 1px var(--border); cursor: pointer; transition: box-shadow 160ms var(--ease), transform 150ms var(--ease); }
+.oc:hover { box-shadow: inset 0 0 0 1px var(--border), var(--shadow-hover); transform: translateY(-1px); }
+.oc[aria-pressed="true"] { box-shadow: inset 0 0 0 2px var(--primary), var(--shadow-hover); }
+.oc b { display: flex; align-items: center; gap: 8px; font-size: 14.5px; font-weight: 600; }
+.oc span { display: block; margin-top: 4px; color: var(--muted); font-size: 12.5px; }
+.guard { border-radius: var(--r-panel); background: var(--mnm-bg); padding: 12px 14px; font-size: 13px; display: grid; gap: 8px; }
+.output { border-radius: var(--r-panel); background: var(--soft); padding: 14px 16px; font-size: 13px; white-space: pre-wrap; }
+.row-end { display: flex; justify-content: flex-end; gap: 8px; flex-wrap: wrap; }
+.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.toast { position: fixed; left: 50%; bottom: 20px; transform: translateX(-50%); background: var(--ink); color: #fff; padding: 10px 16px; border-radius: var(--r-pill); font-size: 13px; box-shadow: var(--shadow-pop); opacity: 0; pointer-events: none; transition: opacity 200ms var(--ease), transform 200ms var(--ease); z-index: 60; }
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(-4px); }
+.diff { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+.diff li { display: grid; grid-template-columns: 1fr auto; gap: 8px; align-items: center; padding: 8px 10px; border-radius: var(--r-panel); background: var(--soft); font-size: 13px; }
+.diff .up { color: var(--for); font-family: var(--font-mono); }
+.diff .down { color: var(--against); font-family: var(--font-mono); }
+.stream span { animation: fade-token 150ms var(--ease) both; }
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="appbar">
+    <div class="brand">
+      <svg width="28" height="28" viewBox="0 0 28 28" aria-hidden="true"><rect width="28" height="28" rx="9" fill="var(--ink)"/><path d="M8 7l5 14M13 7l5 14M18 7l3 8" stroke="#fff" stroke-width="2.2" stroke-linecap="round"/></svg>
+      <div><h1>Zebrio</h1><small>retraceable differential diagnosis</small></div>
+    </div>
+    <nav class="nav"><a href="#" class="on">Cases</a><a href="#">Recipes</a></nav>
+    <div class="patient">
+      <span class="who">79 y · female</span>
+      <span class="meta mono">Kiel, Germany</span>
+      <button class="btn btn-secondary btn-sm" id="btn-trail">Reasoning trail</button>
+    </div>
+  </header>
+
+  <div class="ws">
+    <!-- LEFT: flow + next action + presentation + findings -->
+    <aside class="pane left" aria-label="Case progress">
+      <ol class="steps" id="steps"></ol>
+      <div id="next"></div>
+      <div>
+        <div class="label" style="margin-bottom:8px">Presentation</div>
+        <div class="card-quiet">
+          <b>Increasing shortness of breath for 10 days, now also when lying flat</b><br>
+          <span class="muted">Known: atrial fibrillation · hypertension · previous myocardial infarction</span>
+        </div>
+      </div>
+      <div>
+        <div class="label" style="margin-bottom:8px; display:flex; justify-content:space-between">Findings <span class="muted" style="text-transform:none; letter-spacing:0; font-family:var(--font-ui); font-weight:400">hover to trace</span></div>
+        <ul class="findings" id="findings"></ul>
+      </div>
+    </aside>
+
+    <!-- CENTRE: the reasoning tree -->
+    <main class="pane center" aria-label="Reasoning tree">
+      <div class="center-head">
+        <h3 id="center-title">Reasoning tree</h3><span id="illus" class="tag proposed" title="The case facts are from golden-2-breathlessness. Hypotheses, percentages, the proposed test and round-2 changes are placeholders to show the UI — they are not hypothesis-engine output.">Illustrative differential · not engine output</span>
+        <div class="seg" id="viewseg" role="group" aria-label="View"><button aria-pressed="true" data-view="tree">Tree</button><button aria-pressed="false" data-view="list">List</button></div>
+      </div>
+      <div class="canvas" id="canvas"></div>
+      <div>
+        <div class="legend" id="legend">
+          <span><i style="border-color:var(--primary)"></i>leading</span>
+          <span><i></i>live</span>
+          <span><i style="border-style:dashed"></i>agent proposal</span>
+          <span><i style="background:var(--confirmed-bg);border-color:var(--confirmed)"></i>working dx</span>
+          <span><i style="opacity:.5"></i>ruled out (kept)</span>
+          <span><span class="dot" style="background:var(--zebra)"></span> zebra</span>
+          <span><span class="dot" style="background:var(--mnm)"></span> must-not-miss</span>
+          <span><span class="dot" style="background:var(--heat-pos)"></span> for · <span class="dot" style="background:var(--heat-neg)"></span> against</span>
+        </div>
+        <div class="timeline"><span class="label">Case</span><div class="tl" id="tl"></div></div>
+      </div>
+    </main>
+
+    <!-- RIGHT: hypothesis detail -->
+    <aside class="pane right" aria-label="Hypothesis detail">
+      <div id="detail"></div>
+      <div class="chat-dock">
+        <div class="label" style="margin-bottom:8px">Ask the engine</div>
+        <div class="field"><input id="ask" placeholder="Ask about this case"></div>
+        <div id="answer" class="stream" style="font-size:13px; margin-top:10px; color:var(--muted)"></div>
+      </div>
+    </aside>
+  </div>
+</div>
+
+<!-- Decision modal (Step 4) -->
+<div class="scrim" id="decision" role="dialog" aria-modal="true" aria-labelledby="dec-title">
+  <div class="modal">
+    <div>
+      <div class="label">Step 4 · Diagnostic decision</div>
+      <h2 id="dec-title">What do you decide?</h2>
+      <p class="muted" style="margin:6px 0 0">The agent suggests <b id="dec-suggest"></b>. The choice is yours.</p>
+    </div>
+    <div class="outcomes" id="outcomes">
+      <button class="oc" data-o="confirm" aria-pressed="false"><b><span class="dot" style="background:var(--confirmed)"></span>Confirm</b><span>Set the working diagnosis</span></button>
+      <button class="oc" data-o="refer" aria-pressed="false"><b><span class="dot" style="background:var(--zebra)"></span>Refer</b><span>Summary for a specialist</span></button>
+      <button class="oc" data-o="investigate" aria-pressed="false"><b><span class="dot" style="background:var(--heat-pos)"></span>Investigate</b><span>Order tests, park the case</span></button>
+      <button class="oc" data-o="unresolved" aria-pressed="false"><b><span class="dot" style="background:var(--mnm)"></span>Unresolved</b><span>Safety-net + review date</span></button>
+    </div>
+    <div id="dec-body"></div>
+    <div class="row-end"><button class="btn btn-ghost" data-close>Cancel</button><button class="btn btn-primary" id="dec-commit" disabled>Choose an outcome</button></div>
+  </div>
+</div>
+
+<!-- Rule-out / add / trail modal -->
+<div class="scrim" id="small" role="dialog" aria-modal="true"><div class="modal" style="width:min(480px,100%)" id="small-body"></div></div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+(function () {
+  // ---------------------------------------------------------------- data
+  // Case facts: verbatim from requestId "golden-2-breathlessness" (presentation,
+  // history sentences, observations, demographics). Nothing else is known.
+  // ILLUSTRATIVE ONLY (not hypothesis-engine output): the hypotheses, their
+  // percentages, the cardiac/pulmonary grouping, the for/against weights, the
+  // proposed chest X-ray and the round-2 re-ranking. They exist to show the UI.
+  const H = {
+    root: { name: "Shortness of breath, 10 days · 79 y", kind: "root", x: 16,  y: 226 },
+    card: { name: "Cardiac cause", kind: "group", parent: "root", p: 80, x: 268, y: 92 },
+    pulm: { name: "Pulmonary / other cause", kind: "group", parent: "root", p: 20, x: 268, y: 362 },
+    hf:   { name: "Decompensated heart failure", parent: "card", p: 60, x: 540, y: 4 },
+    af:   { name: "AF with fast ventricular rate", parent: "card", p: 12, x: 540, y: 92 },
+    acs:  { name: "Acute coronary syndrome", parent: "card", p: 8, x: 540, y: 180 },
+    pneu: { name: "Pneumonia", parent: "pulm", p: 8, x: 540, y: 274 },
+    pe:   { name: "Pulmonary embolism", parent: "pulm", p: 8, x: 540, y: 362 },
+    lung: { name: "Chronic lung disease exacerbation", parent: "pulm", p: 4, x: 540, y: 450 },
+  };
+  for (const [id, h] of Object.entries(H)) { h.id = id; h.status = h.kind ? h.kind : "live"; h.author = "agent"; }
+
+  // finding text is verbatim from the case; w (+1 supports / -1 against) is illustrative
+  const F = [
+    { id: "f1", text: "Breathless after a few steps, now sleeps on three pillows and wakes up at night short of breath.", src: "history", w: { hf: 1 } },
+    { id: "f2", text: "Both ankles swollen, gained about 3 kg in one week.", src: "history", w: { hf: 1 } },
+    { id: "f3", text: "Dry cough at night, no fever, no chest pain, no coloured sputum.", src: "history", w: { pneu: -1, acs: -1 } },
+    { id: "f4", text: "Known atrial fibrillation, hypertension and a heart attack years ago.", src: "history", w: { hf: 1, af: 1, acs: 1 } },
+    { id: "f5", text: "Stopped her water tablets two weeks ago because of frequent urination.", src: "history", w: { hf: 1 } },
+    { id: "f6", text: "Never smoked.", src: "history", w: { lung: -1 } },
+    { id: "o1", text: "T 36.9°C, BP 158/92, HR 104 irregular, RR 24, SpO2 90% on room air", src: "vitals", w: { af: 1, pneu: -1 } },
+    { id: "o2", text: "Fine crackles over both lung bases, jugular venous pressure raised", src: "exam", w: { hf: 1 } },
+    { id: "o3", text: "Pitting oedema of both legs up to mid-shin", src: "exam", w: { hf: 1 } },
+    { id: "o4", text: "NT-proBNP 4800 pg/ml, CRP 9 mg/l", src: "lab", w: { hf: 1, pneu: -1 } },
+  ];
+
+  const S = {
+    page: "presentation",     // presentation · assessment · reasoning · followup (decision is a dialog)
+    reached: 0,               // furthest step index reached (0–4)
+    stage: "pre",             // pre → reasoning → gate → reasoning → review → ready → decided
+    round: 0,
+    selected: "hf",
+    view: "tree",
+    held: null,
+    trail: [
+      { a: "clinician", t: "R0", s: "Presentation recorded (case golden-2-breathlessness)." },
+    ],
+    decision: null,
+    pendingDiff: null,
+  };
+
+  const $ = (s) => document.querySelector(s);
+  const esc = (t) => String(t).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+  const leaves = () => Object.values(H).filter((h) => !h.kind);
+  const liveLeaves = () => leaves().filter((h) => h.status === "live" || h.status === "proposed_out");
+  const lead = () => liveLeaves().sort((a, b) => b.p - a.p)[0];
+  const toast = (m) => { const t = $("#toast"); t.textContent = m; t.classList.add("show"); clearTimeout(toast.k); toast.k = setTimeout(() => t.classList.remove("show"), 2200); };
+  const log = (a, s) => { S.trail.push({ a, t: "R" + S.round, s }); };
+
+  // ---------------------------------------------------------------- left rail
+  const PAGES = ["presentation", "assessment", "reasoning", "decision", "followup"];
+  const curIdx = () => (S.decOpen ? 3 : PAGES.indexOf(S.page));
+  function renderSteps() {
+    const names = ["Presentation", "Assessment", "Reasoning", "Decision", "Follow-up"];
+    const decided = S.stage === "decided" || !!S.decision;
+    const done = (i) => [S.reached > 0, S.round >= 1, decided, decided, false][i];
+    $("#steps").innerHTML = names.map((n, i) => {
+      const st = i === curIdx() ? "now" : done(i) ? "done" : "";
+      return `<li class="${st}" role="button" tabindex="0" data-go="${PAGES[i]}" aria-current="${i === curIdx() ? "step" : "false"}"><span class="n">${st === "done" ? "✓" : i + 1}</span>${n}<span class="mono muted">${i === 2 && S.round ? "round " + S.round : ""}</span></li>`;
+    }).join("");
+    $("#steps").querySelectorAll("li").forEach((li) => {
+      li.onclick = () => goTo(li.dataset.go);
+      li.onkeydown = (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); goTo(li.dataset.go); } };
+    });
+  }
+
+  // Every stage is reachable at any time. Jumping ahead of round 1 runs it.
+  function goTo(page) {
+    if (page === "decision") {
+      if (!S.round) { runRound1(true); }
+      S.page = "reasoning"; renderAll(); openDecision(); return;
+    }
+    if (page === "reasoning" && !S.round) { runRound1(); return; }
+    S.page = page; S.reached = Math.max(S.reached, PAGES.indexOf(page)); renderAll();
+  }
+
+  function runRound1(instant) {
+    S.page = "reasoning"; S.round = 1; S.reached = Math.max(S.reached, 2);
+    log("clinician", "Assessment reviewed; started round 1.");
+    const finish = () => {
+      S.stage = "gate";
+      S.trail.push({ a: "agent", t: "R1", s: "Illustrative differential shown (not engine output): cardiac cause 80% · pulmonary / other cause 20%." });
+      S.trail.push({ a: "agent", t: "R1", s: "Illustrative proposed test: chest X-ray — separates pneumonia from the cardiac branch." });
+      renderAll();
+    };
+    if (instant) { finish(); return; }
+    S.stage = "reasoning"; renderAll(); setTimeout(finish, 1200);
+  }
+
+  function renderNext() {
+    const el = $("#next");
+    if (S.page === "presentation") {
+      el.innerHTML = `<div class="next"><span class="label">Step 1 · Patient presentation</span><h2>Review what was recorded</h2>
+        <p>Confirm the base-rate context before reasoning starts: 79 years · female · Kiel, Germany.</p>
+        <button class="btn btn-primary btn-block" id="p-next">Confirm &amp; go to assessment</button></div>`;
+      $("#p-next").onclick = () => { if (S.reached < 1) log("clinician", "Confirmed base-rate context: 79 years, female, Kiel, Germany."); goTo("assessment"); };
+      return;
+    }
+    if (S.page === "assessment") {
+      el.innerHTML = `<div class="next"><span class="label">Step 2 · Clinical assessment</span><h2>4 observations recorded</h2>
+        <p>Vitals, examination and laboratory are in. No imaging yet.</p>
+        <button class="btn btn-primary btn-block" id="a-next">${S.round ? "Back to reasoning" : "Run round 1"}</button></div>`;
+      $("#a-next").onclick = () => goTo("reasoning");
+      return;
+    }
+    if (S.page === "followup" && S.stage !== "decided") {
+      el.innerHTML = `<div class="next"><span class="label">Step 5 · Follow-up</span><h2>No decision yet</h2>
+        <p>Follow-up starts after a decision. New findings at a later visit restart the loop on the same tree.</p>
+        <button class="btn btn-primary btn-block" id="f-dec">Go to decision</button></div>`;
+      $("#f-dec").onclick = () => goTo("decision");
+      return;
+    }
+    if (S.stage === "gate") {
+      el.innerHTML = `<div class="next gate">
+        <span class="tag hitl">● Waiting for you · test result</span>
+        <h2>Chest X-ray</h2>
+        <p>Separates <b>pneumonia</b> from the cardiac branch <span class="muted">(illustrative proposal)</span>. Enter the report to run round 2.</p>
+        <div class="field"><input id="res" value="${esc(S.gateRes || "")}" placeholder="Enter the chest X-ray report" aria-label="Result"></div>
+        <div class="seg" role="group" aria-label="Bears on pneumonia" id="dir"><button aria-pressed="${S.gateDir === 1}" data-d="1">Supports pneumonia</button><button aria-pressed="${S.gateDir === -1}" data-d="-1">Against pneumonia</button></div>
+        <button class="btn btn-primary btn-block" id="go-round" disabled>Add result &amp; run round 2</button>
+        <div class="alts"><button class="btn btn-pill btn-sm" id="park">Order &amp; park case</button><button class="btn btn-ghost btn-sm" id="to-dec">Go to decision</button></div>
+      </div>`;
+      const gateReady = () => ($("#go-round").disabled = !($("#res").value.trim() && el.querySelector('#dir [aria-pressed="true"]')));
+      el.querySelectorAll("#dir button").forEach((b) => b.onclick = () => { S.gateDir = Number(b.dataset.d); el.querySelectorAll("#dir button").forEach((x) => x.setAttribute("aria-pressed", String(x === b))); gateReady(); });
+      $("#res").oninput = () => { S.gateRes = $("#res").value; gateReady(); };
+      gateReady();
+      $("#go-round").onclick = runRound;
+      $("#park").onclick = () => { log("clinician", "Ordered chest X-ray; case parked — awaiting results."); toast("Case parked · Awaiting results"); renderTrailIfOpen(); };
+      $("#to-dec").onclick = openDecision;
+    } else if (S.stage === "reasoning") {
+      el.innerHTML = `<div class="next"><span class="label">Round ${S.round}</span><h2>Re-ranking the differential…</h2><p>You can keep reading and browsing while the engine works.</p><button class="btn btn-primary btn-block" disabled><span class="spinner"></span>Reasoning</button></div>`;
+    } else if (S.stage === "review") {
+      const d = S.pendingDiff;
+      el.innerHTML = `<div class="next"><span class="label">Round ${S.round} · review</span><h2>What changed</h2>
+        <ul class="diff">${d.moves.map((m) => `<li>${esc(H[m.id].name)}<span class="${m.to > m.from ? "up" : "down"}">${m.from}→${m.to}%</span></li>`).join("")}
+        ${d.ruleOuts.map((r) => `<li><span>Rule out <b>${esc(H[r.id].name)}</b><br><span class="muted" style="font-size:12px">${esc(r.why)}</span></span><span style="display:flex;gap:4px"><button class="btn btn-sm btn-secondary" data-acc="${r.id}">Accept</button><button class="btn btn-sm btn-ghost" data-rej="${r.id}">Keep</button></span></li>`).join("")}</ul>
+        <button class="btn btn-primary btn-block" id="accept-all">Accept round ${S.round}</button></div>`;
+      el.querySelectorAll("[data-acc]").forEach((b) => b.onclick = () => resolveRuleOut(b.dataset.acc, true));
+      el.querySelectorAll("[data-rej]").forEach((b) => b.onclick = () => resolveRuleOut(b.dataset.rej, false));
+      $("#accept-all").onclick = () => { d.ruleOuts.slice().forEach((r) => resolveRuleOut(r.id, true, true)); finishReview(); };
+    } else if (S.stage === "ready") {
+      const l = lead();
+      el.innerHTML = `<div class="next"><span class="label">Round ${S.round} · converging</span><h2>${esc(l.name)} leads at ${l.p}%</h2><p>Enough to decide? You can also add another finding.</p>
+        <button class="btn btn-primary btn-block" id="to-dec">Go to decision</button>
+        <div class="alts"><button class="btn btn-pill btn-sm" id="add-f">Add finding</button></div></div>`;
+      $("#to-dec").onclick = openDecision;
+      $("#add-f").onclick = () => toast("Add finding → runs round " + (S.round + 1) + " (not wired in this prototype)");
+    } else {
+      const d = S.decision;
+      el.innerHTML = `<div class="next" style="background:var(--confirmed-bg)"><span class="tag ok">✓ ${esc(d.label)}</span><h2>${esc(d.title)}</h2><p>${esc(d.sub)}</p>
+        <button class="btn btn-secondary btn-block" id="reopen">New visit · re-open the loop</button></div>`;
+      $("#reopen").onclick = () => { S.page = "reasoning"; S.stage = "ready"; S.round += 1; Object.values(H).forEach((h) => { if (h.status === "confirmed") h.status = "live"; }); log("clinician", "Visit 2: case re-opened — new findings restart the loop."); toast("Visit 2 started · same tree"); renderAll(); };
+    }
+  }
+
+  function renderFindings() {
+    $("#findings").innerHTML = F.map((f) => {
+      const vals = Object.values(f.w); const g = vals.every((v) => v > 0) ? "+" : vals.every((v) => v < 0) ? "−" : "±";
+      return `<li data-f="${f.id}" class="${f.isNew ? "new" : ""}" tabindex="0"><span class="g">${g}</span><span>${esc(f.text)}</span><span class="src">${f.src}</span></li>`;
+    }).join("");
+    F.forEach((f) => (f.isNew = false));
+    $("#findings").querySelectorAll("li").forEach((li) => {
+      li.onmouseenter = li.onfocus = () => traceFinding(li.dataset.f);
+      li.onmouseleave = li.onblur = restoreTrace;
+      li.onclick = () => { S.held = { f: li.dataset.f }; traceFinding(li.dataset.f); };
+    });
+  }
+
+  // ---------------------------------------------------------------- tree
+  function renderCenter() {
+    const c = $("#canvas"), isTree = S.page === "reasoning";
+    $("#center-title").textContent = { presentation: "Patient presentation", assessment: "Clinical assessment", reasoning: "Reasoning tree", followup: "Follow-up" }[S.page];
+    $("#illus").hidden = !isTree || !S.round; $("#viewseg").hidden = !isTree || !S.round; $("#legend").hidden = !isTree;
+    c.classList.toggle("doc", !isTree);
+    if (isTree) { renderTree(); return; }
+    if (S.page === "presentation") {
+      c.innerHTML = `
+        <div class="doc-sec"><h4>Chief complaint</h4><p class="doc-cc">Increasing shortness of breath for 10 days, now also when lying flat</p></div>
+        <div class="doc-sec"><h4>History</h4><p>Breathless after a few steps, now sleeps on three pillows and wakes up at night short of breath. Both ankles swollen, gained about 3 kg in one week. Dry cough at night, no fever, no chest pain, no coloured sputum. Known atrial fibrillation, hypertension and a heart attack years ago. Stopped her water tablets two weeks ago because of frequent urination. Never smoked.</p></div>
+        <div class="doc-sec"><h4>Demographics</h4><dl class="kv"><dt>Age</dt><dd>79 years</dd><dt>Sex</dt><dd>female</dd><dt>Location</dt><dd>Kiel, Germany</dd></dl></div>
+        <div class="doc-sec"><h4>Comorbidities</h4><div style="display:flex;gap:6px;flex-wrap:wrap"><span class="tag">atrial fibrillation</span><span class="tag">hypertension</span><span class="tag">previous myocardial infarction</span></div></div>`;
+      return;
+    }
+    if (S.page === "assessment") {
+      const xr = F.find((f) => f.id === "f7");
+      const obs = (ids) => ids.map((id) => `<div class="obs">${esc(F.find((f) => f.id === id).text)}</div>`).join("");
+      c.innerHTML = `<div class="lanes">
+        <div class="lane"><h4>Vitals <span class="mono">1</span></h4>${obs(["o1"])}</div>
+        <div class="lane"><h4>Examination <span class="mono">2</span></h4>${obs(["o2", "o3"])}</div>
+        <div class="lane"><h4>Laboratory <span class="mono">1</span></h4>${obs(["o4"])}</div>
+        <div class="lane"><h4>Imaging <span class="mono">${xr ? 1 : 0}</span></h4>${xr ? `<div class="obs">${esc(xr.text)}</div>` : '<div class="none">None recorded in this case.</div>'}</div>
+      </div>
+      <div class="doc-sec" style="margin-top:16px"><h4>From the history</h4><div class="lane" style="background:transparent;padding:0">${obs(["f1", "f2", "f3", "f4", "f5", "f6"])}</div></div>`;
+      return;
+    }
+    // follow-up
+    const d = S.decision;
+    c.innerHTML = d
+      ? `<div class="doc-sec"><h4>Visit 1 · outcome</h4><p class="doc-cc">${esc(d.title)}</p><p class="muted" style="margin-top:6px">${esc(d.label)} · ${esc(d.sub)}</p></div>
+         <div class="doc-sec"><h4>What happens next</h4><p>A new visit re-opens the case on the same tree. New findings, results or specialist feedback enter at the assessment step and restart the reasoning loop.</p>
+         <div style="margin-top:12px"><button class="btn btn-secondary" id="fu-reopen">Start visit 2</button></div></div>
+         <div class="doc-sec"><h4>Visit 1 · reasoning trail</h4><ul class="trail">${S.trail.map((e) => `<li><span class="dot" style="background:var(--${e.a})"></span><div><span class="t">${e.t} · ${e.a}</span><br>${esc(e.s)}</div></li>`).join("")}</ul></div>`
+      : `<div class="doc-sec"><h4>Status</h4><p class="doc-cc">No decision yet</p><p class="muted" style="margin-top:6px">Make a decision (confirm, refer, investigate further or remain unresolved) to start follow-up.</p></div>`;
+    $("#fu-reopen") && ($("#fu-reopen").onclick = () => $("#reopen").click());
+  }
+
+  function renderTree() {
+    const c = $("#canvas");
+    if (S.view === "list") {
+      const rows = leaves().sort((a, b) => (a.status === "ruled_out") - (b.status === "ruled_out") || b.p - a.p);
+      c.innerHTML = `<div class="ranked">${rows.map((h) => `<div class="row ${h.status === "ruled_out" ? "ruled" : ""}" data-h="${h.id}" tabindex="0"><span>${esc(h.name)} ${badges(h)}</span><span class="mono" style="text-align:right">${h.p}%</span><div class="track"><i style="width:${h.p}%"></i></div></div>`).join("")}</div>`;
+      c.querySelectorAll(".row").forEach((r) => r.onclick = () => select(r.dataset.h));
+      return;
+    }
+    const l = Object.values(H).some((h) => h.status === "confirmed") ? null : lead();
+    const path = new Set(); let cur = H[S.selected]; while (cur) { path.add(cur.id); cur = H[cur.parent]; }
+    const r1Running = S.round === 1 && S.stage === "reasoning";
+    const shown = S.round && !r1Running ? Object.values(H) : [H.root];
+    const edges = shown.filter((h) => h.parent).map((h) => {
+      const p = H[h.parent], x1 = p.x + 200, y1 = p.y + 26, x2 = h.x, y2 = h.y + 26, mx = (x1 + x2) / 2;
+      const cls = ["edge", h.status === "ruled_out" ? "dim" : "", path.has(h.id) && S.selected !== "root" ? "path" : ""].join(" ");
+      return `<path class="${cls}" d="M${x1} ${y1} C${mx} ${y1} ${mx} ${y2} ${x2} ${y2}"/>`;
+    }).join("");
+    const nodes = shown.map((h) => {
+      const cls = ["node", h.kind || "", h.status === "ruled_out" ? "ruled" : "", h.status === "confirmed" ? "confirmed" : "", h.status === "proposed_out" ? "proposed" : "", l && h.id === l.id && h.status === "live" ? "lead" : "", S.selected === h.id ? "sel" : ""].join(" ");
+      const sub = h.kind === "root" ? `<div class="sub">Presentation · round ${S.round}</div>`
+        : `<div class="sub"><span class="mono">${h.p}%</span>${h.status === "ruled_out" ? " · ruled out" : ""}${h.status === "confirmed" ? " · working dx" : ""}${h.status === "proposed_out" ? " · rule-out proposed" : ""}${h.author === "clinician" ? ' · <span class="dot" style="background:var(--clinician)"></span> added by you' : ""}</div>${h.kind ? "" : `<div class="bar"><i style="width:${h.p}%"></i></div>`}`;
+      return `<div class="${cls}" data-h="${h.id}" style="left:${h.x}px;top:${h.y}px" tabindex="${h.kind === "root" ? -1 : 0}" role="button" aria-label="${esc(h.name)} ${h.p ?? ""}%"><div class="nm"><span>${esc(h.name)}</span>${h.zebra ? '<span class="dot" style="background:var(--zebra)" title="zebra"></span>' : ""}${h.pinned ? '<span class="dot" style="background:var(--mnm)" title="must-not-miss"></span>' : ""}</div>${sub}<span class="flash"></span></div>`;
+    }).join("");
+    c.innerHTML = `<div class="tree-fit"><div class="tree"><svg width="780" height="540" aria-hidden="true">${edges}</svg>${nodes}</div></div>`;
+    fitTree();
+    c.querySelectorAll(".node").forEach((n) => {
+      const id = n.dataset.h; if (id === "root") return;
+      n.onclick = () => { S.held = null; select(id); };
+      n.onkeydown = (e) => { if (e.key === "Enter") select(id); if (e.key.toLowerCase() === "p") togglePin(id); if (e.key.toLowerCase() === "x") askRuleOut(id); };
+      if (!H[id].kind) { n.onmouseenter = n.onfocus = () => traceNode(id); n.onmouseleave = n.onblur = restoreTrace; }
+    });
+  }
+  // Scale the fixed-size tree to the canvas width (never above 1:1).
+  function fitTree() {
+    const c = $("#canvas"), fit = c.querySelector(".tree-fit"), t = c.querySelector(".tree"); if (!t) return;
+    const k = Math.min(1, (c.clientWidth - 24) / 780);
+    t.style.transform = `scale(${k})`; fit.style.width = 780 * k + "px"; fit.style.height = 540 * k + "px";
+  }
+  window.addEventListener("resize", fitTree);
+  window.addEventListener("load", fitTree);
+
+  function badges(h) {
+    return [h.zebra ? '<span class="tag zebra">zebra</span>' : "", h.pinned ? '<span class="tag mnm">must-not-miss</span>' : "", h.status === "ruled_out" ? '<span class="tag">ruled out</span>' : "", h.status === "confirmed" ? '<span class="tag ok">working dx</span>' : ""].join(" ");
+  }
+
+  // ---- attribution (the AttnLRP hover pattern) ----
+  function clearTrace() { document.querySelectorAll(".node.for,.node.against").forEach((n) => n.classList.remove("for", "against")); document.querySelectorAll("#findings li").forEach((l) => l.classList.remove("for", "against", "on")); }
+  function traceNode(id) { clearTrace(); F.forEach((f) => { const w = f.w[id]; if (w) $(`#findings li[data-f="${f.id}"]`).classList.add(w > 0 ? "for" : "against"); }); }
+  function traceFinding(fid) { clearTrace(); $(`#findings li[data-f="${fid}"]`).classList.add("on"); const f = F.find((x) => x.id === fid); for (const [h, w] of Object.entries(f.w)) { const n = document.querySelector(`.node[data-h="${h}"]`); if (n) n.classList.add(w > 0 ? "for" : "against"); } }
+  function restoreTrace() { if (S.held?.f) traceFinding(S.held.f); else clearTrace(); }
+
+  // ---------------------------------------------------------------- detail
+  function renderDetail() {
+    const el = $("#detail");
+    if (S.page === "presentation" || S.page === "assessment") {
+      const n = (src) => F.filter((f) => f.src === src).length;
+      el.innerHTML = S.page === "presentation"
+        ? `<div><div class="label">Base-rate context</div><h2 class="dx-name">79 y · female</h2><p class="muted" style="margin:6px 0 0">Kiel, Germany</p></div>
+           <div class="card-quiet">The hypothesis engine sets its priors from age, sex, location and known comorbidities. You confirm this context before round 1.</div>`
+        : `<div><div class="label">Recorded so far</div><h2 class="dx-name">${F.length} findings</h2></div>
+           <dl class="kv"><dt>History</dt><dd class="mono">${n("history")}</dd><dt>Vitals</dt><dd class="mono">${n("vitals")}</dd><dt>Examination</dt><dd class="mono">${n("exam")}</dd><dt>Laboratory</dt><dd class="mono">${n("lab")}</dd><dt>Imaging</dt><dd class="mono">${n("imaging")}</dd></dl>`;
+      return;
+    }
+    if (S.page === "followup") {
+      el.innerHTML = `<div><div class="label">Case status</div><h2 class="dx-name">${S.decision ? esc(S.decision.label) : "Open"}</h2></div>`;
+      return;
+    }
+    if (!S.round) { el.innerHTML = `<div class="empty">Round 1 has not run yet.</div>`; return; }
+    if (S.round === 1 && S.stage === "reasoning") { el.innerHTML = `<div class="empty">Round 1 is running…</div>`; return; }
+    const h = H[S.selected];
+    if (!h || h.kind === "root") { el.innerHTML = `<div class="empty">Select a hypothesis on the tree to see its evidence.</div>`; return; }
+    const forF = F.filter((f) => f.w[h.id] > 0), agF = F.filter((f) => f.w[h.id] < 0);
+    const isLeaf = !h.kind, ruled = h.status === "ruled_out";
+    el.innerHTML = `
+      <div><div class="label">${h.kind === "group" ? "Branch" : "Hypothesis"} · <span class="mono" style="text-transform:none">${h.code || ""}</span></div>
+        <h2 class="dx-name">${esc(h.name)}</h2>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px">${badges(h)}<span class="tag"><span class="dot" style="background:var(--${h.author === "clinician" ? "clinician" : "agent"})"></span>${h.author === "clinician" ? "added by you" : "agent proposed"}</span></div></div>
+      <div><div class="prob"><b>${h.p}%</b><span class="muted">probability mass</span></div><div class="prob-bar" style="margin-top:8px"><i style="width:${h.p}%"></i></div>
+        ${h.base ? `<p class="muted" style="font-size:12.5px;margin:10px 0 0"><b style="color:var(--ink);font-weight:600">Base rate.</b> ${esc(h.base)}</p>` : ""}
+        ${h.ruledWhy ? `<p style="font-size:12.5px;margin:8px 0 0"><b>Ruled out:</b> ${esc(h.ruledWhy)}</p>` : ""}</div>
+      ${isLeaf ? `<div><div class="label" style="margin-bottom:8px">Evidence</div><div class="ev">
+        <div class="f"><b>▲ For</b>${forF.length ? `<ul>${forF.map((f) => `<li>${esc(f.text)}</li>`).join("")}</ul>` : '<p class="muted" style="margin:6px 0 0">None yet</p>'}</div>
+        <div class="a"><b>▼ Against</b>${agF.length ? `<ul>${agF.map((f) => `<li>${esc(f.text)}</li>`).join("")}</ul>` : '<p class="muted" style="margin:6px 0 0">None yet</p>'}</div></div></div>` : ""}
+      ${isLeaf ? `<div><div class="label" style="margin-bottom:8px">Your decision on this node</div><div class="actions">
+        ${ruled ? `<button class="btn btn-secondary" id="a-restore">Restore</button>` : `<button class="btn btn-secondary" id="a-pin">${h.pinned ? "Unpin" : "Pin must-not-miss"}</button><button class="btn btn-danger" id="a-rule">Rule out…</button>`}
+        <button class="btn btn-pill" id="a-add">Add child</button>
+        ${ruled ? "" : `<button class="btn btn-pill" id="a-conf">Set as working dx</button>`}</div></div>` : `<div class="actions"><button class="btn btn-pill" id="a-add">Add hypothesis here</button></div>`}`;
+    $("#a-pin") && ($("#a-pin").onclick = () => togglePin(h.id));
+    $("#a-rule") && ($("#a-rule").onclick = () => askRuleOut(h.id));
+    $("#a-restore") && ($("#a-restore").onclick = () => { h.status = "live"; h.ruledWhy = ""; log("clinician", `Restored ${h.name}.`); toast("Restored — back on the differential"); renderAll(); });
+    $("#a-add").onclick = () => askAdd(h.kind ? h.id : h.parent);
+    $("#a-conf") && ($("#a-conf").onclick = () => openDecision("confirm", h.id));
+  }
+
+  function select(id) { S.selected = id; renderTree(); renderDetail(); }
+
+  // ---------------------------------------------------------------- node actions
+  function togglePin(id) {
+    const h = H[id]; h.pinned = !h.pinned;
+    log("clinician", h.pinned ? `Pinned ${h.name} as must-not-miss.` : `Unpinned ${h.name}.`);
+    toast(h.pinned ? "Pinned — stays on the tree until you rule it out" : "Unpinned"); renderAll();
+  }
+  function askRuleOut(id) {
+    const h = H[id];
+    openSmall(`<div class="label">Rule out</div><h2>${esc(h.name)}</h2>
+      ${h.pinned ? `<div class="guard">This node is pinned as <b>must-not-miss</b>. Ruling it out also unpins it.</div>` : ""}
+      <div class="field"><label class="muted" for="why">Reason (required — saved on the reasoning trail)</label><textarea id="why" rows="3" placeholder="Your reason"></textarea></div>
+      <div class="row-end"><button class="btn btn-ghost" data-close>Cancel</button><button class="btn btn-danger" id="do-rule" disabled>Rule out</button></div>`);
+    const why = $("#why"), go = $("#do-rule"); why.focus();
+    why.oninput = () => (go.disabled = !why.value.trim());
+    go.onclick = () => { h.status = "ruled_out"; h.pinned = false; h.ruledWhy = why.value.trim(); redistribute(id); log("clinician", `Ruled out ${h.name}: “${h.ruledWhy}”`); closeSmall(); toast("Ruled out — dimmed, kept on the tree"); renderAll(); };
+  }
+  function askAdd(parentId) {
+    openSmall(`<div class="label">Add hypothesis under ${esc(H[parentId].name)}</div><h2>Your own candidate</h2>
+      <div class="field"><input id="nm" placeholder="Hypothesis name"></div>
+      <label style="display:flex;gap:8px;align-items:center;font-size:13px"><input type="checkbox" id="z"> Rare (zebra)</label>
+      <div class="row-end"><button class="btn btn-ghost" data-close>Cancel</button><button class="btn btn-primary" id="do-add" disabled>Add to tree</button></div>`);
+    const nm = $("#nm"), go = $("#do-add"); nm.focus(); nm.oninput = () => (go.disabled = !nm.value.trim());
+    go.onclick = () => {
+      const sibs = Object.values(H).filter((x) => x.parent === parentId), last = sibs.reduce((m, x) => Math.max(m, x.y), H[parentId].y - 76);
+      const id = "c" + Date.now();
+      H[id] = { id, name: nm.value.trim(), parent: parentId, p: 2, x: 540, y: Math.min(last + 88, 480), status: "live", author: "clinician", zebra: $("#z").checked, base: "" };
+      log("clinician", `Added ${H[id].name} under ${H[parentId].name}.`); closeSmall(); toast("Added — the engine ranks it next round"); S.selected = id; renderAll();
+    };
+  }
+  function redistribute(outId) {
+    const out = H[outId], rest = liveLeaves().filter((h) => h.id !== outId); const add = out.p; out.p = 0;
+    const tot = rest.reduce((s, h) => s + h.p, 0) || 1; rest.forEach((h) => (h.p = Math.round(h.p + (add * h.p) / tot)));
+    regroup();
+  }
+  function regroup() { ["card", "pulm"].forEach((g) => (H[g].p = leaves().filter((h) => h.parent === g && h.status !== "ruled_out").reduce((s, h) => s + h.p, 0))); }
+
+  // ---------------------------------------------------------------- the round
+  function runRound() {
+    const res = $("#res").value.trim();
+    const d = Number(document.querySelector('#dir [aria-pressed="true"]').dataset.d);
+    F.push({ id: "f7", text: "Chest X-ray: " + res, src: "imaging", w: { pneu: d }, isNew: true });
+    log("clinician", `Entered result — chest X-ray: ${res}.`);
+    S.stage = "reasoning"; S.round = 2; renderAll();
+    const fl = document.querySelector('.node[data-h="pneu"] .flash'); if (fl) fl.classList.add("go");
+    setTimeout(() => {
+      // illustrative re-ranking (not engine output)
+      const target = d < 0 ? { hf: 72, af: 12, acs: 7, pneu: 2, pe: 6, lung: 1 } : { hf: 50, af: 8, acs: 5, pneu: 30, pe: 5, lung: 2 };
+      const moves = Object.entries(target).filter(([id]) => H[id].status !== "ruled_out").map(([id, to]) => ({ id, from: H[id].p, to })).filter((m) => m.from !== m.to);
+      moves.forEach((m) => (H[m.id].p = m.to));
+      const ruleOuts = d < 0 && H.pneu.status === "live" ? [{ id: "pneu", why: "Illustrative proposal: the clinician-entered X-ray result argues against pneumonia." }] : [];
+      ruleOuts.forEach((r) => (H[r.id].status = "proposed_out"));
+      regroup(); S.pendingDiff = { moves, ruleOuts }; S.stage = "review";
+      log("agent", `Round 2 (illustrative): re-ranked ${moves.length} hypotheses${ruleOuts.length ? "; proposed ruling out pneumonia" : ""}.`);
+      renderAll(); streamAnswer("Round 2 (illustrative, not engine output): re-ranked using your chest X-ray entry." + (ruleOuts.length ? " Proposed ruling out pneumonia — accept or keep it." : ""));
+    }, 1600);
+  }
+  function resolveRuleOut(id, accept, quiet) {
+    const d = S.pendingDiff; const h = H[id];
+    if (accept) { h.status = "ruled_out"; h.ruledWhy = d.ruleOuts.find((r) => r.id === id).why; redistribute(id); log("clinician", `Accepted rule-out of ${h.name}.`); }
+    else { h.status = "live"; log("clinician", `Kept ${h.name} on the differential (rejected the agent's rule-out).`); }
+    d.ruleOuts = d.ruleOuts.filter((r) => r.id !== id);
+    if (!quiet) { if (!d.ruleOuts.length) finishReview(); else renderAll(); }
+  }
+  function finishReview() { S.stage = "ready"; S.pendingDiff = null; toast("Round 2 accepted"); renderAll(); }
+
+  // ---------------------------------------------------------------- decision (Step 4)
+  let pick = null, pickNode = null;
+  function openDecision(o, nodeId) {
+    pick = null; pickNode = nodeId || lead().id;
+    $("#dec-suggest").textContent = `Confirm · ${lead().name} (${lead().p}%)`;
+    document.querySelectorAll(".oc").forEach((b) => b.setAttribute("aria-pressed", "false"));
+    $("#dec-body").innerHTML = ""; $("#dec-commit").disabled = true; $("#dec-commit").textContent = "Choose an outcome";
+    $("#decision").classList.add("open"); S.decOpen = true; S.reached = Math.max(S.reached, 3); renderSteps(); renderTimeline();
+    if (typeof o === "string") choose(o);
+  }
+  function choose(o) {
+    pick = o; document.querySelectorAll(".oc").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.o === o)));
+    const live = liveLeaves().filter((h) => h.status === "live"); const mnm = live.filter((h) => h.pinned && h.id !== pickNode);
+    const body = $("#dec-body"), btn = $("#dec-commit");
+    if (o === "confirm") {
+      body.innerHTML = `<div class="grid2"><div class="field"><label class="muted">Working diagnosis</label><select id="d-node">${live.map((h) => `<option value="${h.id}" ${h.id === pickNode ? "selected" : ""}>${esc(h.name)} — ${h.p}%</option>`).join("")}</select></div>
+        <div class="field"><label class="muted">Your note</label><input id="d-note" placeholder="Optional"></div></div>
+        ${mnm.length ? `<div class="guard"><b>${mnm.map((h) => esc(h.name)).join(", ")}</b> is pinned as must-not-miss and still live. Why is it acceptable to confirm now?<div class="field"><input id="d-guard" placeholder="Your reason"></div></div>` : ""}`;
+      btn.textContent = "Confirm working diagnosis";
+      const check = () => (btn.disabled = mnm.length ? !$("#d-guard").value.trim() : false);
+      $("#d-guard") && ($("#d-guard").oninput = check); $("#d-node").onchange = () => { pickNode = $("#d-node").value; choose("confirm"); }; check();
+    } else if (o === "refer") {
+      body.innerHTML = `<div class="grid2"><div class="field"><label class="muted">Specialty</label><select><option>Cardiology</option><option>Pulmonology</option><option>Emergency department</option></select></div><div class="field"><label class="muted">Urgency</label><select><option>Routine</option><option>Urgent</option><option>Emergency</option></select></div></div>
+        <div class="output">${esc(summary())}</div>`;
+      btn.textContent = "Copy summary & refer"; btn.disabled = false;
+    } else if (o === "investigate") {
+      body.innerHTML = `<div class="field"><label class="muted">Tests to order</label><input placeholder="Tests you are ordering"></div><p class="muted" style="margin:0;font-size:13px">The case moves to <b>Awaiting results</b> and stays open on the tree.</p>`;
+      btn.textContent = "Order & park case"; btn.disabled = false;
+    } else {
+      body.innerHTML = `<div class="grid2"><div class="field"><label class="muted">Review date (required)</label><input type="date" id="d-date"></div><div class="field"><label class="muted">Review by</label><select><option>Same practice</option><option>Out-of-hours</option></select></div></div>
+        <div class="field"><label class="muted">Safety-net advice for the patient</label><textarea rows="4" placeholder="Write the advice you give the patient"></textarea></div>`;
+      btn.textContent = "Save safety-net & review date"; btn.disabled = true; $("#d-date").oninput = () => (btn.disabled = !$("#d-date").value);
+    }
+  }
+  function summary() {
+    const ruled = leaves().filter((h) => h.status === "ruled_out");
+    return `79-year-old female, Kiel, Germany. Known atrial fibrillation, hypertension, previous myocardial infarction.\nChief complaint: Increasing shortness of breath for 10 days, now also when lying flat.\nFindings:\n${F.map((f) => "• " + f.text).join("\n")}\nDifferential (illustrative, not engine output): ${liveLeaves().sort((a, b) => b.p - a.p).map((h) => `${h.name} ${h.p}%`).join(", ")}.\nRuled out: ${ruled.length ? ruled.map((h) => `${h.name} (${h.ruledWhy})`).join("; ") : "none"}.\nQuestion: please assess and advise on management.`;
+  }
+  document.querySelectorAll(".oc").forEach((b) => (b.onclick = () => choose(b.dataset.o)));
+  $("#dec-commit").onclick = () => {
+    const map = {
+      confirm: () => { const h = H[pickNode]; h.status = "confirmed"; S.selected = h.id; log("clinician", `Confirmed working diagnosis: ${h.name}${$("#d-guard") ? ` — guard: “${$("#d-guard").value.trim()}”` : ""}.`); return { label: "Confirmed", title: h.name, sub: "Working diagnosis set. Next: treatment plan." }; },
+      refer: () => { log("clinician", "Referred with tree summary."); try { navigator.clipboard?.writeText(summary()); } catch (e) {} return { label: "Referred", title: "Referral sent", sub: "Summary copied. The case stays open for the reply." }; },
+      investigate: () => { log("clinician", "Investigate further: tests ordered, case parked."); return { label: "Awaiting results", title: "Case parked", sub: "Results will restart the loop at Step 2." }; },
+      unresolved: () => { log("clinician", `Remain unresolved — review on ${$("#d-date").value}.`); return { label: "Monitoring", title: "Unresolved · safety-netted", sub: "Review date set; safety-net advice recorded." }; },
+    };
+    S.decision = map[pick](); S.stage = "decided"; S.decOpen = false; S.page = "followup"; S.reached = 4; $("#decision").classList.remove("open"); toast(S.decision.label); renderAll();
+  };
+
+  // ---------------------------------------------------------------- misc
+  function openSmall(html) { $("#small-body").innerHTML = html; $("#small").classList.add("open"); }
+  function closeSmall() { $("#small").classList.remove("open"); }
+    const closeScrims = () => { document.querySelectorAll(".scrim.open").forEach((s) => s.classList.remove("open")); if (S.decOpen) { S.decOpen = false; renderSteps(); renderTimeline(); } };
+  document.querySelectorAll(".scrim").forEach((s) => s.addEventListener("click", (e) => { if (e.target === s || e.target.closest("[data-close]")) { s.classList.remove("open"); if (s.id === "decision") { S.decOpen = false; renderSteps(); renderTimeline(); } } }));
+  document.addEventListener("keydown", (e) => { if (e.key === "Escape") { closeScrims(); S.held = null; clearTrace(); } });
+  function renderTrail() {
+    return `<div class="label">Reasoning trail</div><h2>Every step, retraceable</h2>
+      <div class="seg" role="group" id="tf"><button aria-pressed="true" data-a="all">Both</button><button aria-pressed="false" data-a="clinician">Clinician</button><button aria-pressed="false" data-a="agent">Agent</button></div>
+      <ul class="trail" id="trail-list"></ul><div class="row-end"><button class="btn btn-pill" data-close>Close</button></div>`;
+  }
+  function fillTrail(a) { $("#trail-list").innerHTML = S.trail.filter((e) => a === "all" || e.a === a).map((e) => `<li><span class="dot" style="background:var(--${e.a})"></span><div><span class="t">${e.t} · ${e.a}</span><br>${esc(e.s)}</div></li>`).join(""); }
+  function renderTrailIfOpen() { if ($("#trail-list") && $("#small").classList.contains("open")) fillTrail("all"); }
+  $("#btn-trail").onclick = () => { openSmall(renderTrail()); fillTrail("all"); document.querySelectorAll("#tf button").forEach((b) => (b.onclick = () => { document.querySelectorAll("#tf button").forEach((x) => x.setAttribute("aria-pressed", String(x === b))); fillTrail(b.dataset.a); })); };
+  document.querySelectorAll("[data-view]").forEach((b) => (b.onclick = () => { S.view = b.dataset.view; document.querySelectorAll("[data-view]").forEach((x) => x.setAttribute("aria-pressed", String(x === b))); renderTree(); }));
+  function streamAnswer(text) { $("#answer").innerHTML = text.split(" ").map((w, i) => `<span style="animation-delay:${i * 18}ms">${esc(w)} </span>`).join(""); }
+  $("#ask").addEventListener("keydown", (e) => { if (e.key === "Enter" && e.target.value.trim()) { streamAnswer("No engine is connected to this prototype. In the live app the hypothesis engine answers here, with cited sources."); e.target.value = ""; } });
+  function renderTimeline() {
+    // [label, page it opens, reached?, is-current?, critical gate?]
+    const atGate = S.page === "reasoning" && !S.decOpen && S.round === 1;
+    const st = [
+      ["Intake", "presentation", true, (S.page === "presentation" || S.page === "assessment") && !S.decOpen],
+      ["Round 1", "reasoning", S.round >= 1, atGate && S.stage === "reasoning"],
+      ["Test gate", "reasoning", S.round >= 1, atGate && S.stage === "gate", true],
+      ["Round 2", "reasoning", S.round >= 2, S.page === "reasoning" && !S.decOpen && S.round >= 2],
+      ["Decision", "decision", S.reached >= 3, S.decOpen, true],
+      ["Follow-up", "followup", S.reached >= 4, S.page === "followup" && !S.decOpen],
+    ];
+    $("#tl").innerHTML = st.map(([n, go, done, now, crit]) => `<div class="st ${now ? "now" : done ? "done" : ""} ${crit ? "crit" : ""}" role="button" tabindex="0" data-go="${go}" data-label="${n}"><i></i>${n}</div>`).join("");
+    $("#tl").querySelectorAll(".st").forEach((el) => {
+      const act = () => { if (el.dataset.label === "Round 2" && S.round < 2) { goTo("reasoning"); toast("Round 2 runs after you enter the chest X-ray result"); return; } goTo(el.dataset.go); };
+      el.onclick = act; el.onkeydown = (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); act(); } };
+    });
+  }
+  function renderAll() { renderSteps(); renderNext(); renderFindings(); renderCenter(); renderDetail(); renderTimeline(); }
+  renderAll();
+})();
+</script>
+</body>
+</html>

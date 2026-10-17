@@ -1,0 +1,84 @@
+{
+  "id": "de-14-z-n-mammakarzinom",
+  "title": "Gastroenteritis bei Z.n. Mammakarzinom",
+  "language": "de",
+  "source": "teaching-style",
+  "sourceNote": "Teaching scenario: a completed, recurrence-free cancer is history, not an active C diagnosis.",
+  "tests": [
+    "historical cancer must not get C50",
+    "current condition coded"
+  ],
+  "request": {
+    "requestId": "eval-de-14",
+    "excerpts": [
+      {
+        "id": "ex1",
+        "text": "Aufnahme wegen akuter infektiöser Gastroenteritis mit Diarrhoe und Erbrechen seit 2 Tagen; Erregernachweis negativ."
+      },
+      {
+        "id": "ex2",
+        "text": "Z.n. Mammakarzinom links 2019, Ablatio und adjuvante Chemotherapie, seither rezidivfrei, keine laufende Therapie."
+      }
+    ],
+    "evidence": []
+  },
+  "expected": [
+    {
+      "id": "ge",
+      "match": {
+        "conditionIncludes": [
+          "gastroenter"
+        ],
+        "inputRefs": [
+          "ex1"
+        ]
+      },
+      "assertion": [
+        "documented"
+      ],
+      "status": [
+        "assigned"
+      ],
+      "acceptableCodes": [
+        "A09.0"
+      ],
+      "forbiddenCodes": [
+        "A09.9",
+        "K52",
+        "A08",
+        "A04"
+      ],
+      "notes": "BfArM A09.0 'Sonstige und nicht näher bezeichnete Gastroenteritis und Kolitis infektiösen Ursprungs'. Infectious origin is documented, so A09.9 is wrong."
+    },
+    {
+      "id": "breast-ca",
+      "match": {
+        "conditionIncludes": [
+          "mamma",
+          "breast",
+          "brust"
+        ],
+        "inputRefs": [
+          "ex2"
+        ]
+      },
+      "assertion": [
+        "historical"
+      ],
+      "status": [
+        "no_supported_code",
+        "assigned"
+      ],
+      "acceptableCodes": [
+        "Z85.3"
+      ],
+      "forbiddenCodes": [
+        "C50"
+      ],
+      "notes": "Ideal history code Z85.3; this version returns no_supported_code for history. C50 would be a serious error."
+    }
+  ],
+  "forbiddenAssignedCodes": [
+    "C50"
+  ]
+}

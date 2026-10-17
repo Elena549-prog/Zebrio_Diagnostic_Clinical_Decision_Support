@@ -1,0 +1,82 @@
+{
+  "id": "mixed-13-erysipel",
+  "title": "Erysipel, mixed German/English note",
+  "language": "mixed",
+  "source": "synthetic",
+  "sourceNote": "Resident's note mixing German and English, as on a real ward.",
+  "tests": [
+    "mixed language",
+    "3-character terminal code",
+    "negated"
+  ],
+  "request": {
+    "requestId": "eval-mixed-13",
+    "excerpts": [
+      {
+        "id": "ex1",
+        "text": "Pt. presented with Erysipel des linken Unterschenkels, fever 38.9 °C, scharf begrenzte Rötung."
+      },
+      {
+        "id": "ex2",
+        "text": "Duplex sonography: no DVT, keine tiefe Beinvenenthrombose."
+      }
+    ],
+    "evidence": [
+      {
+        "id": "ev1",
+        "kind": "patient_finding",
+        "text": "CRP 145 mg/l."
+      }
+    ]
+  },
+  "expected": [
+    {
+      "id": "erysipelas",
+      "match": {
+        "conditionIncludes": [
+          "erysip",
+          "wundrose"
+        ],
+        "inputRefs": [
+          "ex1"
+        ]
+      },
+      "assertion": [
+        "documented"
+      ],
+      "status": [
+        "assigned"
+      ],
+      "acceptableCodes": [
+        "A46"
+      ],
+      "forbiddenCodes": [
+        "L03"
+      ],
+      "notes": "BfArM A46 'Erysipel [Wundrose]'. L03 (Phlegmone) is related but wrong."
+    },
+    {
+      "id": "dvt",
+      "required": false,
+      "match": {
+        "conditionIncludes": [
+          "thromb",
+          "dvt"
+        ],
+        "inputRefs": [
+          "ex2"
+        ]
+      },
+      "assertion": [
+        "negated"
+      ],
+      "status": [
+        "no_supported_code"
+      ],
+      "forbiddenCodes": [
+        "I80"
+      ],
+      "notes": "Ruled out by duplex."
+    }
+  ]
+}

@@ -1,5 +1,11 @@
 # Temporary Claude expert adapters
 
+> **Coding is no longer temporary.** `server/index.ts` now calls the Person 2
+> module (`medical-coding-expert/`) through `server/experts/coding.ts`. The
+> coding adapter in `server/experts/index.ts` is unused by the app and kept only
+> for its tests. Run `npm run eval` in `medical-coding-expert/` for the live
+> 15-case evaluation. The evidence adapter below is still temporary.
+
 These replace Corti registry dependencies until the Person 1 evidence module and
 Person 2 coding module arrive. The application uses ordinary asynchronous
 functions, with no hosted Corti agents or registry calls.

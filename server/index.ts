@@ -16,7 +16,7 @@ import { applyEvidence, attachEvidenceTargets, fetchEvidence } from './domain/ev
 import { groundLinks } from './domain/parse.js';
 import { buildTreatmentPlan } from './domain/treatment.js';
 import { mergeSources, renderSourcePool, rewriteMarkers } from './domain/sources.js';
-import { assignMedicalCodes } from './experts/index.js';
+import { assignMedicalCodes } from './experts/coding.js';
 import type { Case, Presentation } from './domain/types.js';
 
 export function loadRootEnv(): void {

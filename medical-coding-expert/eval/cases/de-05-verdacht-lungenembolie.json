@@ -1,0 +1,66 @@
+{
+  "id": "de-05-verdacht-lungenembolie",
+  "title": "Verdacht auf Lungenembolie",
+  "language": "de",
+  "source": "synthetic",
+  "sourceNote": "Emergency-department note with an open suspected diagnosis.",
+  "tests": [
+    "suspected must not be assigned",
+    "symptom codes allowed"
+  ],
+  "request": {
+    "requestId": "eval-de-05",
+    "excerpts": [
+      {
+        "id": "ex1",
+        "text": "V.a. Lungenembolie bei neu aufgetretener Dyspnoe und Tachykardie (HF 118/min) nach Langstreckenflug. CT-Angiographie ausstehend."
+      }
+    ],
+    "evidence": [
+      {
+        "id": "ev1",
+        "kind": "patient_finding",
+        "text": "D-Dimere 2,1 mg/l FEU (Ref. < 0,5)."
+      }
+    ],
+    "hypotheses": [
+      {
+        "id": "h1",
+        "name": "Lungenembolie"
+      }
+    ]
+  },
+  "allowedExtraCodes": [
+    "R06.0",
+    "R00.0",
+    "R79.8"
+  ],
+  "expected": [
+    {
+      "id": "pe",
+      "match": {
+        "hypothesisId": "h1",
+        "conditionIncludes": [
+          "embol"
+        ],
+        "inputRefs": [
+          "ex1"
+        ]
+      },
+      "assertion": [
+        "suspected"
+      ],
+      "status": [
+        "needs_clarification"
+      ],
+      "candidateCodes": [
+        "I26.9",
+        "I26.-"
+      ],
+      "notes": "'V.a.' = Verdacht auf. Must not be assigned until confirmed; candidate I26.9 'Lungenembolie ohne Angabe eines akuten Cor pulmonale' is fine."
+    }
+  ],
+  "forbiddenAssignedCodes": [
+    "I26"
+  ]
+}
