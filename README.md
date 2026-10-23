@@ -8,7 +8,9 @@ and shows the medical evidence for and against each option. Rare diseases stay
 on the list until a real finding rules them out. The doctor makes every
 decision, and every step is saved in the patient's case file.
 
-Demo video: (https://cap.so/s/ck676xhbay5x0ba)
+**Demo video:** https://cap.so/s/ck676xhbay5x0ba
+
+![Zebrio reasoning tree: possible diagnoses with evidence for and against, rare diseases marked as zebras](docs/reasoning-tree.png)
 
 ## Who it is for
 
